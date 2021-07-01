@@ -4,6 +4,7 @@
 
 using Avalonia;
 using Avalonia.ReactiveUI;
+using WillowTree.Sweetgum.Client.DependencyInjection;
 
 namespace WillowTree.Sweetgum.Client
 {
@@ -18,8 +19,13 @@ namespace WillowTree.Sweetgum.Client
         /// things aren't initialized yet and stuff might break.
         /// </summary>
         /// <param name="args">The arguments passed into the application.</param>
-        public static void Main(string[] args) => BuildAvaloniaApp()
-            .StartWithClassicDesktopLifetime(args);
+        public static void Main(string[] args)
+        {
+            // Setup our DI container and services.
+            Dependencies.ConfigureServices();
+
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        }
 
         /// <summary>
         /// Avalonia configuration, don't remove; also used by visual designer.
@@ -28,7 +34,6 @@ namespace WillowTree.Sweetgum.Client
         public static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
-                .LogToTrace()
-                .UseReactiveUI();
+                .LogToTrace();
     }
 }

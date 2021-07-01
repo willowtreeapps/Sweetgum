@@ -1,11 +1,6 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:client="clr-namespace:WillowTree.Sweetgum.Client"
              x:Class="WillowTree.Sweetgum.Client.App">
-    <Application.DataTemplates>
-        <client:ViewLocator/>
-    </Application.DataTemplates>
-
     <Application.Styles>
         <FluentTheme Mode="Light"/>
     </Application.Styles>
