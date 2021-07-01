@@ -1,0 +1,17 @@
+<Project>
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <VersionPrefix>0.1.0</VersionPrefix>
+        <VersionSuffix Condition=" '$(Configuration)'=='Debug' ">dev</VersionSuffix>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="StyleCop.Analyzers" Version="[1.2.0-beta.164]">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+    <ItemGroup>
+        <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" InProject="false" />
+        <None Include="$(MSBuildThisFileDirectory)stylecop.json" />
+    </ItemGroup>
+</Project>
