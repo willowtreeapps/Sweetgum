@@ -14,8 +14,8 @@
         <viewModels:RequestBuilderViewModel/>
     </Design.DataContext>
 
-    <StackPanel Orientation="Vertical">
-        <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,10">
+    <StackPanel Orientation="Vertical" Margin="10">
+        <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,10">
             <ComboBox Grid.Column="0" x:Name="HttpMethodComboBox">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
@@ -23,12 +23,12 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <TextBox Grid.Column="1" x:Name="RequestUrlTextBox" Margin="20,0" />
+            <TextBox Grid.Column="1" x:Name="RequestUrlTextBox" Margin="10,0" />
             <Button Grid.Column="2" x:Name="SubmitRequestButton" Content="Send Request" />
         </Grid>
-        <StackPanel x:Name="RequestHeadersStackPanel" Orientation="Vertical" Margin="0,10">
+        <StackPanel x:Name="RequestHeadersStackPanel" Orientation="Vertical" Margin="0,0,0,10">
             <StackPanel Orientation="Vertical">
-                <TextBlock Text="Request Headers:" />
+                <TextBlock Text="Request Headers:" Margin="0,0,0,10" />
                 <ItemsRepeater x:Name="RequestHeadersItemsRepeater">
                     <ItemsRepeater.ItemTemplate>
                         <DataTemplate>
@@ -39,9 +39,9 @@
                 <Button x:Name="AddRequestHeaderButton" Content="Add Request Header" />
             </StackPanel>
         </StackPanel>
-        <StackPanel x:Name="RequestDataStackPanel" Orientation="Vertical" Margin="0,10">
+        <StackPanel x:Name="RequestDataStackPanel" Orientation="Vertical" Margin="0,0,0,10">
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Content Type:" />
+                <TextBlock Text="Content Type:" VerticalAlignment="Center" Margin="0,0,5,0" />
                 <ComboBox x:Name="ContentTypeComboBox">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
@@ -51,17 +51,23 @@
                 </ComboBox>
             </StackPanel>
             <StackPanel Orientation="Vertical">
-                <TextBlock Text="Request Data:" />
-                <TextBox x:Name="RequestDataTextBox" Height="300" AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap" />
+                <TextBlock Text="Request Data:" Margin="0,0,0,10" />
+                <TextBox x:Name="RequestDataTextBox" Height="100" AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap" />
             </StackPanel>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" Margin="0,10">
-            <TextBlock Text="Response Code:" />
-            <TextBlock x:Name="ResponseStatusCodeTextBlock" />
-        </StackPanel>
-        <StackPanel Orientation="Vertical" Margin="0,10">
-            <TextBlock Text="Response Contents:" />
-            <TextBox x:Name="ResponseContentTextBox" IsReadOnly="True" Height="300" TextWrapping="Wrap" />
+        <StackPanel x:Name="ResponseDetailsStackPanel" Orientation="Vertical">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                <TextBlock Text="Response Code:" Margin="0,0,5,0" />
+                <TextBlock x:Name="ResponseStatusCodeTextBlock" FontWeight="Bold" />
+            </StackPanel>
+            <StackPanel Orientation="Vertical" Margin="0,0,0,10">
+                <TextBlock Text="Response Headers:" Margin="0,0,0,10" />
+                <TextBox x:Name="ResponseHeadersTextBox" IsReadOnly="True" Height="100" TextWrapping="Wrap" />
+            </StackPanel>
+            <StackPanel Orientation="Vertical" Margin="0,0,0,10">
+                <TextBlock Text="Response Contents:" Margin="0,0,0,10" />
+                <TextBox x:Name="ResponseContentTextBox" IsReadOnly="True" Height="100" TextWrapping="Wrap" />
+            </StackPanel>
         </StackPanel>
     </StackPanel>
 </reactiveUi:ReactiveWindow>
