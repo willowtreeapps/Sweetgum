@@ -16,7 +16,7 @@
     </Design.DataContext>
 
     <StackPanel Orientation="Vertical">
-        <Grid ColumnDefinitions="Auto,*,Auto">
+        <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,10">
             <ComboBox Grid.Column="0" x:Name="HttpMethodComboBox">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
@@ -27,13 +27,17 @@
             <TextBox Grid.Column="1" x:Name="RequestUrlTextBox" Margin="20,0" />
             <Button Grid.Column="2" x:Name="SubmitRequestButton" Content="Send Request" />
         </Grid>
-        <StackPanel Orientation="Horizontal">
+        <StackPanel x:Name="RequestDataStackPanel" Orientation="Vertical" Margin="0,10">
+            <TextBlock Text="Request Data:" />
+            <TextBox x:Name="RequestDataTextBox" Height="300" AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="0,10">
             <TextBlock Text="Response Code:" />
             <TextBlock x:Name="ResponseStatusCodeTextBlock" />
         </StackPanel>
-        <StackPanel Orientation="Vertical">
+        <StackPanel Orientation="Vertical" Margin="0,10">
             <TextBlock Text="Response Contents:" />
-            <TextBox x:Name="ResponseContentTextBox" IsReadOnly="True" Height="300" />
+            <TextBox x:Name="ResponseContentTextBox" IsReadOnly="True" Height="300" TextWrapping="Wrap" />
         </StackPanel>
     </StackPanel>
 </reactiveUi:ReactiveWindow>

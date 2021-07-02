@@ -67,6 +67,18 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
                         responseCode => responseCode.ToString())
                     .DisposeWith(disposables);
 
+                this.OneWayBind(
+                        this.ViewModel,
+                        viewModel => viewModel.ShouldShowRequestDataTextBox,
+                        view => view.RequestDataStackPanel.IsVisible)
+                    .DisposeWith(disposables);
+
+                this.Bind(
+                        this.ViewModel,
+                        viewModel => viewModel.RequestData,
+                        view => view.RequestDataTextBox.Text)
+                    .DisposeWith(disposables);
+
                 this.BindCommand(
                         this.ViewModel!,
                         viewModel => viewModel.SendRequestCommand,
@@ -74,6 +86,10 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
                     .DisposeWith(disposables);
             });
         }
+
+        private StackPanel RequestDataStackPanel => this.FindControl<StackPanel>(nameof(this.RequestDataStackPanel));
+
+        private TextBox RequestDataTextBox => this.FindControl<TextBox>(nameof(this.RequestDataTextBox));
 
         private TextBox ResponseContentTextBox => this.FindControl<TextBox>(nameof(this.ResponseContentTextBox));
 
