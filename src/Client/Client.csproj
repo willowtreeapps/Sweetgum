@@ -25,5 +25,9 @@
       <DependentUpon>HttpMethodItem.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="RequestBuilder\Views\ContentTypeItem.axaml.cs">
+      <DependentUpon>ContentTypeItem.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 </Project>

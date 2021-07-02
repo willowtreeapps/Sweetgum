@@ -22,9 +22,12 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
     /// </summary>
     public sealed class RequestBuilderViewModel : ViewModelBase
     {
+        private const string FormUrlEncodedContentType = "application/x-www-form-urlencoded";
+
         private readonly ObservableAsPropertyHelper<bool> shouldShowRequestDataTextBoxObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<HttpStatusCode> responseStatusCodeObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<string> responseContentObservableAsPropertyHelper;
+        private ContentTypeViewModel? selectedContentTypeViewModel;
         private HttpMethodViewModel? selectedHttpMethodViewModel;
         private string requestData;
         private string requestUrl;
@@ -53,6 +56,16 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
 
             this.HttpMethods = httpMethods.Select(httpMethod => new HttpMethodViewModel(httpMethod)).ToList();
 
+            this.ContentTypes = new List<ContentTypeViewModel>
+            {
+                new (FormUrlEncodedContentType, "Form URL Encoded"),
+                new ("application/json", "JSON"),
+                new ("text/plain", "Text"),
+                new ("application/javascript", "Javascript"),
+                new ("text/html", "HTML"),
+                new ("application/xml", "XML"),
+            };
+
             this.SendRequestCommand = ReactiveCommand.CreateFromTask(this.SendRequestAsync);
 
             this.SendRequestCommand.Subscribe();
@@ -65,6 +78,20 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
                 .Select(result => result.ResponseContent)
                 .ToProperty(this, viewModel => viewModel.ResponseContent);
         }
+
+        /// <summary>
+        /// Gets or sets the content type selected.
+        /// </summary>
+        public ContentTypeViewModel? SelectedContentType
+        {
+            get => this.selectedContentTypeViewModel;
+            set => this.RaiseAndSetIfChanged(ref this.selectedContentTypeViewModel, value);
+        }
+
+        /// <summary>
+        /// Gets the valid list of content types.
+        /// </summary>
+        public List<ContentTypeViewModel> ContentTypes { get; }
 
         /// <summary>
         /// Gets or sets the HTTP method selected.
@@ -136,7 +163,14 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
 
             if (IsMethodWithRequestData(httpMethod))
             {
-                request.Content = new StringContent(this.requestData, Encoding.UTF8, "application/x-www-form-urlencoded");
+                var mediaType = string.IsNullOrWhiteSpace(this.SelectedContentType?.ContentType)
+                    ? FormUrlEncodedContentType
+                    : this.SelectedContentType?.ContentType;
+
+                request.Content = new StringContent(
+                    this.requestData,
+                    Encoding.UTF8,
+                    mediaType);
             }
 
             var response = await httpClient.SendAsync(request, cancellationToken);

@@ -54,6 +54,18 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
                         view => view.HttpMethodComboBox.Items)
                     .DisposeWith(disposables);
 
+                this.Bind(
+                        this.ViewModel,
+                        viewModel => viewModel.SelectedContentType,
+                        view => view.ContentTypeComboBox.SelectedItem)
+                    .DisposeWith(disposables);
+
+                this.OneWayBind(
+                        this.ViewModel,
+                        viewModel => viewModel.ContentTypes,
+                        view => view.ContentTypeComboBox.Items)
+                    .DisposeWith(disposables);
+
                 this.OneWayBind(
                         this.ViewModel,
                         viewModel => viewModel.ResponseContent,
@@ -96,6 +108,8 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
         private TextBlock ResponseStatusCodeTextBlock => this.FindControl<TextBlock>(nameof(this.ResponseStatusCodeTextBlock));
 
         private TextBox RequestUrlTextBox => this.FindControl<TextBox>(nameof(this.RequestUrlTextBox));
+
+        private ComboBox ContentTypeComboBox => this.FindControl<ComboBox>(nameof(this.ContentTypeComboBox));
 
         private ComboBox HttpMethodComboBox => this.FindControl<ComboBox>(nameof(this.HttpMethodComboBox));
 
