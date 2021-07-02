@@ -5,6 +5,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using WillowTree.Sweetgum.Client.RequestBuilder.Views;
 
 namespace WillowTree.Sweetgum.Client.Views
 {
@@ -22,7 +23,19 @@ namespace WillowTree.Sweetgum.Client.Views
 #if DEBUG
             this.AttachDevTools();
 #endif
+
+            this.RequestBuilderButton.Click += (sender, args) =>
+            {
+                var requestBuilderWindow = new RequestBuilderWindow
+                {
+                    Width = 600,
+                    Height = 500,
+                };
+                requestBuilderWindow.Show();
+            };
         }
+
+        private Button RequestBuilderButton => this.FindControl<Button>(nameof(this.RequestBuilderButton));
 
         private void InitializeComponent()
         {

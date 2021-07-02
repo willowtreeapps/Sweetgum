@@ -16,4 +16,14 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="[5.0.1]" />
     <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="[11.1.1]" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Update="RequestBuilder\Views\RequestBuilderWindow.axaml.cs">
+      <DependentUpon>MainWindow.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="RequestBuilder\Views\HttpMethodItem.axaml.cs">
+      <DependentUpon>HttpMethodItem.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
 </Project>

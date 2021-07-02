@@ -12,6 +12,9 @@
         <viewModels:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <StackPanel Orientation="Vertical">
+        <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Button x:Name="RequestBuilderButton" Content="Open Request Builder" />
+    </StackPanel>
 
 </Window>

@@ -1,0 +1,39 @@
+<reactiveUi:ReactiveWindow x:TypeArguments="viewModels:RequestBuilderViewModel" xmlns="https://github.com/avaloniaui"
+                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                           xmlns:viewModels="clr-namespace:WillowTree.Sweetgum.Client.RequestBuilder.ViewModels"
+                           xmlns:reactiveUi="http://reactiveui.net"
+                           xmlns:client="clr-namespace:WillowTree.Sweetgum.Client"
+                           xmlns:views="clr-namespace:WillowTree.Sweetgum.Client.RequestBuilder.Views"
+                           mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                           x:Class="WillowTree.Sweetgum.Client.RequestBuilder.Views.RequestBuilderWindow"
+                           Icon="/Assets/avalonia-logo.ico"
+                           Title="Sweetgum">
+
+    <Design.DataContext>
+        <viewModels:RequestBuilderViewModel/>
+    </Design.DataContext>
+
+    <StackPanel Orientation="Vertical">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+            <ComboBox Grid.Column="0" x:Name="HttpMethodComboBox">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <views:HttpMethodItem />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBox Grid.Column="1" x:Name="RequestUrlTextBox" Margin="20,0" />
+            <Button Grid.Column="2" x:Name="SubmitRequestButton" Content="Send Request" />
+        </Grid>
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Response Code:" />
+            <TextBlock x:Name="ResponseStatusCodeTextBlock" />
+        </StackPanel>
+        <StackPanel Orientation="Vertical">
+            <TextBlock Text="Response Contents:" />
+            <TextBox x:Name="ResponseContentTextBox" IsReadOnly="True" Height="300" />
+        </StackPanel>
+    </StackPanel>
+</reactiveUi:ReactiveWindow>

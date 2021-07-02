@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using Splat;
 using Splat.Microsoft.Extensions.DependencyInjection;
+using WillowTree.Sweetgum.Client.RequestBuilder.ViewModels;
 
 namespace WillowTree.Sweetgum.Client.DependencyInjection
 {
@@ -37,6 +38,7 @@ namespace WillowTree.Sweetgum.Client.DependencyInjection
             resolver.InitializeSplat();
             resolver.InitializeReactiveUI();
 
+            services.AddTransient<RequestBuilderViewModel>();
             services.AddSingleton<ICustomAttributeProvider>(provider => typeof(Dependencies).Assembly);
 
             // These are normally called inside the `.UseReactiveUI()` callback, but it executes too late.
