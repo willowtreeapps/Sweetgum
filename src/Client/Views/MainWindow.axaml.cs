@@ -2,7 +2,6 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using WillowTree.Sweetgum.Client.RequestBuilder.Views;
@@ -24,7 +23,7 @@ namespace WillowTree.Sweetgum.Client.Views
             this.AttachDevTools();
 #endif
 
-            this.RequestBuilderButton.Click += (sender, args) =>
+            this.RequestBuilderButton.Click += (_, _) =>
             {
                 var requestBuilderWindow = new RequestBuilderWindow
                 {
