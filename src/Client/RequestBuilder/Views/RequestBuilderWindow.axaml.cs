@@ -3,8 +3,10 @@
 // </copyright>
 
 using System.Reactive.Disposables;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using Avalonia.ReactiveUI;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
@@ -32,16 +34,18 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
 
             this.ViewModel = Dependencies.ServiceProvider?.GetRequiredService<RequestBuilderViewModel>();
 
-            // TODO: Make this a binding somehow. Right now, if we attempt to use a binding method, it will lead to the following exception:
-            // Can't two-way convert between Avalonia.Collections.AvaloniaList`1[WillowTree.Sweetgum.Client.RequestBuilder.ViewModels.RequestHeaderViewModel] and System.Collections.IEnumerable. To fix this, register a IBindingTypeConverter or call the version with the converter Func.
-            this.RequestHeadersItemsRepeater.Items = this.ViewModel?.RequestHeaders;
-
             this.WhenActivated(disposables =>
             {
                 this.Bind(
                         this.ViewModel,
                         viewModel => viewModel.RequestUrl,
                         view => view.RequestUrlTextBox.Text)
+                    .DisposeWith(disposables);
+
+                this.OneWayBind(
+                        this.ViewModel,
+                        viewModel => viewModel.HttpMethods,
+                        view => view.HttpMethodComboBox.Items)
                     .DisposeWith(disposables);
 
                 this.Bind(
@@ -52,8 +56,8 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
 
                 this.OneWayBind(
                         this.ViewModel,
-                        viewModel => viewModel.HttpMethods,
-                        view => view.HttpMethodComboBox.Items)
+                        viewModel => viewModel.RequestHeaders,
+                        view => view.RequestHeadersItemsRepeater.Items)
                     .DisposeWith(disposables);
 
                 this.Bind(
@@ -82,9 +86,22 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
 
                 this.OneWayBind(
                         this.ViewModel,
+                        viewModel => viewModel.ResponseHeaders,
+                        view => view.ResponseHeadersTextBox.Text)
+                    .DisposeWith(disposables);
+
+                this.OneWayBind(
+                        this.ViewModel,
                         viewModel => viewModel.ResponseStatusCode,
                         view => view.ResponseStatusCodeTextBlock.Text,
-                        responseCode => responseCode.ToString())
+                        responseCode => (int)responseCode + " " + responseCode)
+                    .DisposeWith(disposables);
+
+                this.OneWayBind(
+                        this.ViewModel,
+                        viewModel => viewModel.ResponseStatusCodeColor,
+                        view => view.ResponseStatusCodeTextBlock.Foreground,
+                        color => new SolidColorBrush(color))
                     .DisposeWith(disposables);
 
                 this.OneWayBind(
@@ -104,10 +121,18 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
                         viewModel => viewModel.SendRequestCommand,
                         view => view.SubmitRequestButton)
                     .DisposeWith(disposables);
+
+                this.OneWayBind(
+                        this.ViewModel,
+                        viewModel => viewModel.ShouldShowResponseDetails,
+                        view => view.ResponseDetailsStackPanel.IsVisible)
+                    .DisposeWith(disposables);
             });
         }
 
         private StackPanel RequestDataStackPanel => this.FindControl<StackPanel>(nameof(this.RequestDataStackPanel));
+
+        private StackPanel ResponseDetailsStackPanel => this.FindControl<StackPanel>(nameof(this.ResponseDetailsStackPanel));
 
         private Button AddRequestHeaderButton => this.FindControl<Button>(nameof(this.AddRequestHeaderButton));
 
@@ -116,6 +141,8 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
         private TextBox RequestDataTextBox => this.FindControl<TextBox>(nameof(this.RequestDataTextBox));
 
         private TextBox ResponseContentTextBox => this.FindControl<TextBox>(nameof(this.ResponseContentTextBox));
+
+        private TextBox ResponseHeadersTextBox => this.FindControl<TextBox>(nameof(this.ResponseHeadersTextBox));
 
         private TextBlock ResponseStatusCodeTextBlock => this.FindControl<TextBlock>(nameof(this.ResponseStatusCodeTextBlock));
 

@@ -14,6 +14,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Collections;
+using Avalonia.Media;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.ViewModels;
 
@@ -26,9 +27,12 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
     {
         private const string FormUrlEncodedContentType = "application/x-www-form-urlencoded";
 
+        private readonly ObservableAsPropertyHelper<bool> shouldShowResponseDetailsObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<bool> shouldShowRequestDataTextBoxObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<HttpStatusCode> responseStatusCodeObservableAsPropertyHelper;
+        private readonly ObservableAsPropertyHelper<Color> responseStatusCodeColorObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<string> responseContentObservableAsPropertyHelper;
+        private readonly ObservableAsPropertyHelper<string> responseHeadersObservableAsPropertyHelper;
         private ContentTypeViewModel? selectedContentTypeViewModel;
         private HttpMethodViewModel? selectedHttpMethodViewModel;
         private string requestData;
@@ -58,6 +62,9 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
 
             this.HttpMethods = httpMethods.Select(httpMethod => new HttpMethodViewModel(httpMethod)).ToList();
 
+            var defaultHttpMethod = this.HttpMethods.FirstOrDefault(m => m.HttpMethod == HttpMethod.Get);
+            this.SelectedHttpMethod = defaultHttpMethod;
+
             this.ContentTypes = new List<ContentTypeViewModel>
             {
                 new (FormUrlEncodedContentType, "Form URL Encoded"),
@@ -84,17 +91,84 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
 
             this.AddRequestHeaderCommand = ReactiveCommand.Create(() => this.RequestHeaders.Add(new RequestHeaderViewModel(removeObservable)));
 
-            this.SendRequestCommand = ReactiveCommand.CreateFromTask(this.SendRequestAsync);
+            // We can only execute the send request command if the request URL is valid.
+            var canExecute = this
+                .WhenAnyValue(viewModel => viewModel.RequestUrl)
+                .Select(currentRequestUrl =>
+                {
+                    if (string.IsNullOrWhiteSpace(currentRequestUrl))
+                    {
+                        return false;
+                    }
 
-            this.SendRequestCommand.Subscribe();
+                    try
+                    {
+                        var unused = new Uri(currentRequestUrl, UriKind.Absolute);
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        return false;
+                    }
+                });
 
-            this.responseStatusCodeObservableAsPropertyHelper = this.SendRequestCommand
-                .Select(result => result.StatusCode)
+            var statusCodeBehaviorSubject = new BehaviorSubject<HttpStatusCode>(default);
+            var responseContentBehaviorSubject = new BehaviorSubject<string>(string.Empty);
+            var responseHeadersBehaviorSubject = new BehaviorSubject<string>(string.Empty);
+            var shouldShowResponseDetailsBehaviorSubject = new BehaviorSubject<bool>(false);
+
+            this.SendRequestCommand = ReactiveCommand.CreateFromTask(
+                async cancellationToken =>
+                {
+                    shouldShowResponseDetailsBehaviorSubject.OnNext(false);
+
+                    return await this.SendRequestAsync(cancellationToken);
+                },
+                canExecute);
+
+            this.SendRequestCommand
+                .Subscribe(result =>
+                {
+                    statusCodeBehaviorSubject.OnNext(result.StatusCode);
+                    responseContentBehaviorSubject.OnNext(result.ResponseContent);
+                    responseHeadersBehaviorSubject.OnNext(string.Join("\n", result
+                        .Headers
+                        .Select(h => $"{h.HeaderName}: {h.HeaderValue}")));
+                    shouldShowResponseDetailsBehaviorSubject.OnNext(true);
+                });
+
+            this.responseStatusCodeObservableAsPropertyHelper = statusCodeBehaviorSubject
                 .ToProperty(this, viewModel => viewModel.ResponseStatusCode);
 
-            this.responseContentObservableAsPropertyHelper = this.SendRequestCommand
-                .Select(result => result.ResponseContent)
+            this.responseStatusCodeColorObservableAsPropertyHelper = statusCodeBehaviorSubject
+                .Select(currentStatusCode => currentStatusCode switch
+                {
+                    >= HttpStatusCode.Continue and < HttpStatusCode.OK => Color.FromRgb(0, 0, 255),
+                    >= HttpStatusCode.OK and < HttpStatusCode.Ambiguous => Color.FromRgb(68, 100, 18),
+                    >= HttpStatusCode.Ambiguous and < HttpStatusCode.BadRequest => Color.FromRgb(255, 255, 0),
+                    >= HttpStatusCode.BadRequest and < HttpStatusCode.InternalServerError => Color.FromRgb(255, 140, 0),
+                    _ => Color.FromRgb(255, 0, 0),
+                })
+                .ToProperty(this, viewModel => viewModel.ResponseStatusCodeColor);
+
+            this.responseContentObservableAsPropertyHelper = responseContentBehaviorSubject
                 .ToProperty(this, viewModel => viewModel.ResponseContent);
+
+            this.responseHeadersObservableAsPropertyHelper = responseHeadersBehaviorSubject
+                .ToProperty(this, viewModel => viewModel.ResponseHeaders);
+
+            this.shouldShowResponseDetailsObservableAsPropertyHelper = shouldShowResponseDetailsBehaviorSubject
+                .ToProperty(this, viewModel => viewModel.ShouldShowResponseDetails);
+
+            this.SendRequestCommand.ThrownExceptions
+                .Subscribe(_ =>
+                {
+                    statusCodeBehaviorSubject.OnNext(default);
+                    responseContentBehaviorSubject.OnNext(string.Empty);
+                    shouldShowResponseDetailsBehaviorSubject.OnNext(true);
+
+                    // TODO: Show the exception error.
+                });
         }
 
         /// <summary>
@@ -154,14 +228,29 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         public string ResponseContent => this.responseContentObservableAsPropertyHelper.Value;
 
         /// <summary>
+        /// Gets the HTTP request response headers.
+        /// </summary>
+        public string ResponseHeaders => this.responseHeadersObservableAsPropertyHelper.Value;
+
+        /// <summary>
         /// Gets the HTTP request response status code.
         /// </summary>
         public HttpStatusCode ResponseStatusCode => this.responseStatusCodeObservableAsPropertyHelper.Value;
 
         /// <summary>
+        /// Gets the HTTP request response status code color.
+        /// </summary>
+        public Color ResponseStatusCodeColor => this.responseStatusCodeColorObservableAsPropertyHelper.Value;
+
+        /// <summary>
         /// Gets a value indicating whether or not the text box for request data should be shown.
         /// </summary>
         public bool ShouldShowRequestDataTextBox => this.shouldShowRequestDataTextBoxObservableAsPropertyHelper.Value;
+
+        /// <summary>
+        /// Gets a value indicating whether or not the response details should be shown.
+        /// </summary>
+        public bool ShouldShowResponseDetails => this.shouldShowResponseDetailsObservableAsPropertyHelper.Value;
 
         /// <summary>
         /// Gets a command that adds a request header.
@@ -186,7 +275,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
             var request = new HttpRequestMessage
             {
                 Method = httpMethod,
-                RequestUri = new Uri(this.RequestUrl),
+                RequestUri = new Uri(this.RequestUrl, UriKind.Absolute),
             };
 
             if (IsMethodWithRequestData(httpMethod))
@@ -209,7 +298,20 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
             var response = await httpClient.SendAsync(request, cancellationToken);
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
-            return new RequestResult(response.StatusCode, responseContent);
+            var responseHeaders = new List<(string HeaderName, string HeaderValue)>();
+
+            foreach (var responseHeader in response.Headers)
+            {
+                foreach (var responseHeaderValue in responseHeader.Value)
+                {
+                    responseHeaders.Add((responseHeader.Key, responseHeaderValue));
+                }
+            }
+
+            return new RequestResult(
+                response.StatusCode,
+                responseContent,
+                responseHeaders);
         }
 
         /// <summary>
@@ -222,10 +324,15 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
             /// </summary>
             /// <param name="statusCode">An instance of <see cref="HttpStatusCode"/>.</param>
             /// <param name="responseContent">The response content.</param>
-            public RequestResult(HttpStatusCode statusCode, string responseContent)
+            /// <param name="headers">A read-only list of response headers.</param>
+            public RequestResult(
+                HttpStatusCode statusCode,
+                string responseContent,
+                IReadOnlyList<(string HeaderName, string HeaderValue)> headers)
             {
                 this.StatusCode = statusCode;
                 this.ResponseContent = responseContent;
+                this.Headers = headers;
             }
 
             /// <summary>
@@ -237,6 +344,11 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
             /// Gets the response content.
             /// </summary>
             public string ResponseContent { get; }
+
+            /// <summary>
+            /// Gets the response headers dictionary.
+            /// </summary>
+            public IReadOnlyList<(string HeaderName, string HeaderValue)> Headers { get; }
         }
     }
 }
