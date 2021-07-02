@@ -9,9 +9,11 @@ using System.Net;
 using System.Net.Http;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Collections;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.ViewModels;
 
@@ -66,6 +68,22 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
                 new ("application/xml", "XML"),
             };
 
+            this.RequestHeaders = new AvaloniaList<RequestHeaderViewModel>();
+
+            var removeObservable = new Subject<RequestHeaderViewModel>();
+            removeObservable
+                .Subscribe(requestHeaderViewModel =>
+                {
+                    if (!this.RequestHeaders.Contains(requestHeaderViewModel))
+                    {
+                        return;
+                    }
+
+                    this.RequestHeaders.Remove(requestHeaderViewModel);
+                });
+
+            this.AddRequestHeaderCommand = ReactiveCommand.Create(() => this.RequestHeaders.Add(new RequestHeaderViewModel(removeObservable)));
+
             this.SendRequestCommand = ReactiveCommand.CreateFromTask(this.SendRequestAsync);
 
             this.SendRequestCommand.Subscribe();
@@ -92,6 +110,11 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         /// Gets the valid list of content types.
         /// </summary>
         public List<ContentTypeViewModel> ContentTypes { get; }
+
+        /// <summary>
+        /// Gets the observable collection of request headers.
+        /// </summary>
+        public AvaloniaList<RequestHeaderViewModel> RequestHeaders { get; }
 
         /// <summary>
         /// Gets or sets the HTTP method selected.
@@ -141,6 +164,11 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         public bool ShouldShowRequestDataTextBox => this.shouldShowRequestDataTextBoxObservableAsPropertyHelper.Value;
 
         /// <summary>
+        /// Gets a command that adds a request header.
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> AddRequestHeaderCommand { get; }
+
+        /// <summary>
         /// Gets a command that sends the HTTP request.
         /// </summary>
         public ReactiveCommand<Unit, RequestResult> SendRequestCommand { get; }
@@ -171,6 +199,11 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
                     this.requestData,
                     Encoding.UTF8,
                     mediaType);
+            }
+
+            foreach (var requestHeader in this.RequestHeaders)
+            {
+                request.Headers.TryAddWithoutValidation(requestHeader.Name!, requestHeader.Value!);
             }
 
             var response = await httpClient.SendAsync(request, cancellationToken);

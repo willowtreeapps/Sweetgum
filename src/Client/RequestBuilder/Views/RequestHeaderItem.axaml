@@ -1,0 +1,22 @@
+<reactiveUi:ReactiveUserControl x:TypeArguments="viewModels:RequestHeaderViewModel" xmlns="https://github.com/avaloniaui"
+                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                           xmlns:viewModels="clr-namespace:WillowTree.Sweetgum.Client.RequestBuilder.ViewModels"
+                           xmlns:reactiveUi="http://reactiveui.net"
+                           mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                           x:Class="WillowTree.Sweetgum.Client.RequestBuilder.Views.RequestHeaderItem">
+    <Grid x:Name="Grid" ColumnDefinitions="*,*,Auto" Margin="0,0,0,5">
+        <Grid x:Name="NameGrid" Grid.Column="0" ColumnDefinitions="Auto,*" Margin="0,0,10,0">
+            <TextBlock Grid.Column="0" Text="Name:" VerticalAlignment="Center" Margin="0,0,5,0" />
+            <TextBox Grid.Column="1" x:Name="NameTextBox" />
+        </Grid>
+
+        <Grid x:Name="ValueGrid" Grid.Column="1" ColumnDefinitions="Auto,*" Margin="0,0,10,0">
+            <TextBlock Grid.Column="0" Text="Value:" VerticalAlignment="Center" Margin="0,0,5,0" />
+            <TextBox x:Name="ValueTextBox" Grid.Column="1" />
+        </Grid>
+
+        <Button x:Name="RemoveButton" Grid.Column="2" Content="Remove" />
+    </Grid>
+</reactiveUi:ReactiveUserControl>

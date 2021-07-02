@@ -2,9 +2,7 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
-using System;
 using System.Reactive.Disposables;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
@@ -33,6 +31,10 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
 #endif
 
             this.ViewModel = Dependencies.ServiceProvider?.GetRequiredService<RequestBuilderViewModel>();
+
+            // TODO: Make this a binding somehow. Right now, if we attempt to use a binding method, it will lead to the following exception:
+            // Can't two-way convert between Avalonia.Collections.AvaloniaList`1[WillowTree.Sweetgum.Client.RequestBuilder.ViewModels.RequestHeaderViewModel] and System.Collections.IEnumerable. To fix this, register a IBindingTypeConverter or call the version with the converter Func.
+            this.RequestHeadersItemsRepeater.Items = this.ViewModel?.RequestHeaders;
 
             this.WhenActivated(disposables =>
             {
@@ -64,6 +66,12 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
                         this.ViewModel,
                         viewModel => viewModel.ContentTypes,
                         view => view.ContentTypeComboBox.Items)
+                    .DisposeWith(disposables);
+
+                this.BindCommand(
+                        this.ViewModel!,
+                        viewModel => viewModel.AddRequestHeaderCommand,
+                        view => view.AddRequestHeaderButton)
                     .DisposeWith(disposables);
 
                 this.OneWayBind(
@@ -100,6 +108,10 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
         }
 
         private StackPanel RequestDataStackPanel => this.FindControl<StackPanel>(nameof(this.RequestDataStackPanel));
+
+        private Button AddRequestHeaderButton => this.FindControl<Button>(nameof(this.AddRequestHeaderButton));
+
+        private ItemsRepeater RequestHeadersItemsRepeater => this.FindControl<ItemsRepeater>(nameof(this.RequestHeadersItemsRepeater));
 
         private TextBox RequestDataTextBox => this.FindControl<TextBox>(nameof(this.RequestDataTextBox));
 

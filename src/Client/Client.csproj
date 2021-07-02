@@ -29,5 +29,9 @@
       <DependentUpon>ContentTypeItem.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="RequestBuilder\Views\RequestHeaderItem.axaml.cs">
+      <DependentUpon>RequestHeaderItem.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 </Project>
