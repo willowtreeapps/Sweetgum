@@ -4,7 +4,6 @@
                            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                            xmlns:viewModels="clr-namespace:WillowTree.Sweetgum.Client.RequestBuilder.ViewModels"
                            xmlns:reactiveUi="http://reactiveui.net"
-                           xmlns:client="clr-namespace:WillowTree.Sweetgum.Client"
                            xmlns:views="clr-namespace:WillowTree.Sweetgum.Client.RequestBuilder.Views"
                            mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
                            x:Class="WillowTree.Sweetgum.Client.RequestBuilder.Views.RequestBuilderWindow"

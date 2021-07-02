@@ -39,7 +39,7 @@ namespace WillowTree.Sweetgum.Client.DependencyInjection
             resolver.InitializeReactiveUI();
 
             services.AddTransient<RequestBuilderViewModel>();
-            services.AddSingleton<ICustomAttributeProvider>(provider => typeof(Dependencies).Assembly);
+            services.AddSingleton<ICustomAttributeProvider>(_ => typeof(Dependencies).Assembly);
 
             // These are normally called inside the `.UseReactiveUI()` callback, but it executes too late.
             services.AddSingleton<IActivationForViewFetcher>(new AvaloniaActivationForViewFetcher());

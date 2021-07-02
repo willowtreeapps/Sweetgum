@@ -2,9 +2,7 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
-using System.Collections.Generic;
 using System.Net.Http;
-using ReactiveUI;
 using WillowTree.Sweetgum.Client.ViewModels;
 
 namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
