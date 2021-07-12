@@ -2,13 +2,13 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
+using System.Linq;
 using System.Reactive.Disposables;
+using Autofac;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using Avalonia.Media;
 using Avalonia.ReactiveUI;
-using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.DependencyInjection;
 using WillowTree.Sweetgum.Client.RequestBuilder.ViewModels;
@@ -32,7 +32,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
             this.AttachDevTools();
 #endif
 
-            this.ViewModel = Dependencies.ServiceProvider?.GetRequiredService<RequestBuilderViewModel>();
+            this.ViewModel = Dependencies.Container.Resolve<RequestBuilderViewModel>();
 
             this.WhenActivated(disposables =>
             {
@@ -93,15 +93,19 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
                 this.OneWayBind(
                         this.ViewModel,
                         viewModel => viewModel.ResponseStatusCode,
-                        view => view.ResponseStatusCodeTextBlock.Text,
-                        responseCode => (int)responseCode + " " + responseCode)
+                        view => view.ResponseStatusCodeTextBlock.Text)
                     .DisposeWith(disposables);
 
                 this.OneWayBind(
                         this.ViewModel,
                         viewModel => viewModel.ResponseStatusCodeColor,
-                        view => view.ResponseStatusCodeTextBlock.Foreground,
-                        color => new SolidColorBrush(color))
+                        view => view.ResponseStatusCodeTextBlock.Foreground)
+                    .DisposeWith(disposables);
+
+                this.OneWayBind(
+                        this.ViewModel,
+                        viewModel => viewModel.ResponseTime,
+                        view => view.ResponseTimeTextBlock.Text)
                     .DisposeWith(disposables);
 
                 this.OneWayBind(
@@ -122,10 +126,50 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
                         view => view.SubmitRequestButton)
                     .DisposeWith(disposables);
 
+                this.BindCommand(
+                        this.ViewModel!,
+                        viewModel => viewModel.SaveCommand,
+                        view => view.SaveRequestButton)
+                    .DisposeWith(disposables);
+
+                this.BindCommand(
+                        this.ViewModel!,
+                        viewModel => viewModel.LoadCommand,
+                        view => view.LoadRequestButton)
+                    .DisposeWith(disposables);
+
                 this.OneWayBind(
                         this.ViewModel,
                         viewModel => viewModel.ShouldShowResponseDetails,
                         view => view.ResponseDetailsStackPanel.IsVisible)
+                    .DisposeWith(disposables);
+
+                this.BindInteraction(
+                        this.ViewModel,
+                        viewModel => viewModel.LoadSpecifyPathInteraction,
+                        async (context) =>
+                        {
+                            var dialog = new OpenFileDialog
+                            {
+                                AllowMultiple = false,
+                            };
+
+                            var path = await dialog.ShowAsync(this);
+
+                            context.SetOutput(path.FirstOrDefault());
+                        })
+                    .DisposeWith(disposables);
+
+                this.BindInteraction(
+                        this.ViewModel,
+                        viewModel => viewModel.SaveSpecifyPathInteraction,
+                        async (context) =>
+                        {
+                            var dialog = new SaveFileDialog();
+                            var path = await dialog.ShowAsync(this);
+
+                            context.SetOutput(path);
+                        })
                     .DisposeWith(disposables);
             });
         }
@@ -146,6 +190,8 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
 
         private TextBlock ResponseStatusCodeTextBlock => this.FindControl<TextBlock>(nameof(this.ResponseStatusCodeTextBlock));
 
+        private TextBlock ResponseTimeTextBlock => this.FindControl<TextBlock>(nameof(this.ResponseTimeTextBlock));
+
         private TextBox RequestUrlTextBox => this.FindControl<TextBox>(nameof(this.RequestUrlTextBox));
 
         private ComboBox ContentTypeComboBox => this.FindControl<ComboBox>(nameof(this.ContentTypeComboBox));
@@ -153,6 +199,10 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
         private ComboBox HttpMethodComboBox => this.FindControl<ComboBox>(nameof(this.HttpMethodComboBox));
 
         private Button SubmitRequestButton => this.FindControl<Button>(nameof(this.SubmitRequestButton));
+
+        private Button SaveRequestButton => this.FindControl<Button>(nameof(this.SaveRequestButton));
+
+        private Button LoadRequestButton => this.FindControl<Button>(nameof(this.LoadRequestButton));
 
         private void InitializeComponent()
         {

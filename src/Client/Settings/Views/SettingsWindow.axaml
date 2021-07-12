@@ -1,0 +1,41 @@
+<reactiveUi:ReactiveWindow x:TypeArguments="viewModels:SettingsViewModel" xmlns="https://github.com/avaloniaui"
+                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                           xmlns:viewModels="clr-namespace:WillowTree.Sweetgum.Client.Settings.ViewModels"
+                           xmlns:reactiveUi="http://reactiveui.net"
+                           xmlns:views="clr-namespace:WillowTree.Sweetgum.Client.Settings.Views"
+                           mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                           x:Class="WillowTree.Sweetgum.Client.Settings.Views.SettingsWindow"
+                           Icon="/Assets/avalonia-logo.ico"
+                           Title="Sweetgum">
+    <StackPanel Orientation="Vertical" Margin="10">
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBlock Text="Proxy Option:" Margin="0,0,5,0" />
+            <ComboBox x:Name="ProxyOptionsComboBox">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <views:ProxyOptionItem />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </StackPanel>
+
+        <StackPanel x:Name="ManualProxyStackPanel" Orientation="Vertical" Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <TextBlock Text="Proxy Host:" Margin="0,0,5,0" />
+                <TextBox x:Name="ProxyHostTextBox" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Proxy Port:" Margin="0,0,5,0" />
+                <TextBox x:Name="ProxyPortTextBox" />
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal">
+            <Button x:Name="CancelButton" Content="Cancel" Margin="0,0,5,0" />
+            <Button x:Name="SaveButton" Content="Save" />
+        </StackPanel>
+    </StackPanel>
+</reactiveUi:ReactiveWindow>

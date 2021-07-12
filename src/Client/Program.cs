@@ -3,6 +3,7 @@
 // </copyright>
 
 using Avalonia;
+using Avalonia.ReactiveUI;
 using WillowTree.Sweetgum.Client.DependencyInjection;
 
 namespace WillowTree.Sweetgum.Client
@@ -33,6 +34,7 @@ namespace WillowTree.Sweetgum.Client
         public static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
-                .LogToTrace();
+                .LogToTrace()
+                .UseReactiveUI();
     }
 }

@@ -5,17 +5,17 @@
 using System;
 using System.Reactive;
 using ReactiveUI;
-using WillowTree.Sweetgum.Client.ViewModels;
+using WillowTree.Sweetgum.Client.Requests.Models;
 
 namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
 {
     /// <summary>
     /// The request header view model.
     /// </summary>
-    public sealed class RequestHeaderViewModel : ViewModelBase
+    public sealed class RequestHeaderViewModel : ReactiveObject
     {
-        private string? name;
-        private string? value;
+        private string name;
+        private string value;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequestHeaderViewModel"/> class.
@@ -23,13 +23,15 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         /// <param name="removeObserver">An observer to notify when you want to remove the request header.</param>
         public RequestHeaderViewModel(IObserver<RequestHeaderViewModel> removeObserver)
         {
+            this.name = string.Empty;
+            this.value = string.Empty;
             this.RemoveCommand = ReactiveCommand.Create(() => removeObserver.OnNext(this));
         }
 
         /// <summary>
         /// Gets or sets the name of the request header.
         /// </summary>
-        public string? Name
+        public string Name
         {
             get => this.name;
             set => this.RaiseAndSetIfChanged(ref this.name, value);
@@ -38,7 +40,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         /// <summary>
         /// Gets or sets the value of the request header.
         /// </summary>
-        public string? Value
+        public string Value
         {
             get => this.value;
             set => this.RaiseAndSetIfChanged(ref this.value, value);
@@ -48,5 +50,14 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         /// Gets the command to remove the request header.
         /// </summary>
         public ReactiveCommand<Unit, Unit> RemoveCommand { get; }
+
+        /// <summary>
+        /// Converts the view model to an instance of <see cref="RequestHeaderModel"/>.
+        /// </summary>
+        /// <returns>An instance of <see cref="RequestHeaderModel"/>.</returns>
+        public RequestHeaderModel ToModel()
+        {
+            return new RequestHeaderModel(this.Name, this.Value);
+        }
     }
 }

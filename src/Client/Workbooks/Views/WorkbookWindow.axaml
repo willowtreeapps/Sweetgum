@@ -1,0 +1,15 @@
+<reactiveUi:ReactiveWindow x:TypeArguments="viewModels:WorkbookViewModel" xmlns="https://github.com/avaloniaui"
+                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                           xmlns:viewModels="clr-namespace:WillowTree.Sweetgum.Client.Workbooks.ViewModels"
+                           xmlns:reactiveUi="http://reactiveui.net"
+                           xmlns:views="clr-namespace:WillowTree.Sweetgum.Client.Workbooks.Views"
+                           mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                           x:Class="WillowTree.Sweetgum.Client.Workbooks.Views.WorkbookWindow"
+                           Icon="/Assets/avalonia-logo.ico"
+                           Title="Sweetgum">
+    <StackPanel Orientation="Vertical" Margin="10">
+
+    </StackPanel>
+</reactiveUi:ReactiveWindow>

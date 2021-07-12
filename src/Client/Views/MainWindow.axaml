@@ -2,19 +2,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:viewModels="clr-namespace:WillowTree.Sweetgum.Client.ViewModels"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="WillowTree.Sweetgum.Client.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="Sweetgum">
-
-    <Design.DataContext>
-        <viewModels:MainWindowViewModel/>
-    </Design.DataContext>
-
     <StackPanel Orientation="Vertical">
         <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <Button x:Name="RequestBuilderButton" Content="Open Request Builder" />
+        <Button x:Name="SettingsButton" Content="Open Settings" />
+        <Button x:Name="NewWorkbookButton" Content="New Workbook" />
+        <Button x:Name="LoadWorkbookButton" Content="Load Workbook" />
     </StackPanel>
 
 </Window>

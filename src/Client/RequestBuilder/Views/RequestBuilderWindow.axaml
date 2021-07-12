@@ -9,12 +9,11 @@
                            x:Class="WillowTree.Sweetgum.Client.RequestBuilder.Views.RequestBuilderWindow"
                            Icon="/Assets/avalonia-logo.ico"
                            Title="Sweetgum">
-
-    <Design.DataContext>
-        <viewModels:RequestBuilderViewModel/>
-    </Design.DataContext>
-
     <StackPanel Orientation="Vertical" Margin="10">
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+            <Button x:Name="SaveRequestButton" Content="Save Request" Margin="0,0,10,0" />
+            <Button x:Name="LoadRequestButton" Content="Load Request" />
+        </StackPanel>
         <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,10">
             <ComboBox Grid.Column="0" x:Name="HttpMethodComboBox">
                 <ComboBox.ItemTemplate>
@@ -58,7 +57,10 @@
         <StackPanel x:Name="ResponseDetailsStackPanel" Orientation="Vertical">
             <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                 <TextBlock Text="Response Code:" Margin="0,0,5,0" />
-                <TextBlock x:Name="ResponseStatusCodeTextBlock" FontWeight="Bold" />
+                <TextBlock x:Name="ResponseStatusCodeTextBlock" FontWeight="Bold" Margin="0,0,10,0" />
+
+                <TextBlock Text="Response Time:" Margin="0,0,5,0" />
+                <TextBlock x:Name="ResponseTimeTextBlock" FontWeight="Bold" />
             </StackPanel>
             <StackPanel Orientation="Vertical" Margin="0,0,0,10">
                 <TextBlock Text="Response Headers:" Margin="0,0,0,10" />

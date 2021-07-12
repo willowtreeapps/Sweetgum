@@ -2,14 +2,14 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
-using WillowTree.Sweetgum.Client.ViewModels;
+using ReactiveUI;
 
 namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
 {
     /// <summary>
     /// The content type view model.
     /// </summary>
-    public sealed class ContentTypeViewModel : ViewModelBase
+    public sealed class ContentTypeViewModel : ReactiveObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ContentTypeViewModel"/> class.

@@ -3,14 +3,14 @@
 // </copyright>
 
 using System.Net.Http;
-using WillowTree.Sweetgum.Client.ViewModels;
+using ReactiveUI;
 
 namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
 {
     /// <summary>
     /// The main window view model.
     /// </summary>
-    public sealed class HttpMethodViewModel : ViewModelBase
+    public sealed class HttpMethodViewModel : ReactiveObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpMethodViewModel"/> class.

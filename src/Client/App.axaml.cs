@@ -2,10 +2,12 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
+using Autofac;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using WillowTree.Sweetgum.Client.ViewModels;
+using WillowTree.Sweetgum.Client.DependencyInjection;
+using WillowTree.Sweetgum.Client.Settings.Services;
 using WillowTree.Sweetgum.Client.Views;
 
 namespace WillowTree.Sweetgum.Client
@@ -32,12 +34,12 @@ namespace WillowTree.Sweetgum.Client
         /// <inheritdoc cref="Application"/>
         public override void OnFrameworkInitializationCompleted()
         {
+            var settingsInteractor = Dependencies.Container.Resolve<SettingsManager>();
+            settingsInteractor.Load();
+
             if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow = new MainWindow
-                {
-                    DataContext = new MainWindowViewModel(),
-                };
+                desktop.MainWindow = new MainWindow();
             }
 
             base.OnFrameworkInitializationCompleted();

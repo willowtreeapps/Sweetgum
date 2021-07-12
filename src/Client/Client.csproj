@@ -9,12 +9,15 @@
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="[6.2.0]" />
     <PackageReference Include="Avalonia" Version="[0.10.6]" />
     <PackageReference Include="Avalonia.Desktop" Version="[0.10.6]" />
     <PackageReference Include="Avalonia.Diagnostics" Version="[0.10.6]" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="[0.10.6]" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="[5.0.1]" />
-    <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="[11.1.1]" />
+    <PackageReference Include="Companion" Version="[0.4.0]" />
+    <PackageReference Include="ExhaustiveMatching.Analyzer" Version="[0.5.0]" />
+    <PackageReference Include="Newtonsoft.Json" Version="[13.0.1]" />
+    <PackageReference Include="Splat.Autofac" Version="[11.1.1]" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="RequestBuilder\Views\RequestBuilderWindow.axaml.cs">
@@ -31,6 +34,18 @@
     </Compile>
     <Compile Update="RequestBuilder\Views\RequestHeaderItem.axaml.cs">
       <DependentUpon>RequestHeaderItem.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Settings\Views\SettingsWindow.axaml.cs">
+      <DependentUpon>RequestBuilderWindow.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Settings\Views\ProxyOptionItem.axaml.cs">
+      <DependentUpon>HttpMethodItem.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Workbooks\Views\WorkbookWindow.axaml.cs">
+      <DependentUpon>RequestBuilderWindow.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

@@ -2,15 +2,16 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
-using System;
 using System.Reflection;
-using Avalonia.ReactiveUI;
-using Avalonia.Threading;
-using Microsoft.Extensions.DependencyInjection;
+using Autofac;
 using ReactiveUI;
-using Splat;
-using Splat.Microsoft.Extensions.DependencyInjection;
+using Splat.Autofac;
 using WillowTree.Sweetgum.Client.RequestBuilder.ViewModels;
+using WillowTree.Sweetgum.Client.Settings.Services;
+using WillowTree.Sweetgum.Client.Settings.ViewModels;
+using WillowTree.Sweetgum.Client.ViewModels;
+using WillowTree.Sweetgum.Client.Workbooks.Services;
+using WillowTree.Sweetgum.Client.Workbooks.ViewModels;
 
 namespace WillowTree.Sweetgum.Client.DependencyInjection
 {
@@ -20,36 +21,36 @@ namespace WillowTree.Sweetgum.Client.DependencyInjection
     public static class Dependencies
     {
         /// <summary>
-        /// Gets or sets the service provider.
+        /// Gets the Autofac container.
         /// </summary>
-        public static IServiceProvider? ServiceProvider { get; set; }
+        public static IContainer Container { get; private set; } = null!;
 
         /// <summary>
         /// Configure the services in our dependency injection container.
-        /// At the end of this method, the service provider is built and ready for use.
+        /// At the end of this method, the container is built and ready for use.
         /// </summary>
         public static void ConfigureServices()
         {
-            var services = new ServiceCollection();
+            var builder = new ContainerBuilder();
 
-            // For more information, see: https://github.com/reactiveui/splat/tree/main/src/Splat.Microsoft.Extensions.DependencyInjection
-            services.UseMicrosoftDependencyResolver();
-            var resolver = Locator.CurrentMutable;
-            resolver.InitializeSplat();
-            resolver.InitializeReactiveUI();
+            builder.RegisterType<RequestBuilderViewModel>().InstancePerDependency();
+            builder.RegisterType<MainWindowViewModel>().InstancePerDependency();
+            builder.RegisterType<SettingsViewModel>().InstancePerDependency();
+            builder.RegisterType<WorkbookViewModel>().InstancePerDependency();
+            builder.RegisterType<SettingsManager>().SingleInstance();
+            builder.RegisterType<WorkbookManager>().SingleInstance();
+            builder.Register<ICustomAttributeProvider>(_ => typeof(Dependencies).Assembly).SingleInstance();
 
-            services.AddTransient<RequestBuilderViewModel>();
-            services.AddSingleton<ICustomAttributeProvider>(_ => typeof(Dependencies).Assembly);
+            // Creates and sets the Autofac resolver as the Locator
+            var autofacResolver = builder.UseAutofacDependencyResolver();
 
-            // These are normally called inside the `.UseReactiveUI()` callback, but it executes too late.
-            services.AddSingleton<IActivationForViewFetcher>(new AvaloniaActivationForViewFetcher());
-            services.AddSingleton<IPropertyBindingHook>(new AutoDataTemplateBindingHook());
-            RxApp.MainThreadScheduler = AvaloniaScheduler.Instance;
+            // Register the resolver in Autofac so it can be later resolved
+            builder.RegisterInstance(autofacResolver);
 
-            ServiceProvider = services.BuildServiceProvider();
+            // Initialize ReactiveUI components
+            autofacResolver.InitializeReactiveUI();
 
-            // For more information, see: https://github.com/reactiveui/splat/tree/main/src/Splat.Microsoft.Extensions.DependencyInjection
-            ServiceProvider.UseMicrosoftDependencyResolver();
+            Container = builder.Build();
         }
     }
 }
