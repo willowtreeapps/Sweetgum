@@ -24,6 +24,14 @@
 
         <views1:WorkbookItems x:Name="WorkbookItems" />
 
-        <Button x:Name="SaveButton" Content="Save Workbook" />
+        <StackPanel x:Name="NewFolderStackPanel" Orientation="Horizontal" IsVisible="False">
+            <TextBox x:Name="NewFolderNameTextBox" Margin="0,0,5,0" />
+            <Button x:Name="FinishNewFolderButton" Content="Add" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal">
+            <Button x:Name="NewFolderButton" Content="New Folder" />
+            <Button x:Name="SaveButton" Content="Save Workbook" />
+        </StackPanel>
     </StackPanel>
 </views:BaseWindow>

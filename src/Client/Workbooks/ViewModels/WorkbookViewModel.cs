@@ -17,7 +17,9 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
     public sealed class WorkbookViewModel : ReactiveObject
     {
         private readonly ObservableAsPropertyHelper<bool> isRenamingObservableAsPropertyHelper;
+        private readonly ObservableAsPropertyHelper<bool> isCreatingNewFolderObservableAsPropertyHelper;
         private string name;
+        private string newFolderName;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WorkbookViewModel"/> class.
@@ -26,11 +28,16 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         public WorkbookViewModel(WorkbookModel workbookModel)
         {
             this.name = workbookModel.Name;
+            this.newFolderName = string.Empty;
 
             var isRenamingBehaviorSubject = new BehaviorSubject<bool>(false);
+            var isCreatingNewFolderBehaviorSubject = new BehaviorSubject<bool>(false);
 
             this.isRenamingObservableAsPropertyHelper = isRenamingBehaviorSubject
                 .ToProperty(this, viewModel => viewModel.IsRenaming);
+
+            this.isCreatingNewFolderObservableAsPropertyHelper = isCreatingNewFolderBehaviorSubject
+                .ToProperty(this, viewModel => viewModel.IsCreatingNewFolder);
 
             this.RenameCommand = ReactiveCommand.Create(() => isRenamingBehaviorSubject.OnNext(true));
             this.FinishRenameCommand = ReactiveCommand.Create(() =>
@@ -45,7 +52,21 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                     await WorkbookManager.SaveAsync(workbookModel, cancellationToken);
                     return Unit.Default;
                 },
-                isRenamingBehaviorSubject.Select(r => !r));
+                isRenamingBehaviorSubject.CombineLatest(isCreatingNewFolderBehaviorSubject, (r, n) => !r && !n));
+
+            this.NewFolderCommand = ReactiveCommand.Create(() =>
+            {
+                this.NewFolderName = string.Empty;
+                isCreatingNewFolderBehaviorSubject.OnNext(true);
+            });
+
+            this.FinishNewFolderCommand = ReactiveCommand.Create(() =>
+            {
+                isCreatingNewFolderBehaviorSubject.OnNext(false);
+
+                // TODO: This will technically let you create a folder anywhere in the tree. Kind of a cool "feature".
+                workbookModel = workbookModel.NewFolder(this.NewFolderName);
+            });
 
             this.WorkbookItems = new WorkbookItemsViewModel(workbookModel.Folders);
         }
@@ -60,9 +81,23 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         }
 
         /// <summary>
+        /// Gets or sets the new folder name.
+        /// </summary>
+        public string NewFolderName
+        {
+            get => this.newFolderName;
+            set => this.RaiseAndSetIfChanged(ref this.newFolderName, value);
+        }
+
+        /// <summary>
         /// Gets a value indicating whether or not the workbook is being renamed.
         /// </summary>
         public bool IsRenaming => this.isRenamingObservableAsPropertyHelper.Value;
+
+        /// <summary>
+        /// Gets a value indicating whether or not a new folder is being created.
+        /// </summary>
+        public bool IsCreatingNewFolder => this.isCreatingNewFolderObservableAsPropertyHelper.Value;
 
         /// <summary>
         /// Gets a command to rename the workbook.
@@ -73,6 +108,16 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// Gets a command to finish renaming the workbook.
         /// </summary>
         public ReactiveCommand<Unit, Unit> FinishRenameCommand { get; }
+
+        /// <summary>
+        /// Gets a command to create a new folder in the workbook.
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> NewFolderCommand { get; }
+
+        /// <summary>
+        /// Gets a command to finish creating a new folder in the workbook.
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> FinishNewFolderCommand { get; }
 
         /// <summary>
         /// Gets a command to save the workbook.

@@ -22,11 +22,19 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
 
         private TextBox RenameTextBox => this.FindControl<TextBox>(nameof(this.RenameTextBox));
 
+        private TextBox NewFolderNameTextBox => this.FindControl<TextBox>(nameof(this.NewFolderNameTextBox));
+
         private Button RenameButton => this.FindControl<Button>(nameof(this.RenameButton));
 
         private Button FinishRenameButton => this.FindControl<Button>(nameof(this.FinishRenameButton));
 
         private Button SaveButton => this.FindControl<Button>(nameof(this.SaveButton));
+
+        private Button NewFolderButton => this.FindControl<Button>(nameof(this.NewFolderButton));
+
+        private Button FinishNewFolderButton => this.FindControl<Button>(nameof(this.FinishNewFolderButton));
+
+        private StackPanel NewFolderStackPanel => this.FindControl<StackPanel>(nameof(this.NewFolderStackPanel));
 
         private WorkbookItems WorkbookItems => this.FindControl<WorkbookItems>(nameof(this.WorkbookItems));
 
@@ -96,6 +104,30 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
                         window.ViewModel!,
                         viewModel => viewModel.FinishRenameCommand,
                         view => view.FinishRenameButton)
+                    .DisposeWith(disposables);
+
+                window.BindCommand(
+                        window.ViewModel!,
+                        viewModel => viewModel.NewFolderCommand,
+                        view => view.NewFolderButton)
+                    .DisposeWith(disposables);
+
+                window.OneWayBind(
+                        window.ViewModel,
+                        viewModel => viewModel.IsCreatingNewFolder,
+                        view => view.NewFolderStackPanel.IsVisible)
+                    .DisposeWith(disposables);
+
+                window.Bind(
+                        window.ViewModel,
+                        viewModel => viewModel.NewFolderName,
+                        view => view.NewFolderNameTextBox.Text)
+                    .DisposeWith(disposables);
+
+                window.BindCommand(
+                        window.ViewModel!,
+                        viewModel => viewModel.FinishNewFolderCommand,
+                        view => view.FinishNewFolderButton)
                     .DisposeWith(disposables);
 
                 window.BindCommand(
