@@ -57,7 +57,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         /// <returns>An instance of <see cref="RequestHeaderModel"/>.</returns>
         public RequestHeaderModel ToModel()
         {
-            return new RequestHeaderModel(this.Name, this.Value);
+            return new(this.Name, this.Value);
         }
     }
 }

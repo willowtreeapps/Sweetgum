@@ -4,9 +4,9 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.Annotations;
 using RealGoodApps.Companion.Attributes;
 using WillowTree.Sweetgum.Client.Requests.Models;
+using WillowTree.Sweetgum.Client.Serializable.Interfaces;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
 
 namespace WillowTree.Sweetgum.Client.Folders.Models
@@ -14,7 +14,7 @@ namespace WillowTree.Sweetgum.Client.Folders.Models
     /// <summary>
     /// A model for a folder within a workbook.
     /// </summary>
-    public sealed class FolderModel
+    public sealed class FolderModel : IModel<FolderModel, SerializableFolderModel>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FolderModel"/> class.
@@ -23,7 +23,6 @@ namespace WillowTree.Sweetgum.Client.Folders.Models
         /// <param name="parentPath">The parent path of the folder.</param>
         /// <param name="folders">The folders within the folder.</param>
         /// <param name="requests">The requests within the folder.</param>
-        [CompanionType(typeof(WorkbookModel))]
         public FolderModel(
             string name,
             string parentPath,
@@ -44,15 +43,6 @@ namespace WillowTree.Sweetgum.Client.Folders.Models
         public FolderModel(FolderModel source)
             : this(source.Name, source.ParentPath, source.Folders, source.Requests)
         {
-        }
-
-        [UsedImplicitly]
-        private FolderModel()
-        {
-            this.Name = string.Empty;
-            this.ParentPath = string.Empty;
-            this.Folders = new List<FolderModel>();
-            this.Requests = new List<RequestModel>();
         }
 
         /// <summary>
@@ -133,6 +123,18 @@ namespace WillowTree.Sweetgum.Client.Folders.Models
                 Folders = this.Folders
                     .Select(f => f.RewriteParentPath($"{newParentPath}/{this.Name}"))
                     .ToList(),
+            };
+        }
+
+        /// <inheritdoc cref="IModel{TModel,TSerializableModel}"/>
+        public SerializableFolderModel ToSerializable()
+        {
+            return new()
+            {
+                Name = this.Name,
+                ParentPath = this.ParentPath,
+                Folders = this.Folders.Select(f => f.ToSerializable()).ToList(),
+                Requests = this.Requests.Select(r => r.ToSerializable()).ToList(),
             };
         }
     }

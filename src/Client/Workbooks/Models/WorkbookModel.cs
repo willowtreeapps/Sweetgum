@@ -7,22 +7,21 @@ using System.Collections.Generic;
 using System.Linq;
 using WillowTree.Sweetgum.Client.Folders.Models;
 using WillowTree.Sweetgum.Client.Requests.Models;
+using WillowTree.Sweetgum.Client.Serializable.Interfaces;
 
 namespace WillowTree.Sweetgum.Client.Workbooks.Models
 {
     /// <summary>
     /// A model for a workbook.
     /// </summary>
-    public sealed class WorkbookModel
+    public sealed class WorkbookModel : IModel<WorkbookModel, SerializableWorkbookModel>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="WorkbookModel"/> class.
         /// </summary>
-        /// <param name="name">The name of the workbook.</param>
-        /// <param name="folders">A list of folders in the workbook.</param>
-        public WorkbookModel(
-            string name,
-            IReadOnlyList<FolderModel> folders)
+        /// <param name="name">The workbook's name.</param>
+        /// <param name="folders">The workbook's folders.</param>
+        public WorkbookModel(string name, IReadOnlyList<FolderModel> folders)
         {
             this.Name = name;
             this.Folders = folders;
@@ -33,19 +32,20 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// </summary>
         /// <param name="source">An instance of <see cref="WorkbookModel"/>.</param>
         private WorkbookModel(WorkbookModel source)
-            : this(source.Name, source.Folders)
         {
+            this.Name = source.Name;
+            this.Folders = source.Folders;
         }
 
         /// <summary>
         /// Gets the name of the workbook.
         /// </summary>
-        public string Name { get; init; }
+        public string Name { get; private init; }
 
         /// <summary>
         /// Gets the list of folders in the workbook.
         /// </summary>
-        public IReadOnlyList<FolderModel> Folders { get; init; }
+        public IReadOnlyList<FolderModel> Folders { get; private init; }
 
         /// <summary>
         /// Rename a workbook.
@@ -54,7 +54,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
         public WorkbookModel Rename(string newName)
         {
-            return new WorkbookModel(this)
+            return new(this)
             {
                 Name = newName,
             };
@@ -225,6 +225,16 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
             return new WorkbookModel(this)
             {
                 Folders = GetAllFoldersExceptPath(path, this.Folders),
+            };
+        }
+
+        /// <inheritdoc cref="IModel{TModel,TSerializableModel}"/>
+        public SerializableWorkbookModel ToSerializable()
+        {
+            return new()
+            {
+                Name = this.Name,
+                Folders = this.Folders.Select(f => f.ToSerializable()).ToList(),
             };
         }
 

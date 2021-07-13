@@ -15,6 +15,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
     {
         private readonly WorkbookManager workbookManager;
         private readonly WorkbookModel workbookModel;
+        private string name;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WorkbookViewModel"/> class.
@@ -25,8 +26,26 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             WorkbookManager workbookManager,
             WorkbookModel workbookModel)
         {
+            this.name = workbookModel.Name;
+
             this.workbookManager = workbookManager;
             this.workbookModel = workbookModel;
+
+            this.WorkbookItems = new WorkbookItemsViewModel(workbookModel);
         }
+
+        /// <summary>
+        /// Gets or sets the name of the workbook.
+        /// </summary>
+        public string Name
+        {
+            get => this.name;
+            set => this.RaiseAndSetIfChanged(ref this.name, value);
+        }
+
+        /// <summary>
+        /// Gets the workbook items.
+        /// </summary>
+        public WorkbookItemsViewModel WorkbookItems { get; }
     }
 }

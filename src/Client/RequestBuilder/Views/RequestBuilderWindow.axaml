@@ -1,14 +1,14 @@
-<reactiveUi:ReactiveWindow x:TypeArguments="viewModels:RequestBuilderViewModel" xmlns="https://github.com/avaloniaui"
-                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                           xmlns:viewModels="clr-namespace:WillowTree.Sweetgum.Client.RequestBuilder.ViewModels"
-                           xmlns:reactiveUi="http://reactiveui.net"
-                           xmlns:views="clr-namespace:WillowTree.Sweetgum.Client.RequestBuilder.Views"
-                           mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-                           x:Class="WillowTree.Sweetgum.Client.RequestBuilder.Views.RequestBuilderWindow"
-                           Icon="/Assets/avalonia-logo.ico"
-                           Title="Sweetgum">
+<views1:BaseWindow x:TypeArguments="viewModels:RequestBuilderViewModel" xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:viewModels="clr-namespace:WillowTree.Sweetgum.Client.RequestBuilder.ViewModels"
+                    xmlns:views="clr-namespace:WillowTree.Sweetgum.Client.RequestBuilder.Views"
+                    xmlns:views1="clr-namespace:WillowTree.Sweetgum.Client.BaseControls.Views"
+                    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                    x:Class="WillowTree.Sweetgum.Client.RequestBuilder.Views.RequestBuilderWindow"
+                    Icon="/Assets/avalonia-logo.ico"
+                    Title="Sweetgum">
     <StackPanel Orientation="Vertical" Margin="10">
         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
             <Button x:Name="SaveRequestButton" Content="Save Request" Margin="0,0,10,0" />
@@ -72,4 +72,4 @@
             </StackPanel>
         </StackPanel>
     </StackPanel>
-</reactiveUi:ReactiveWindow>
+</views1:BaseWindow>

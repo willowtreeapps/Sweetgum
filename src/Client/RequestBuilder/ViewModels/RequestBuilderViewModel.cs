@@ -432,6 +432,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         {
             var path = await this.SaveSpecifyPathInteraction.Handle(Unit.Default);
             var savedRequest = new RequestModel(
+                "My Request", // TODO: Change this
                 this.CalculateCurrentHttpMethod(),
                 this.RequestUrl,
                 this.RequestHeaders.Select(requestHeader => requestHeader.ToModel()).ToList(),
@@ -440,7 +441,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
 
             await File.WriteAllTextAsync(
                 path,
-                JsonConvert.SerializeObject(savedRequest),
+                JsonConvert.SerializeObject(savedRequest.ToSerializable()),
                 cancellationToken);
         }
 

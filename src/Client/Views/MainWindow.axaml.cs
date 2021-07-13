@@ -3,7 +3,9 @@
 // </copyright>
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Reactive.Disposables;
 using Autofac;
 using Avalonia;
@@ -13,6 +15,7 @@ using Avalonia.ReactiveUI;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.DependencyInjection;
 using WillowTree.Sweetgum.Client.RequestBuilder.Views;
+using WillowTree.Sweetgum.Client.Requests.Models;
 using WillowTree.Sweetgum.Client.Settings.Views;
 using WillowTree.Sweetgum.Client.ViewModels;
 using WillowTree.Sweetgum.Client.Workbooks.Views;
@@ -36,13 +39,17 @@ namespace WillowTree.Sweetgum.Client.Views
             this.AttachDevTools();
 #endif
 
+            // TODO: Get rid of this.
             this.RequestBuilderButton.Click += (_, _) =>
             {
-                var requestBuilderWindow = new RequestBuilderWindow
-                {
-                    Width = 800,
-                    Height = 800,
-                };
+                var requestBuilderWindow = RequestBuilderWindow.Create(new RequestModel(
+                    "New Request", // TODO: Change this?
+                    HttpMethod.Get,
+                    string.Empty,
+                    new List<RequestHeaderModel>(),
+                    "application/x-www-form-urlencoded",
+                    null));
+
                 requestBuilderWindow.Show();
             };
 

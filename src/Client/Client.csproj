@@ -21,7 +21,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Update="RequestBuilder\Views\RequestBuilderWindow.axaml.cs">
-      <DependentUpon>MainWindow.axaml</DependentUpon>
+      <DependentUpon>RequestBuilderWindow.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="RequestBuilder\Views\HttpMethodItem.axaml.cs">
@@ -37,15 +37,35 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Settings\Views\SettingsWindow.axaml.cs">
-      <DependentUpon>RequestBuilderWindow.axaml</DependentUpon>
+      <DependentUpon>SettingsWindow.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Settings\Views\ProxyOptionItem.axaml.cs">
-      <DependentUpon>HttpMethodItem.axaml</DependentUpon>
+      <DependentUpon>ProxyOptionItem.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Workbooks\Views\WorkbookWindow.axaml.cs">
-      <DependentUpon>RequestBuilderWindow.axaml</DependentUpon>
+      <DependentUpon>WorkbookWindow.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Workbooks\Views\WorkbookItems.axaml.cs">
+      <DependentUpon>WorkbookItems.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Workbooks\Views\WorkbookFolderItems.axaml.cs">
+      <DependentUpon>WorkbookFolderItems.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Workbooks\Views\WorkbookRequestItems.axaml.cs">
+      <DependentUpon>WorkbookRequestItems.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Workbooks\Views\FolderWorkbookItem.axaml.cs">
+      <DependentUpon>FolderWorkbookItem.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Workbooks\Views\RequestWorkbookItem.axaml.cs">
+      <DependentUpon>RequestWorkbookItem.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
