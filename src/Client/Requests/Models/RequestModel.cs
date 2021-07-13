@@ -5,14 +5,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using WillowTree.Sweetgum.Client.Serializable.Interfaces;
 
 namespace WillowTree.Sweetgum.Client.Requests.Models
 {
     /// <summary>
     /// A model for a request.
     /// </summary>
-    public sealed class RequestModel : IModel<RequestModel, SerializableRequestModel>
+    public sealed class RequestModel
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RequestModel"/> class.
@@ -70,10 +69,13 @@ namespace WillowTree.Sweetgum.Client.Requests.Models
         /// </summary>
         public string? RequestData { get; }
 
-        /// <inheritdoc cref="IModel{TModel,TSerializableModel}"/>
+        /// <summary>
+        /// Converts an instance of <see cref="RequestModel"/> to an instance of <see cref="SerializableRequestModel"/>.
+        /// </summary>
+        /// <returns>An instance of <see cref="SerializableRequestModel"/>.</returns>
         public SerializableRequestModel ToSerializable()
         {
-            return new SerializableRequestModel
+            return new()
             {
                 Name = this.Name,
                 ContentType = this.ContentType,

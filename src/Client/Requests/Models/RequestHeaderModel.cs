@@ -2,14 +2,12 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
-using WillowTree.Sweetgum.Client.Serializable.Interfaces;
-
 namespace WillowTree.Sweetgum.Client.Requests.Models
 {
     /// <summary>
     /// A request header model.
     /// </summary>
-    public sealed class RequestHeaderModel : IModel<RequestHeaderModel, SerializableRequestHeaderModel>
+    public sealed class RequestHeaderModel
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RequestHeaderModel"/> class.
@@ -32,7 +30,10 @@ namespace WillowTree.Sweetgum.Client.Requests.Models
         /// </summary>
         public string Value { get; }
 
-        /// <inheritdoc cref="IModel{TModel,TSerializableModel}"/>
+        /// <summary>
+        /// Converts an instance of <see cref="RequestHeaderModel"/> to an instance of <see cref="SerializableRequestHeaderModel"/>.
+        /// </summary>
+        /// <returns>An instance of <see cref="SerializableRequestHeaderModel"/>.</returns>
         public SerializableRequestHeaderModel ToSerializable()
         {
             return new()

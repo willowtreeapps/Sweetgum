@@ -17,7 +17,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Services
     /// <summary>
     /// The workbook manager.
     /// </summary>
-    public sealed class WorkbookManager
+    public static class WorkbookManager
     {
         /// <summary>
         /// Load a workbook from the file system.
@@ -26,13 +26,13 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Services
         /// <param name="cancellationToken">An instance of <see cref="CancellationToken"/>.</param>
         /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
         [CompanionType(typeof(MainWindowViewModel))]
-        public async Task<WorkbookModel> LoadAsync(
+        public static async Task<WorkbookModel> LoadAsync(
             string path,
             CancellationToken cancellationToken)
         {
             var workbookContents = await File.ReadAllTextAsync(path, cancellationToken);
-            var workbookModel = JsonConvert.DeserializeObject<WorkbookModel>(workbookContents) ??
-                                new WorkbookModel(string.Empty, new List<FolderModel>());
+            var workbookModel = JsonConvert.DeserializeObject<SerializableWorkbookModel>(workbookContents)?.ToModel(path) ??
+                                new WorkbookModel(string.Empty, path, new List<FolderModel>());
 
             return workbookModel;
         }
@@ -43,21 +43,35 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Services
         /// <param name="path">The path to the new workbook.</param>
         /// <param name="cancellationToken">An instance of <see cref="CancellationToken"/>.</param>
         /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
-        public async Task<WorkbookModel> NewAsync(
+        public static async Task<WorkbookModel> NewAsync(
             string path,
             CancellationToken cancellationToken)
         {
             var workbookModel = new WorkbookModel(
                 "Untitled Workbook",
+                path,
                 new List<FolderModel>());
 
-            // TODO: We should probably throw an actual error if this fails.
-            await File.WriteAllTextAsync(
-                path,
-                JsonConvert.SerializeObject(workbookModel),
-                cancellationToken);
+            await SaveAsync(workbookModel, cancellationToken);
 
             return workbookModel;
+        }
+
+        /// <summary>
+        /// Saves a workbook on the filesystem.
+        /// </summary>
+        /// <param name="workbookModel">An instance of <see cref="WorkbookModel"/>.</param>
+        /// <param name="cancellationToken">An instance of <see cref="CancellationToken"/>.</param>
+        /// <returns>An instance of <see cref="Task"/>.</returns>
+        public static async Task SaveAsync(
+            WorkbookModel workbookModel,
+            CancellationToken cancellationToken)
+        {
+            // TODO: We should probably throw an actual error if this fails.
+            await File.WriteAllTextAsync(
+                workbookModel.Path,
+                JsonConvert.SerializeObject(workbookModel),
+                cancellationToken);
         }
     }
 }

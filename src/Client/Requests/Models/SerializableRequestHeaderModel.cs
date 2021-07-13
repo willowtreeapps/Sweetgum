@@ -3,7 +3,6 @@
 // </copyright>
 
 using RealGoodApps.Companion.Attributes;
-using WillowTree.Sweetgum.Client.Serializable.Interfaces;
 
 namespace WillowTree.Sweetgum.Client.Requests.Models
 {
@@ -11,7 +10,7 @@ namespace WillowTree.Sweetgum.Client.Requests.Models
     /// A simplified version of <see cref="RequestHeaderModel"/> that supports nullability for serialization.
     /// You do not want to use this model throughout the application in most cases.
     /// </summary>
-    public sealed class SerializableRequestHeaderModel : ISerializableModel<SerializableRequestHeaderModel, RequestHeaderModel>
+    public sealed class SerializableRequestHeaderModel
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SerializableRequestHeaderModel"/> class.
@@ -32,7 +31,10 @@ namespace WillowTree.Sweetgum.Client.Requests.Models
         /// </summary>
         public string? Value { get; set; }
 
-        /// <inheritdoc cref="ISerializableModel{TSerializableModel,TModel}"/>
+        /// <summary>
+        /// Converts an instance of <see cref="SerializableRequestHeaderModel"/> to an instance of <see cref="RequestHeaderModel"/>.
+        /// </summary>
+        /// <returns>An instance of <see cref="RequestHeaderModel"/>.</returns>
         public RequestHeaderModel ToModel()
         {
             return new RequestHeaderModel(

@@ -17,16 +17,11 @@ namespace WillowTree.Sweetgum.Client.ViewModels
     /// </summary>
     public sealed class MainWindowViewModel : ReactiveObject
     {
-        private readonly WorkbookManager workbookManager;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindowViewModel"/> class.
         /// </summary>
-        /// <param name="workbookManager">An instance of <see cref="WorkbookManager"/>.</param>
-        public MainWindowViewModel(WorkbookManager workbookManager)
+        public MainWindowViewModel()
         {
-            this.workbookManager = workbookManager;
-
             this.NewWorkbookCommand = ReactiveCommand.CreateFromTask<Unit, WorkbookModel>(this.NewWorkbookAsync);
             this.NewWorkbookSpecifyPathInteraction = new Interaction<Unit, string>();
 
@@ -60,7 +55,7 @@ namespace WillowTree.Sweetgum.Client.ViewModels
         {
             var path = await this.NewWorkbookSpecifyPathInteraction.Handle(Unit.Default);
 
-            return await this.workbookManager.NewAsync(path, cancellationToken);
+            return await WorkbookManager.NewAsync(path, cancellationToken);
         }
 
         private async Task<WorkbookModel> LoadWorkbookAsync(
@@ -69,7 +64,7 @@ namespace WillowTree.Sweetgum.Client.ViewModels
         {
             var path = await this.LoadWorkbookSpecifyPathInteraction.Handle(Unit.Default);
 
-            return await this.workbookManager.LoadAsync(path, cancellationToken);
+            return await WorkbookManager.LoadAsync(path, cancellationToken);
         }
     }
 }

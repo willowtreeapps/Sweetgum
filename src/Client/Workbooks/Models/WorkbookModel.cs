@@ -5,25 +5,31 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RealGoodApps.Companion.Attributes;
 using WillowTree.Sweetgum.Client.Folders.Models;
 using WillowTree.Sweetgum.Client.Requests.Models;
-using WillowTree.Sweetgum.Client.Serializable.Interfaces;
+using WillowTree.Sweetgum.Client.Workbooks.ViewModels;
 
 namespace WillowTree.Sweetgum.Client.Workbooks.Models
 {
     /// <summary>
     /// A model for a workbook.
     /// </summary>
-    public sealed class WorkbookModel : IModel<WorkbookModel, SerializableWorkbookModel>
+    public sealed class WorkbookModel
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="WorkbookModel"/> class.
         /// </summary>
         /// <param name="name">The workbook's name.</param>
+        /// <param name="path">The workbook's path.</param>
         /// <param name="folders">The workbook's folders.</param>
-        public WorkbookModel(string name, IReadOnlyList<FolderModel> folders)
+        public WorkbookModel(
+            string name,
+            string path,
+            IReadOnlyList<FolderModel> folders)
         {
             this.Name = name;
+            this.Path = path;
             this.Folders = folders;
         }
 
@@ -34,6 +40,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         private WorkbookModel(WorkbookModel source)
         {
             this.Name = source.Name;
+            this.Path = source.Path;
             this.Folders = source.Folders;
         }
 
@@ -41,6 +48,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// Gets the name of the workbook.
         /// </summary>
         public string Name { get; private init; }
+
+        /// <summary>
+        /// Gets the path of the workbook.
+        /// </summary>
+        public string Path { get; private init; }
 
         /// <summary>
         /// Gets the list of folders in the workbook.
@@ -52,6 +64,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// </summary>
         /// <param name="newName">The new name of the workbook.</param>
         /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
+        [CompanionType(typeof(WorkbookViewModel))]
         public WorkbookModel Rename(string newName)
         {
             return new(this)
@@ -62,12 +75,12 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
 
         /// <summary>
         /// Rename a folder.
-        /// TODO: This could be improved a lot. I feel the issue is `GetAllFoldersWithNewOrMovedFolder` is clunky.
         /// </summary>
         /// <param name="path">The path of the folder to rename.</param>
         /// <param name="newFolderName">The new folder name.</param>
         /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
         /// <exception cref="Exception">If the folder path does not exist.</exception>
+        [CompanionType(typeof(WorkbookViewModel))]
         public WorkbookModel RenameFolder(string path, string newFolderName)
         {
             var existingFolder = this.GetFolder(path);
@@ -99,6 +112,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// </summary>
         /// <param name="path">The path of the folder.</param>
         /// <returns>A value indicating whether or not the folder exists.</returns>
+        [CompanionType(typeof(WorkbookViewModel))]
         public bool FolderExists(string path)
         {
             // The root folder is implicit and always exists.
@@ -116,6 +130,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// <param name="path">The full path of the folder.</param>
         /// <returns>An instance of <see cref="FolderModel"/>.</returns>
         /// <exception cref="Exception">If the folder is not found.</exception>
+        [CompanionType(typeof(WorkbookViewModel))]
         public FolderModel GetFolder(string path)
         {
             if (path == string.Empty)
@@ -138,6 +153,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// </summary>
         /// <param name="path">The full path of the new folder.</param>
         /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
+        [CompanionType(typeof(WorkbookViewModel))]
         public WorkbookModel NewFolder(string path)
         {
             var (folderName, parentPath) = FolderModel.DecomposePath(path);
@@ -171,6 +187,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// <param name="path">The full path of the existing folder.</param>
         /// <param name="newParentPath">The new parent path of the folder.</param>
         /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
+        [CompanionType(typeof(WorkbookViewModel))]
         public WorkbookModel MoveFolder(
             string path,
             string newParentPath)
@@ -215,6 +232,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// <param name="path">The path of the folder to remove.</param>
         /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
         /// <exception cref="Exception">If the folder specified does not exist.</exception>
+        [CompanionType(typeof(WorkbookViewModel))]
         public WorkbookModel RemoveFolder(string path)
         {
             if (!this.FolderExists(path))
@@ -228,7 +246,10 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
             };
         }
 
-        /// <inheritdoc cref="IModel{TModel,TSerializableModel}"/>
+        /// <summary>
+        /// Converts an instance of <see cref="WorkbookModel"/> to an instance of <see cref="SerializableWorkbookModel"/>.
+        /// </summary>
+        /// <returns>An instance of <see cref="SerializableWorkbookModel"/>.</returns>
         public SerializableWorkbookModel ToSerializable()
         {
             return new()

@@ -18,6 +18,16 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
     /// </summary>
     public partial class WorkbookWindow : BaseWindow<WorkbookViewModel>
     {
+        private TextBlock NameTextBlock => this.FindControl<TextBlock>(nameof(this.NameTextBlock));
+
+        private TextBox RenameTextBox => this.FindControl<TextBox>(nameof(this.RenameTextBox));
+
+        private Button RenameButton => this.FindControl<Button>(nameof(this.RenameButton));
+
+        private Button FinishRenameButton => this.FindControl<Button>(nameof(this.FinishRenameButton));
+
+        private Button SaveButton => this.FindControl<Button>(nameof(this.SaveButton));
+
         private WorkbookItems WorkbookItems => this.FindControl<WorkbookItems>(nameof(this.WorkbookItems));
 
         /// <summary>
@@ -38,6 +48,62 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
 
             window.WhenActivated(disposables =>
             {
+                window.Bind(
+                        window.ViewModel,
+                        viewModel => viewModel.Name,
+                        view => view.NameTextBlock.Text)
+                    .DisposeWith(disposables);
+
+                window.OneWayBind(
+                        window.ViewModel,
+                        viewModel => viewModel.IsRenaming,
+                        view => view.NameTextBlock.IsVisible,
+                        r => !r)
+                    .DisposeWith(disposables);
+
+                window.OneWayBind(
+                        window.ViewModel,
+                        viewModel => viewModel.IsRenaming,
+                        view => view.RenameButton.IsVisible,
+                        r => !r)
+                    .DisposeWith(disposables);
+
+                window.Bind(
+                        window.ViewModel,
+                        viewModel => viewModel.Name,
+                        view => view.RenameTextBox.Text)
+                    .DisposeWith(disposables);
+
+                window.OneWayBind(
+                        window.ViewModel,
+                        viewModel => viewModel.IsRenaming,
+                        view => view.RenameTextBox.IsVisible)
+                    .DisposeWith(disposables);
+
+                window.OneWayBind(
+                        window.ViewModel,
+                        viewModel => viewModel.IsRenaming,
+                        view => view.FinishRenameButton.IsVisible)
+                    .DisposeWith(disposables);
+
+                window.BindCommand(
+                        window.ViewModel!,
+                        viewModel => viewModel.RenameCommand,
+                        view => view.RenameButton)
+                    .DisposeWith(disposables);
+
+                window.BindCommand(
+                        window.ViewModel!,
+                        viewModel => viewModel.FinishRenameCommand,
+                        view => view.FinishRenameButton)
+                    .DisposeWith(disposables);
+
+                window.BindCommand(
+                        window.ViewModel!,
+                        viewModel => viewModel.SaveCommand,
+                        view => view.SaveButton)
+                    .DisposeWith(disposables);
+
                 window.OneWayBind(
                         window.ViewModel,
                         viewModel => viewModel.WorkbookItems,

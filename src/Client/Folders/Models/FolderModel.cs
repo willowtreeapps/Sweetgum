@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using RealGoodApps.Companion.Attributes;
 using WillowTree.Sweetgum.Client.Requests.Models;
-using WillowTree.Sweetgum.Client.Serializable.Interfaces;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
 
 namespace WillowTree.Sweetgum.Client.Folders.Models
@@ -14,7 +13,7 @@ namespace WillowTree.Sweetgum.Client.Folders.Models
     /// <summary>
     /// A model for a folder within a workbook.
     /// </summary>
-    public sealed class FolderModel : IModel<FolderModel, SerializableFolderModel>
+    public sealed class FolderModel
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FolderModel"/> class.
@@ -126,7 +125,10 @@ namespace WillowTree.Sweetgum.Client.Folders.Models
             };
         }
 
-        /// <inheritdoc cref="IModel{TModel,TSerializableModel}"/>
+        /// <summary>
+        /// Converts an instance of <see cref="FolderModel"/> to an instance of <see cref="SerializableFolderModel"/>.
+        /// </summary>
+        /// <returns>An instance of <see cref="SerializableFolderModel"/>.</returns>
         public SerializableFolderModel ToSerializable()
         {
             return new()
