@@ -27,6 +27,17 @@ namespace WillowTree.Sweetgum.Client.Views
     /// </summary>
     public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
+        private const string WorkbookFileExtension = "sg";
+
+        private static readonly List<FileDialogFilter> FileDialogFilters = new()
+        {
+            new FileDialogFilter
+            {
+                Name = "Sweetgum Workbook",
+                Extensions = new List<string> { WorkbookFileExtension },
+            },
+        };
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
         /// </summary>
@@ -82,7 +93,11 @@ namespace WillowTree.Sweetgum.Client.Views
                     viewModel => viewModel.NewWorkbookSpecifyPathInteraction,
                     async context =>
                     {
-                        var dialog = new SaveFileDialog();
+                        var dialog = new SaveFileDialog
+                        {
+                            DefaultExtension = WorkbookFileExtension,
+                            Filters = FileDialogFilters,
+                        };
                         var path = await dialog.ShowAsync(this);
 
                         context.SetOutput(string.IsNullOrWhiteSpace(path) ? string.Empty : path);
@@ -96,6 +111,7 @@ namespace WillowTree.Sweetgum.Client.Views
                         var dialog = new OpenFileDialog
                         {
                             AllowMultiple = false,
+                            Filters = FileDialogFilters,
                         };
 
                         var path = await dialog.ShowAsync(this);

@@ -31,7 +31,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Services
             CancellationToken cancellationToken)
         {
             var workbookContents = await File.ReadAllTextAsync(path, cancellationToken);
-            var workbookModel = JsonConvert.DeserializeObject<SerializableWorkbookModel>(workbookContents)?.ToModel(path) ??
+            var workbookModel = JsonConvert.DeserializeObject<WorkbookModel>(workbookContents)?.WithPath(path) ??
                                 new WorkbookModel(string.Empty, path, new List<FolderModel>());
 
             return workbookModel;

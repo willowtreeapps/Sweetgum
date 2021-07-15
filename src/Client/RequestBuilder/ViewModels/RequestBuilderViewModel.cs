@@ -441,7 +441,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
 
             await File.WriteAllTextAsync(
                 path,
-                JsonConvert.SerializeObject(savedRequest.ToSerializable()),
+                JsonConvert.SerializeObject(savedRequest),
                 cancellationToken);
         }
 

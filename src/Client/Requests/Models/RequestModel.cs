@@ -3,8 +3,8 @@
 // </copyright>
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
+using Newtonsoft.Json;
 
 namespace WillowTree.Sweetgum.Client.Requests.Models
 {
@@ -23,19 +23,20 @@ namespace WillowTree.Sweetgum.Client.Requests.Models
         /// <param name="contentType">The content type.</param>
         /// <param name="requestData">The request data.</param>
         /// <returns>An instance of <see cref="RequestModel"/>.</returns>
+        [JsonConstructor]
         public RequestModel(
-            string name,
-            HttpMethod httpMethod,
-            string requestUrl,
-            IReadOnlyList<RequestHeaderModel> requestHeaders,
-            string contentType,
+            string? name,
+            HttpMethod? httpMethod,
+            string? requestUrl,
+            IReadOnlyList<RequestHeaderModel>? requestHeaders,
+            string? contentType,
             string? requestData)
         {
-            this.Name = name;
-            this.HttpMethod = httpMethod;
-            this.RequestUrl = requestUrl;
-            this.RequestHeaders = requestHeaders;
-            this.ContentType = contentType;
+            this.Name = name ?? string.Empty;
+            this.HttpMethod = httpMethod ?? HttpMethod.Get;
+            this.RequestUrl = requestUrl ?? string.Empty;
+            this.RequestHeaders = requestHeaders ?? new List<RequestHeaderModel>();
+            this.ContentType = contentType ?? string.Empty;
             this.RequestData = requestData;
         }
 
@@ -68,22 +69,5 @@ namespace WillowTree.Sweetgum.Client.Requests.Models
         /// Gets the request data.
         /// </summary>
         public string? RequestData { get; }
-
-        /// <summary>
-        /// Converts an instance of <see cref="RequestModel"/> to an instance of <see cref="SerializableRequestModel"/>.
-        /// </summary>
-        /// <returns>An instance of <see cref="SerializableRequestModel"/>.</returns>
-        public SerializableRequestModel ToSerializable()
-        {
-            return new()
-            {
-                Name = this.Name,
-                ContentType = this.ContentType,
-                HttpMethod = this.HttpMethod,
-                RequestData = this.RequestData,
-                RequestHeaders = this.RequestHeaders.Select(h => h.ToSerializable()).ToList(),
-                RequestUrl = this.RequestUrl,
-            };
-        }
     }
 }

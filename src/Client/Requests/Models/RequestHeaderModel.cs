@@ -2,6 +2,8 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
+using Newtonsoft.Json;
+
 namespace WillowTree.Sweetgum.Client.Requests.Models
 {
     /// <summary>
@@ -14,10 +16,13 @@ namespace WillowTree.Sweetgum.Client.Requests.Models
         /// </summary>
         /// <param name="name">The name of the request header.</param>
         /// <param name="value">The value of the request header.</param>
-        public RequestHeaderModel(string name, string value)
+        [JsonConstructor]
+        public RequestHeaderModel(
+            string? name,
+            string? value)
         {
-            this.Name = name;
-            this.Value = value;
+            this.Name = name ?? string.Empty;
+            this.Value = value ?? string.Empty;
         }
 
         /// <summary>
@@ -29,18 +34,5 @@ namespace WillowTree.Sweetgum.Client.Requests.Models
         /// Gets the value of the header.
         /// </summary>
         public string Value { get; }
-
-        /// <summary>
-        /// Converts an instance of <see cref="RequestHeaderModel"/> to an instance of <see cref="SerializableRequestHeaderModel"/>.
-        /// </summary>
-        /// <returns>An instance of <see cref="SerializableRequestHeaderModel"/>.</returns>
-        public SerializableRequestHeaderModel ToSerializable()
-        {
-            return new()
-            {
-                Name = this.Name,
-                Value = this.Value,
-            };
-        }
     }
 }

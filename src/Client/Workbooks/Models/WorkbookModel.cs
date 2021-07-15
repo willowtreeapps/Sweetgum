@@ -5,9 +5,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using RealGoodApps.Companion.Attributes;
 using WillowTree.Sweetgum.Client.Folders.Models;
 using WillowTree.Sweetgum.Client.Requests.Models;
+using WillowTree.Sweetgum.Client.Workbooks.Services;
 using WillowTree.Sweetgum.Client.Workbooks.ViewModels;
 
 namespace WillowTree.Sweetgum.Client.Workbooks.Models
@@ -27,16 +29,21 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
             string name,
             string path,
             IReadOnlyList<FolderModel> folders)
+            : this(name, folders)
         {
-            this.Name = name;
             this.Path = path;
-            this.Folders = folders;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="WorkbookModel"/> class.
-        /// </summary>
-        /// <param name="source">An instance of <see cref="WorkbookModel"/>.</param>
+        [JsonConstructor]
+        private WorkbookModel(
+            string? name,
+            IReadOnlyList<FolderModel>? folders)
+        {
+            this.Name = name ?? string.Empty;
+            this.Path = string.Empty;
+            this.Folders = folders ?? new List<FolderModel>();
+        }
+
         private WorkbookModel(WorkbookModel source)
         {
             this.Name = source.Name;
@@ -52,7 +59,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// <summary>
         /// Gets the path of the workbook.
         /// </summary>
-        public string Path { get; private init; }
+        [JsonIgnore]
+        public string Path { get; private set; }
 
         /// <summary>
         /// Gets the list of folders in the workbook.
@@ -153,7 +161,6 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// </summary>
         /// <param name="path">The full path of the new folder.</param>
         /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
-        [CompanionType(typeof(WorkbookViewModel))]
         public WorkbookModel NewFolder(string path)
         {
             var (folderName, parentPath) = FolderModel.DecomposePath(path);
@@ -247,15 +254,16 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         }
 
         /// <summary>
-        /// Converts an instance of <see cref="WorkbookModel"/> to an instance of <see cref="SerializableWorkbookModel"/>.
+        /// Sets the path of a workbook.
         /// </summary>
-        /// <returns>An instance of <see cref="SerializableWorkbookModel"/>.</returns>
-        public SerializableWorkbookModel ToSerializable()
+        /// <param name="path">The path of the workbook.</param>
+        /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
+        [CompanionType(typeof(WorkbookManager))]
+        public WorkbookModel WithPath(string path)
         {
-            return new()
+            return new(this)
             {
-                Name = this.Name,
-                Folders = this.Folders.Select(f => f.ToSerializable()).ToList(),
+                Path = path,
             };
         }
 

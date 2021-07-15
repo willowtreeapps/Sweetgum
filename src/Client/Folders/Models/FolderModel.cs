@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using RealGoodApps.Companion.Attributes;
 using WillowTree.Sweetgum.Client.Requests.Models;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
@@ -22,16 +23,17 @@ namespace WillowTree.Sweetgum.Client.Folders.Models
         /// <param name="parentPath">The parent path of the folder.</param>
         /// <param name="folders">The folders within the folder.</param>
         /// <param name="requests">The requests within the folder.</param>
+        [JsonConstructor]
         public FolderModel(
-            string name,
-            string parentPath,
-            IReadOnlyList<FolderModel> folders,
-            IReadOnlyList<RequestModel> requests)
+            string? name,
+            string? parentPath,
+            IReadOnlyList<FolderModel>? folders,
+            IReadOnlyList<RequestModel>? requests)
         {
-            this.Name = name;
-            this.ParentPath = parentPath;
-            this.Folders = folders;
-            this.Requests = requests;
+            this.Name = name ?? string.Empty;
+            this.ParentPath = parentPath ?? string.Empty;
+            this.Folders = folders ?? new List<FolderModel>();
+            this.Requests = requests ?? new List<RequestModel>();
         }
 
         /// <summary>
@@ -116,27 +118,12 @@ namespace WillowTree.Sweetgum.Client.Folders.Models
         [CompanionType(typeof(WorkbookModel))]
         public FolderModel RewriteParentPath(string newParentPath)
         {
-            return new FolderModel(this)
+            return new(this)
             {
                 ParentPath = newParentPath,
                 Folders = this.Folders
                     .Select(f => f.RewriteParentPath($"{newParentPath}/{this.Name}"))
                     .ToList(),
-            };
-        }
-
-        /// <summary>
-        /// Converts an instance of <see cref="FolderModel"/> to an instance of <see cref="SerializableFolderModel"/>.
-        /// </summary>
-        /// <returns>An instance of <see cref="SerializableFolderModel"/>.</returns>
-        public SerializableFolderModel ToSerializable()
-        {
-            return new()
-            {
-                Name = this.Name,
-                ParentPath = this.ParentPath,
-                Folders = this.Folders.Select(f => f.ToSerializable()).ToList(),
-                Requests = this.Requests.Select(r => r.ToSerializable()).ToList(),
             };
         }
     }
