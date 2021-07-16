@@ -20,6 +20,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         private readonly ObservableAsPropertyHelper<bool> isCreatingNewFolderObservableAsPropertyHelper;
         private string name;
         private string newFolderName;
+        private WorkbookItemsViewModel workbookItems;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WorkbookViewModel"/> class.
@@ -66,9 +67,10 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
                 // TODO: This will technically let you create a folder anywhere in the tree. Kind of a cool "feature".
                 workbookModel = workbookModel.NewFolder(this.NewFolderName);
+                this.WorkbookItems = new WorkbookItemsViewModel(workbookModel.Folders);
             });
 
-            this.WorkbookItems = new WorkbookItemsViewModel(workbookModel.Folders);
+            this.workbookItems = new WorkbookItemsViewModel(workbookModel.Folders);
         }
 
         /// <summary>
@@ -125,8 +127,12 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         public ReactiveCommand<Unit, Unit> SaveCommand { get; }
 
         /// <summary>
-        /// Gets the workbook items.
+        /// Gets or sets the workbook items.
         /// </summary>
-        public WorkbookItemsViewModel WorkbookItems { get; }
+        public WorkbookItemsViewModel WorkbookItems
+        {
+            get => this.workbookItems;
+            set => this.RaiseAndSetIfChanged(ref this.workbookItems, value);
+        }
     }
 }

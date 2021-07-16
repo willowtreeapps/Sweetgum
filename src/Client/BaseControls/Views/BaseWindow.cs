@@ -46,7 +46,7 @@ namespace WillowTree.Sweetgum.Client.BaseControls.Views
                 ? Dependencies.Container.BeginLifetimeScope()
                 : Dependencies.Container.BeginLifetimeScope(registerDependencies);
 
-            this.ViewModel = this.lifetimeScope.Resolve<TViewModel>();
+            this.ViewModel = this.Resolve<TViewModel>();
         }
 
         /// <summary>
