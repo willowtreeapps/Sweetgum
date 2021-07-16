@@ -17,9 +17,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
     public sealed class WorkbookViewModel : ReactiveObject
     {
         private readonly ObservableAsPropertyHelper<bool> isRenamingObservableAsPropertyHelper;
-        private readonly ObservableAsPropertyHelper<bool> isCreatingNewFolderObservableAsPropertyHelper;
         private string name;
-        private string newFolderName;
         private WorkbookItemsViewModel workbookItems;
 
         /// <summary>
@@ -29,16 +27,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         public WorkbookViewModel(WorkbookModel workbookModel)
         {
             this.name = workbookModel.Name;
-            this.newFolderName = string.Empty;
 
             var isRenamingBehaviorSubject = new BehaviorSubject<bool>(false);
-            var isCreatingNewFolderBehaviorSubject = new BehaviorSubject<bool>(false);
 
             this.isRenamingObservableAsPropertyHelper = isRenamingBehaviorSubject
                 .ToProperty(this, viewModel => viewModel.IsRenaming);
-
-            this.isCreatingNewFolderObservableAsPropertyHelper = isCreatingNewFolderBehaviorSubject
-                .ToProperty(this, viewModel => viewModel.IsCreatingNewFolder);
 
             this.RenameCommand = ReactiveCommand.Create(() => isRenamingBehaviorSubject.OnNext(true));
             this.FinishRenameCommand = ReactiveCommand.Create(() =>
@@ -53,21 +46,21 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                     await WorkbookManager.SaveAsync(workbookModel, cancellationToken);
                     return Unit.Default;
                 },
-                isRenamingBehaviorSubject.CombineLatest(isCreatingNewFolderBehaviorSubject, (r, n) => !r && !n));
+                isRenamingBehaviorSubject.Select(r => !r));
 
-            this.NewFolderCommand = ReactiveCommand.Create(() =>
+            this.NewFolderInteraction = new Interaction<WorkbookModel, string?>();
+
+            this.NewFolderCommand = ReactiveCommand.CreateFromTask(async () =>
             {
-                this.NewFolderName = string.Empty;
-                isCreatingNewFolderBehaviorSubject.OnNext(true);
-            });
+                var path = await this.NewFolderInteraction.Handle(workbookModel);
 
-            this.FinishNewFolderCommand = ReactiveCommand.Create(() =>
-            {
-                isCreatingNewFolderBehaviorSubject.OnNext(false);
+                if (path != null)
+                {
+                    workbookModel = workbookModel.NewFolder(path);
+                    this.WorkbookItems = new WorkbookItemsViewModel(workbookModel.Folders);
+                }
 
-                // TODO: This will technically let you create a folder anywhere in the tree. Kind of a cool "feature".
-                workbookModel = workbookModel.NewFolder(this.NewFolderName);
-                this.WorkbookItems = new WorkbookItemsViewModel(workbookModel.Folders);
+                return Unit.Default;
             });
 
             this.workbookItems = new WorkbookItemsViewModel(workbookModel.Folders);
@@ -83,23 +76,9 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         }
 
         /// <summary>
-        /// Gets or sets the new folder name.
-        /// </summary>
-        public string NewFolderName
-        {
-            get => this.newFolderName;
-            set => this.RaiseAndSetIfChanged(ref this.newFolderName, value);
-        }
-
-        /// <summary>
         /// Gets a value indicating whether or not the workbook is being renamed.
         /// </summary>
         public bool IsRenaming => this.isRenamingObservableAsPropertyHelper.Value;
-
-        /// <summary>
-        /// Gets a value indicating whether or not a new folder is being created.
-        /// </summary>
-        public bool IsCreatingNewFolder => this.isCreatingNewFolderObservableAsPropertyHelper.Value;
 
         /// <summary>
         /// Gets a command to rename the workbook.
@@ -117,9 +96,9 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         public ReactiveCommand<Unit, Unit> NewFolderCommand { get; }
 
         /// <summary>
-        /// Gets a command to finish creating a new folder in the workbook.
+        /// Gets an interaction to prompt to the user for creating a new folder in the workbook.
         /// </summary>
-        public ReactiveCommand<Unit, Unit> FinishNewFolderCommand { get; }
+        public Interaction<WorkbookModel, string?> NewFolderInteraction { get; }
 
         /// <summary>
         /// Gets a command to save the workbook.

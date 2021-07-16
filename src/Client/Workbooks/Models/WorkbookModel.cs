@@ -267,6 +267,28 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
             };
         }
 
+        /// <summary>
+        /// Gets the folders in the workbook flattened.
+        /// </summary>
+        /// <returns>The flattened list of folders.</returns>
+        public IReadOnlyList<FolderModel> GetFlatFolders()
+        {
+            var flatFolders = new List<FolderModel>();
+
+            if (this.Folders.Count == 0)
+            {
+                return flatFolders;
+            }
+
+            foreach (var folder in this.Folders)
+            {
+                flatFolders.Add(folder);
+                flatFolders.AddRange(folder.GetFlatChildFolders());
+            }
+
+            return flatFolders;
+        }
+
         private static IReadOnlyList<FolderModel> GetAllFoldersExceptPath(string path, IReadOnlyList<FolderModel> folders)
         {
             return folders

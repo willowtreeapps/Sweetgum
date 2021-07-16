@@ -126,5 +126,27 @@ namespace WillowTree.Sweetgum.Client.Folders.Models
                     .ToList(),
             };
         }
+
+        /// <summary>
+        /// Gets a flattened list of child folders to the folder.
+        /// </summary>
+        /// <returns>A flattened list of the folder's child folders.</returns>
+        public IReadOnlyList<FolderModel> GetFlatChildFolders()
+        {
+            var flatChildFolders = new List<FolderModel>();
+
+            if (this.Folders.Count == 0)
+            {
+                return flatChildFolders;
+            }
+
+            foreach (var childFolder in this.Folders)
+            {
+                flatChildFolders.Add(childFolder);
+                flatChildFolders.AddRange(childFolder.GetFlatChildFolders());
+            }
+
+            return flatChildFolders;
+        }
     }
 }
