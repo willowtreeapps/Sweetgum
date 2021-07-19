@@ -125,7 +125,10 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
                     {
                         var dialog = WorkbookNewFolderDialog.Create(context.Input);
 
-                        var result = await dialog.ShowDialog<string?>(window);
+                        var result = await dialog.ShowDialog<PathModel?>(window);
+
+                        context.SetOutput(result);
+                    });
 
                         context.SetOutput(result);
                     });

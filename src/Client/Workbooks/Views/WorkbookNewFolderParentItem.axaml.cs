@@ -4,6 +4,7 @@
 
 using System.Reactive.Disposables;
 using Avalonia.Controls;
+using Avalonia.Controls.Shapes;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using ReactiveUI;
@@ -25,13 +26,21 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
 
             this.WhenActivated(disposables =>
             {
-                this.Bind(
+                this.OneWayBind(
                         this.ViewModel,
-                        viewModel => viewModel.Path,
+                        viewModel => viewModel.DisplayPath,
                         view => view.PathTextBlock.Text)
+                    .DisposeWith(disposables);
+
+                this.OneWayBind(
+                        this.ViewModel,
+                        viewModel => viewModel.DepthWidth,
+                        view => view.Rectangle.Width)
                     .DisposeWith(disposables);
             });
         }
+
+        private Rectangle Rectangle => this.FindControl<Rectangle>(nameof(this.Rectangle));
 
         private TextBlock PathTextBlock => this.FindControl<TextBlock>(nameof(this.PathTextBlock));
 

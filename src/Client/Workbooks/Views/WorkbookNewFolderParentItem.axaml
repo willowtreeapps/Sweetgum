@@ -3,9 +3,16 @@
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     xmlns:viewModels="clr-namespace:WillowTree.Sweetgum.Client.Workbooks.ViewModels"
-                    xmlns:views1="clr-namespace:WillowTree.Sweetgum.Client.Workbooks.Views"
                     xmlns:reactiveUi="http://reactiveui.net"
                     mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
                     x:Class="WillowTree.Sweetgum.Client.Workbooks.Views.WorkbookNewFolderParentItem">
-    <TextBlock x:Name="PathTextBlock" />
+    <StackPanel Orientation="Horizontal">
+        <StackPanel.Styles>
+            <Style Selector="Rectangle:not(ComboBoxItem Rectangle)">
+                <Setter Property="IsVisible" Value="False" />
+            </Style>
+        </StackPanel.Styles>
+        <Rectangle x:Name="Rectangle" />
+        <TextBlock x:Name="PathTextBlock" />
+    </StackPanel>
 </reactiveUi:ReactiveUserControl>

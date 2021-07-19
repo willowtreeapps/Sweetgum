@@ -25,6 +25,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         public WorkbookNewFolderViewModel(WorkbookModel workbookModel)
         {
             this.folderName = string.Empty;
+
             var rootParentItem = new WorkbookNewFolderParentViewModel();
 
             this.ParentItems = new AvaloniaList<WorkbookNewFolderParentViewModel>
@@ -38,15 +39,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             this.selectedParent = rootParentItem;
 
-            this.SubmitCommand = ReactiveCommand.Create(() =>
-            {
-                if (this.selectedParent.Path == string.Empty)
-                {
-                    return this.FolderName;
-                }
-
-                return $"{this.selectedParent.Path}/{this.FolderName}";
-            });
+            this.SubmitCommand = ReactiveCommand.Create(() => this.selectedParent.Path.AddSegment(this.FolderName));
         }
 
         /// <summary>
@@ -75,6 +68,6 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// <summary>
         /// Gets the submit command.
         /// </summary>
-        public ReactiveCommand<Unit, string> SubmitCommand { get; }
+        public ReactiveCommand<Unit, PathModel> SubmitCommand { get; }
     }
 }

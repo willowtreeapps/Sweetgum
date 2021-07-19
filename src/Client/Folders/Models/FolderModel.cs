@@ -26,12 +26,12 @@ namespace WillowTree.Sweetgum.Client.Folders.Models
         [JsonConstructor]
         public FolderModel(
             string? name,
-            string? parentPath,
+            PathModel? parentPath,
             IReadOnlyList<FolderModel>? folders,
             IReadOnlyList<RequestModel>? requests)
         {
             this.Name = name ?? string.Empty;
-            this.ParentPath = parentPath ?? string.Empty;
+            this.ParentPath = parentPath ?? PathModel.Root;
             this.Folders = folders ?? new List<FolderModel>();
             this.Requests = requests ?? new List<RequestModel>();
         }
@@ -54,7 +54,7 @@ namespace WillowTree.Sweetgum.Client.Folders.Models
         /// <summary>
         /// Gets the parent path of the folder.
         /// </summary>
-        public string ParentPath { get; init; }
+        public PathModel ParentPath { get; init; }
 
         /// <summary>
         /// Gets the subfolders within the folder.
@@ -67,47 +67,12 @@ namespace WillowTree.Sweetgum.Client.Folders.Models
         public IReadOnlyList<RequestModel> Requests { get; init; }
 
         /// <summary>
-        /// Build a full path to a folder.
-        /// </summary>
-        /// <param name="folderName">The name of the folder.</param>
-        /// <param name="parentPath">The parent path of the folder.</param>
-        /// <returns>The full path of the folder.</returns>
-        public static string BuildPath(string folderName, string parentPath)
-        {
-            if (parentPath == string.Empty)
-            {
-                return folderName;
-            }
-
-            return $"{parentPath}/{folderName}";
-        }
-
-        /// <summary>
-        /// Decomposes a folder path into the components, which returns the folder name and the parent path.
-        /// </summary>
-        /// <param name="path">The full path to the folder.</param>
-        /// <returns>A tuple with the folder name and the parent path.</returns>
-        public static (string FolderName, string ParentPath) DecomposePath(string path)
-        {
-            var pieces = path.Split('/');
-
-            if (pieces.Length == 1)
-            {
-                return (path, string.Empty);
-            }
-
-            var parentPath = string.Join('/', pieces.Take(pieces.Length - 1));
-
-            return (pieces.Last(), parentPath);
-        }
-
-        /// <summary>
         /// Gets the full path of the folder.
         /// </summary>
         /// <returns>The full path of the folder.</returns>
-        public string GetPath()
+        public PathModel GetPath()
         {
-            return BuildPath(this.Name, this.ParentPath);
+            return this.ParentPath.AddSegment(this.Name);
         }
 
         /// <summary>
@@ -116,13 +81,13 @@ namespace WillowTree.Sweetgum.Client.Folders.Models
         /// <param name="newParentPath">The new parent path.</param>
         /// <returns>An instance of <see cref="FolderModel"/>.</returns>
         [CompanionType(typeof(WorkbookModel))]
-        public FolderModel RewriteParentPath(string newParentPath)
+        public FolderModel RewriteParentPath(PathModel newParentPath)
         {
             return new(this)
             {
                 ParentPath = newParentPath,
                 Folders = this.Folders
-                    .Select(f => f.RewriteParentPath($"{newParentPath}/{this.Name}"))
+                    .Select(f => f.RewriteParentPath(newParentPath.AddSegment(this.Name)))
                     .ToList(),
             };
         }

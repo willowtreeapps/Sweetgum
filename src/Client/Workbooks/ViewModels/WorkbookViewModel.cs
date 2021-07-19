@@ -48,7 +48,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                 },
                 isRenamingBehaviorSubject.Select(r => !r));
 
-            this.NewFolderInteraction = new Interaction<WorkbookModel, string?>();
+            this.NewFolderInteraction = new Interaction<WorkbookModel, PathModel?>();
 
             this.NewFolderCommand = ReactiveCommand.CreateFromTask(async () =>
             {
@@ -98,7 +98,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// <summary>
         /// Gets an interaction to prompt to the user for creating a new folder in the workbook.
         /// </summary>
-        public Interaction<WorkbookModel, string?> NewFolderInteraction { get; }
+        public Interaction<WorkbookModel, PathModel?> NewFolderInteraction { get; }
 
         /// <summary>
         /// Gets a command to save the workbook.

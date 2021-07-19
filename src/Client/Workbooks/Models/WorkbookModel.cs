@@ -89,8 +89,13 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
         /// <exception cref="Exception">If the folder path does not exist.</exception>
         [CompanionType(typeof(WorkbookViewModel))]
-        public WorkbookModel RenameFolder(string path, string newFolderName)
+        public WorkbookModel RenameFolder(PathModel path, string newFolderName)
         {
+            if (path.IsRoot())
+            {
+                throw new Exception("You are unable to rename the root folder.");
+            }
+
             var existingFolder = this.GetFolder(path);
 
             if (existingFolder == null)
@@ -98,9 +103,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
                 throw new Exception($"The folder path does not exist: {path}");
             }
 
-            var (folderName, parentPath) = FolderModel.DecomposePath(path);
-
-            if (folderName == newFolderName)
+            if (path.Segments[^1] == newFolderName)
             {
                 // Not sure if it makes sense to copy here or just return this.
                 return this;
@@ -110,8 +113,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
             {
                 Folders = GetAllFoldersWithNewOrMovedFolder(
                     GetAllFoldersExceptPath(path, this.Folders),
-                    string.Empty,
-                    existingFolder.RewriteParentPath(parentPath)),
+                    PathModel.Root,
+                    existingFolder.RewriteParentPath(path.GetParent())),
             };
         }
 
@@ -121,10 +124,10 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// <param name="path">The path of the folder.</param>
         /// <returns>A value indicating whether or not the folder exists.</returns>
         [CompanionType(typeof(WorkbookViewModel))]
-        public bool FolderExists(string path)
+        public bool FolderExists(PathModel path)
         {
             // The root folder is implicit and always exists.
-            if (path == string.Empty)
+            if (path.IsRoot())
             {
                 return true;
             }
@@ -139,9 +142,9 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// <returns>An instance of <see cref="FolderModel"/>.</returns>
         /// <exception cref="Exception">If the folder is not found.</exception>
         [CompanionType(typeof(WorkbookViewModel))]
-        public FolderModel GetFolder(string path)
+        public FolderModel GetFolder(PathModel path)
         {
-            if (path == string.Empty)
+            if (path.IsRoot())
             {
                 throw new Exception("The root folder is implicit and there is no folder model.");
             }
@@ -161,27 +164,32 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// </summary>
         /// <param name="path">The full path of the new folder.</param>
         /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
-        public WorkbookModel NewFolder(string path)
+        public WorkbookModel NewFolder(PathModel path)
         {
-            var (folderName, parentPath) = FolderModel.DecomposePath(path);
+            if (path.IsRoot())
+            {
+                throw new Exception("The root folder is implicit and can not be created.");
+            }
 
-            if (!this.FolderExists(parentPath))
+            var parentPath = path.GetParent();
+
+            if (!this.FolderExists(path.GetParent()))
             {
                 throw new Exception($"The parent folder does not exist: {parentPath}");
             }
 
             if (this.FolderExists(path))
             {
-                throw new Exception($"The folder already exists: {parentPath}");
+                throw new Exception($"The folder already exists: {path}");
             }
 
             return new WorkbookModel(this)
             {
                 Folders = GetAllFoldersWithNewOrMovedFolder(
                     this.Folders,
-                    string.Empty,
+                    PathModel.Root,
                     new FolderModel(
-                        folderName,
+                        path.Segments[^1],
                         parentPath,
                         new List<FolderModel>(),
                         new List<RequestModel>())),
@@ -196,9 +204,14 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
         [CompanionType(typeof(WorkbookViewModel))]
         public WorkbookModel MoveFolder(
-            string path,
-            string newParentPath)
+            PathModel path,
+            PathModel newParentPath)
         {
+            if (path.IsRoot())
+            {
+                throw new Exception("You can not move the root folder.");
+            }
+
             var existingFolder = this.GetFolder(path);
 
             if (existingFolder == null)
@@ -206,7 +219,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
                 throw new Exception($"The folder path does not exist: {path}");
             }
 
-            var (_, parentPath) = FolderModel.DecomposePath(path);
+            var parentPath = path.GetParent();
 
             if (newParentPath == parentPath)
             {
@@ -228,7 +241,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
             {
                 Folders = GetAllFoldersWithNewOrMovedFolder(
                     GetAllFoldersExceptPath(path, this.Folders),
-                    string.Empty,
+                    PathModel.Root,
                     existingFolder.RewriteParentPath(newParentPath)),
             };
         }
@@ -240,7 +253,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
         /// <exception cref="Exception">If the folder specified does not exist.</exception>
         [CompanionType(typeof(WorkbookViewModel))]
-        public WorkbookModel RemoveFolder(string path)
+        public WorkbookModel RemoveFolder(PathModel path)
         {
             if (!this.FolderExists(path))
             {
@@ -289,7 +302,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
             return flatFolders;
         }
 
-        private static IReadOnlyList<FolderModel> GetAllFoldersExceptPath(string path, IReadOnlyList<FolderModel> folders)
+        private static IReadOnlyList<FolderModel> GetAllFoldersExceptPath(PathModel path, IReadOnlyList<FolderModel> folders)
         {
             return folders
                 .Where(folder => folder.GetPath() != path)
@@ -302,7 +315,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
 
         private static IReadOnlyList<FolderModel> GetAllFoldersWithNewOrMovedFolder(
             IReadOnlyList<FolderModel> folders,
-            string currentParentPath,
+            PathModel currentParentPath,
             FolderModel newOrMovedFolder)
         {
             if (newOrMovedFolder.ParentPath == currentParentPath)
@@ -323,12 +336,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
                 .ToList();
         }
 
-        private FolderModel? GetFolderInternal(string path)
+        private FolderModel? GetFolderInternal(PathModel path)
         {
-            var pathSegments = path.Split('/');
             FolderModel? currentFolder = null;
 
-            foreach (var pathSegment in pathSegments)
+            foreach (var pathSegment in path.Segments)
             {
                 var folders = currentFolder == null ? this.Folders : currentFolder.Folders;
                 currentFolder = folders.FirstOrDefault(f => f.Name == pathSegment);
