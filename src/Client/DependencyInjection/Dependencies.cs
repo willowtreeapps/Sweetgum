@@ -37,6 +37,7 @@ namespace WillowTree.Sweetgum.Client.DependencyInjection
             builder.RegisterType<SettingsViewModel>().InstancePerDependency();
             builder.RegisterType<WorkbookViewModel>().InstancePerDependency();
             builder.RegisterType<WorkbookNewFolderViewModel>().InstancePerDependency();
+            builder.RegisterType<WorkbookNewRequestViewModel>().InstancePerDependency();
             builder.RegisterType<SettingsManager>().SingleInstance();
             builder.Register<ICustomAttributeProvider>(_ => typeof(Dependencies).Assembly).SingleInstance();
 

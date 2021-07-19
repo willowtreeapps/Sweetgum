@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using Newtonsoft.Json;
 using RealGoodApps.Companion.Attributes;
 using WillowTree.Sweetgum.Client.Folders.Models;
@@ -193,6 +194,69 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
                         parentPath,
                         new List<FolderModel>(),
                         new List<RequestModel>())),
+            };
+        }
+
+        /// <summary>
+        /// Creates a new request at the specified path.
+        /// </summary>
+        /// <param name="path">The path to the new request.</param>
+        /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
+        public WorkbookModel NewRequest(PathModel path)
+        {
+            if (path.IsRoot())
+            {
+                throw new Exception("The path specified is not a valid request path.");
+            }
+
+            var parent = path.GetParent();
+
+            if (!this.FolderExists(parent))
+            {
+                throw new Exception($"The folder path does not exist: {parent}");
+            }
+
+            if (parent.IsRoot())
+            {
+                throw new Exception("Requests must not live in the root folder.");
+            }
+
+            IReadOnlyList<FolderModel> AddRequestInternal(IReadOnlyList<FolderModel> folders)
+            {
+                var newFolders = new List<FolderModel>();
+
+                foreach (var folder in folders)
+                {
+                    if (folder.GetPath() != parent)
+                    {
+                        var subfolders = folder.Folders;
+
+                        newFolders.Add(new FolderModel(folder)
+                        {
+                            Folders = AddRequestInternal(subfolders),
+                        });
+
+                        continue;
+                    }
+
+                    newFolders.Add(new FolderModel(folder)
+                    {
+                        Requests = folder.Requests.Append(new RequestModel(
+                            path.Segments[^1],
+                            HttpMethod.Get,
+                            string.Empty,
+                            new List<RequestHeaderModel>(),
+                            string.Empty,
+                            null)).ToList(),
+                    });
+                }
+
+                return newFolders;
+            }
+
+            return new WorkbookModel(this)
+            {
+                Folders = AddRequestInternal(this.Folders),
             };
         }
 

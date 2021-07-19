@@ -1,0 +1,32 @@
+<views:BaseWindow x:TypeArguments="viewModels:WorkbookNewFolderViewModel" xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:viewModels="clr-namespace:WillowTree.Sweetgum.Client.Workbooks.ViewModels"
+                    xmlns:views="clr-namespace:WillowTree.Sweetgum.Client.BaseControls.Views"
+                    xmlns:views1="clr-namespace:WillowTree.Sweetgum.Client.Workbooks.Views"
+                    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                    x:Class="WillowTree.Sweetgum.Client.Workbooks.Views.WorkbookNewRequestDialog"
+                    Icon="/Assets/avalonia-logo.ico"
+                    Title="Sweetgum"
+                    WindowStartupLocation="CenterOwner">
+    <StackPanel Orientation="Vertical" Margin="10">
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBlock Text="Parent Folder" Margin="0,0,5,0" />
+            <ComboBox x:Name="ParentComboBox">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <views1:WorkbookNewFolderParentItem />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBlock Text="Request Name" Margin="0,0,5,0" />
+            <TextBox x:Name="NameTextBox" />
+        </StackPanel>
+
+        <Button x:Name="SubmitButton" Content="Create Request" />
+    </StackPanel>
+</views:BaseWindow>

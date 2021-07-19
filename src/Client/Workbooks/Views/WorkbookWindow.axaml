@@ -26,6 +26,7 @@
 
         <StackPanel Orientation="Horizontal">
             <Button x:Name="NewFolderButton" Content="New Folder" />
+            <Button x:Name="NewRequestButton" Content="New Request" />
             <Button x:Name="SaveButton" Content="Save Workbook" />
         </StackPanel>
     </StackPanel>

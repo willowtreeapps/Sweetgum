@@ -76,5 +76,9 @@
       <DependentUpon>WorkbookNewFolderParentItem.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Workbooks\Views\WorkbookNewRequestDialog.axaml.cs">
+      <DependentUpon>WorkbookNewRequestDialog.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 </Project>

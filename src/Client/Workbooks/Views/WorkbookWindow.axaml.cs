@@ -30,6 +30,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
 
         private Button NewFolderButton => this.FindControl<Button>(nameof(this.NewFolderButton));
 
+        private Button NewRequestButton => this.FindControl<Button>(nameof(this.NewRequestButton));
+
         private WorkbookItems WorkbookItems => this.FindControl<WorkbookItems>(nameof(this.WorkbookItems));
 
         /// <summary>
@@ -108,6 +110,12 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
 
                 window.BindCommand(
                         window.ViewModel!,
+                        viewModel => viewModel.NewRequestCommand,
+                        view => view.NewRequestButton)
+                    .DisposeWith(disposables);
+
+                window.BindCommand(
+                        window.ViewModel!,
                         viewModel => viewModel.SaveCommand,
                         view => view.SaveButton)
                     .DisposeWith(disposables);
@@ -129,6 +137,15 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
 
                         context.SetOutput(result);
                     });
+
+                window.BindInteraction(
+                    window.ViewModel,
+                    viewModel => viewModel.NewRequestInteraction,
+                    async (context) =>
+                    {
+                        var dialog = WorkbookNewRequestDialog.Create(context.Input);
+
+                        var result = await dialog.ShowDialog<PathModel?>(window);
 
                         context.SetOutput(result);
                     });

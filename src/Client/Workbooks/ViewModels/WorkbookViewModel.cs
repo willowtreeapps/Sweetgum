@@ -63,6 +63,21 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                 return Unit.Default;
             });
 
+            this.NewRequestInteraction = new Interaction<WorkbookModel, PathModel?>();
+
+            this.NewRequestCommand = ReactiveCommand.CreateFromTask(async () =>
+            {
+                var path = await this.NewRequestInteraction.Handle(workbookModel);
+
+                if (path != null)
+                {
+                    workbookModel = workbookModel.NewRequest(path);
+                    this.WorkbookItems = new WorkbookItemsViewModel(workbookModel.Folders);
+                }
+
+                return Unit.Default;
+            });
+
             this.workbookItems = new WorkbookItemsViewModel(workbookModel.Folders);
         }
 
@@ -99,6 +114,16 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// Gets an interaction to prompt to the user for creating a new folder in the workbook.
         /// </summary>
         public Interaction<WorkbookModel, PathModel?> NewFolderInteraction { get; }
+
+        /// <summary>
+        /// Gets a command to create a new request in the workbook.
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> NewRequestCommand { get; }
+
+        /// <summary>
+        /// Gets an interaction to prompt to the user for creating a new request in the workbook.
+        /// </summary>
+        public Interaction<WorkbookModel, PathModel?> NewRequestInteraction { get; }
 
         /// <summary>
         /// Gets a command to save the workbook.
