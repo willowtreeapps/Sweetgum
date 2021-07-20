@@ -27,6 +27,8 @@ namespace WillowTree.Sweetgum.Client.ViewModels
 
             this.LoadWorkbookCommand = ReactiveCommand.CreateFromTask<Unit, WorkbookModel>(this.LoadWorkbookAsync);
             this.LoadWorkbookSpecifyPathInteraction = new Interaction<Unit, string>();
+
+            this.OpenSettingsCommand = ReactiveCommand.Create(() => { });
         }
 
         /// <summary>
@@ -38,6 +40,11 @@ namespace WillowTree.Sweetgum.Client.ViewModels
         /// Gets the command to load an existing workbook.
         /// </summary>
         public ReactiveCommand<Unit, WorkbookModel> LoadWorkbookCommand { get; }
+
+        /// <summary>
+        /// Gets the command to open the settings.
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> OpenSettingsCommand { get; }
 
         /// <summary>
         /// Gets the interaction to specify a path for a new workbook.

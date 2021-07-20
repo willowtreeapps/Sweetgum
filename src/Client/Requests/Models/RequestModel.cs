@@ -2,6 +2,7 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using Newtonsoft.Json;
@@ -16,6 +17,7 @@ namespace WillowTree.Sweetgum.Client.Requests.Models
         /// <summary>
         /// Initializes a new instance of the <see cref="RequestModel"/> class.
         /// </summary>
+        /// <param name="id">The request ID.</param>
         /// <param name="name">The request name.</param>
         /// <param name="httpMethod">The HTTP method.</param>
         /// <param name="requestUrl">The request URL.</param>
@@ -25,6 +27,7 @@ namespace WillowTree.Sweetgum.Client.Requests.Models
         /// <returns>An instance of <see cref="RequestModel"/>.</returns>
         [JsonConstructor]
         public RequestModel(
+            Guid? id,
             string? name,
             HttpMethod? httpMethod,
             string? requestUrl,
@@ -32,6 +35,7 @@ namespace WillowTree.Sweetgum.Client.Requests.Models
             string? contentType,
             string? requestData)
         {
+            this.Id = id ?? Guid.NewGuid();
             this.Name = name ?? string.Empty;
             this.HttpMethod = httpMethod ?? HttpMethod.Get;
             this.RequestUrl = requestUrl ?? string.Empty;
@@ -39,6 +43,11 @@ namespace WillowTree.Sweetgum.Client.Requests.Models
             this.ContentType = contentType ?? string.Empty;
             this.RequestData = requestData;
         }
+
+        /// <summary>
+        /// Gets the request ID.
+        /// </summary>
+        public Guid Id { get; }
 
         /// <summary>
         /// Gets the request name.

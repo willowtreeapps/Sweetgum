@@ -3,8 +3,10 @@
 // </copyright>
 
 using System.Collections.Generic;
+using System.Reactive;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.Folders.Models;
+using WillowTree.Sweetgum.Client.Workbooks.Models;
 
 namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 {
@@ -17,9 +19,12 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// Initializes a new instance of the <see cref="WorkbookItemsViewModel"/> class.
         /// </summary>
         /// <param name="folders">A read-only list of <see cref="FolderModel"/>.</param>
-        public WorkbookItemsViewModel(IReadOnlyList<FolderModel> folders)
+        /// <param name="saveCommand">A command to invoke to save the request.</param>
+        public WorkbookItemsViewModel(
+            IReadOnlyList<FolderModel> folders,
+            ReactiveCommand<SaveCommandParameter, Unit> saveCommand)
         {
-            this.FolderItems = new WorkbookFolderItemsViewModel(folders);
+            this.FolderItems = new WorkbookFolderItemsViewModel(folders, saveCommand);
         }
 
         /// <summary>

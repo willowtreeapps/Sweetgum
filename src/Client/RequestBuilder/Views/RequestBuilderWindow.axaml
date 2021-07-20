@@ -11,9 +11,14 @@
                     Title="Sweetgum">
     <StackPanel Orientation="Vertical" Margin="10">
         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-            <Button x:Name="SaveRequestButton" Content="Save Request" Margin="0,0,10,0" />
-            <Button x:Name="LoadRequestButton" Content="Load Request" />
+            <Button x:Name="SaveRequestButton" Content="Save Changes" />
         </StackPanel>
+
+        <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,10">
+            <TextBlock Grid.Column="0" Text="Name:" Margin="0,0,10,0" VerticalAlignment="Center" />
+            <TextBox Grid.Column="1" x:Name="NameTextBox" />
+        </Grid>
+
         <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,10">
             <ComboBox Grid.Column="0" x:Name="HttpMethodComboBox">
                 <ComboBox.ItemTemplate>

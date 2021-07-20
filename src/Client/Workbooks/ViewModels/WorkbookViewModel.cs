@@ -40,9 +40,14 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                 workbookModel = workbookModel.Rename(this.Name);
             });
 
-            this.SaveCommand = ReactiveCommand.CreateFromTask(
-                async (cancellationToken) =>
+            this.SaveCommand = ReactiveCommand.CreateFromTask<SaveCommandParameter, Unit>(
+                async (saveParameter, cancellationToken) =>
                 {
+                    if (saveParameter.RequestModelChanges != null)
+                    {
+                        workbookModel = workbookModel.UpdateRequest(saveParameter.RequestModelChanges);
+                    }
+
                     await WorkbookManager.SaveAsync(workbookModel, cancellationToken);
                     return Unit.Default;
                 },
@@ -57,7 +62,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                 if (path != null)
                 {
                     workbookModel = workbookModel.NewFolder(path);
-                    this.WorkbookItems = new WorkbookItemsViewModel(workbookModel.Folders);
+                    this.WorkbookItems = new WorkbookItemsViewModel(workbookModel.Folders, this.SaveCommand);
                 }
 
                 return Unit.Default;
@@ -72,13 +77,13 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                 if (path != null)
                 {
                     workbookModel = workbookModel.NewRequest(path);
-                    this.WorkbookItems = new WorkbookItemsViewModel(workbookModel.Folders);
+                    this.WorkbookItems = new WorkbookItemsViewModel(workbookModel.Folders, this.SaveCommand);
                 }
 
                 return Unit.Default;
             });
 
-            this.workbookItems = new WorkbookItemsViewModel(workbookModel.Folders);
+            this.workbookItems = new WorkbookItemsViewModel(workbookModel.Folders, this.SaveCommand);
         }
 
         /// <summary>
@@ -128,7 +133,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// <summary>
         /// Gets a command to save the workbook.
         /// </summary>
-        public ReactiveCommand<Unit, Unit> SaveCommand { get; }
+        public ReactiveCommand<SaveCommandParameter, Unit> SaveCommand { get; }
 
         /// <summary>
         /// Gets or sets the workbook items.

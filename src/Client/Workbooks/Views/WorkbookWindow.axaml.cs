@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using Autofac;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
@@ -112,6 +113,14 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
                         window.ViewModel!,
                         viewModel => viewModel.NewRequestCommand,
                         view => view.NewRequestButton)
+                    .DisposeWith(disposables);
+
+                // TODO: Disable the button when saving.
+                window.SaveButton
+                    .Events()
+                    .Click
+                    .Select(_ => new SaveCommandParameter())
+                    .InvokeCommand(window, view => view.ViewModel!.SaveCommand)
                     .DisposeWith(disposables);
 
                 window.BindCommand(

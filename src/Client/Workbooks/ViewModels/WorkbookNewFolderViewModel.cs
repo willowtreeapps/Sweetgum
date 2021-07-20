@@ -4,6 +4,7 @@
 
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
 using Avalonia.Collections;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
@@ -39,7 +40,26 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             this.selectedParent = rootParentItem;
 
-            this.SubmitCommand = ReactiveCommand.Create(() => this.selectedParent.Path.AddSegment(this.FolderName));
+            var canExecute = this
+                .WhenAnyValue(
+                    viewModel => viewModel.FolderName,
+                    viewModel => viewModel.SelectedParentItem)
+                .Select(current =>
+                {
+                    var (currentFolderName, currentSelectedParentItem) = current;
+
+                    if (string.IsNullOrWhiteSpace(currentFolderName))
+                    {
+                        return false;
+                    }
+
+                    var newFolderPath = currentSelectedParentItem.Path.AddSegment(currentFolderName);
+                    return !workbookModel.FolderExists(newFolderPath);
+                });
+
+            this.SubmitCommand = ReactiveCommand.Create(
+                () => this.selectedParent.Path.AddSegment(this.FolderName),
+                canExecute);
         }
 
         /// <summary>

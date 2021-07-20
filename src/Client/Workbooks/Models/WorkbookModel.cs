@@ -97,7 +97,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
                 throw new Exception("You are unable to rename the root folder.");
             }
 
-            var existingFolder = this.GetFolder(path);
+            var existingFolder = this.GetFolderInternal(path);
 
             if (existingFolder == null)
             {
@@ -125,6 +125,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// <param name="path">The path of the folder.</param>
         /// <returns>A value indicating whether or not the folder exists.</returns>
         [CompanionType(typeof(WorkbookViewModel))]
+        [CompanionType(typeof(WorkbookNewFolderViewModel))]
         public bool FolderExists(PathModel path)
         {
             // The root folder is implicit and always exists.
@@ -165,6 +166,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// </summary>
         /// <param name="path">The full path of the new folder.</param>
         /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
+        [CompanionType(typeof(WorkbookViewModel))]
         public WorkbookModel NewFolder(PathModel path)
         {
             if (path.IsRoot())
@@ -221,6 +223,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
                 throw new Exception("Requests must not live in the root folder.");
             }
 
+            var requestId = Guid.NewGuid();
+
             IReadOnlyList<FolderModel> AddRequestInternal(IReadOnlyList<FolderModel> folders)
             {
                 var newFolders = new List<FolderModel>();
@@ -242,6 +246,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
                     newFolders.Add(new FolderModel(folder)
                     {
                         Requests = folder.Requests.Append(new RequestModel(
+                            requestId,
                             path.Segments[^1],
                             HttpMethod.Get,
                             string.Empty,
@@ -261,6 +266,56 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         }
 
         /// <summary>
+        /// Check if a request exists in the workbook by ID.
+        /// </summary>
+        /// <param name="id">The ID of the request.</param>
+        /// <returns>A value indicating whether or not the request exists.</returns>
+        public bool RequestExists(Guid id)
+        {
+            var folders = new Stack<FolderModel>();
+
+            foreach (var folder in this.Folders)
+            {
+                folders.Push(folder);
+            }
+
+            while (folders.Count > 0)
+            {
+                var currentFolder = folders.Pop();
+
+                if (currentFolder.Requests.Any(request => request.Id == id))
+                {
+                    return true;
+                }
+
+                foreach (var subfolder in currentFolder.Folders)
+                {
+                    folders.Push(subfolder);
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Updates a request in the workbook.
+        /// </summary>
+        /// <param name="requestModel">An instance of <see cref="RequestModel"/>.</param>
+        /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
+        public WorkbookModel UpdateRequest(RequestModel requestModel)
+        {
+            if (!this.RequestExists(requestModel.Id))
+            {
+                throw new Exception("The request you have specified is not in the workbook and can not be updated.");
+            }
+
+            return new WorkbookModel(this)
+            {
+                Folders = this.Folders,
+            };
+        }
+
+        /// <summary>
         /// Move a folder to another folder in a workbook.
         /// </summary>
         /// <param name="path">The full path of the existing folder.</param>
@@ -276,7 +331,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
                 throw new Exception("You can not move the root folder.");
             }
 
-            var existingFolder = this.GetFolder(path);
+            var existingFolder = this.GetFolderInternal(path);
 
             if (existingFolder == null)
             {

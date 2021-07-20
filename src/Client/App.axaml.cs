@@ -39,7 +39,7 @@ namespace WillowTree.Sweetgum.Client
 
             if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow = new MainWindow();
+                desktop.MainWindow = MainWindow.Create();
             }
 
             base.OnFrameworkInitializationCompleted();

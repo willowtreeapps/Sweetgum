@@ -7,6 +7,6 @@
                     mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
                     x:Class="WillowTree.Sweetgum.Client.Workbooks.Views.RequestWorkbookItem">
     <StackPanel Orientation="Vertical" Margin="10">
-        <TextBlock x:Name="NameTextBlock" />
+        <Button x:Name="NameButton" />
     </StackPanel>
 </reactiveUi:ReactiveUserControl>

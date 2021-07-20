@@ -7,8 +7,6 @@
         Icon="/Assets/avalonia-logo.ico"
         Title="Sweetgum">
     <StackPanel Orientation="Vertical">
-        <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <Button x:Name="RequestBuilderButton" Content="Open Request Builder" />
         <Button x:Name="SettingsButton" Content="Open Settings" />
         <Button x:Name="NewWorkbookButton" Content="New Workbook" />
         <Button x:Name="LoadWorkbookButton" Content="Load Workbook" />

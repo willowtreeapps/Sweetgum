@@ -2,8 +2,10 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
+using System.Reactive;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.Requests.Models;
+using WillowTree.Sweetgum.Client.Workbooks.Models;
 
 namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 {
@@ -18,9 +20,14 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// Initializes a new instance of the <see cref="RequestWorkbookItemViewModel"/> class.
         /// </summary>
         /// <param name="requestModel">An instance of <see cref="RequestModel"/>.</param>
-        public RequestWorkbookItemViewModel(RequestModel requestModel)
+        /// <param name="saveCommand">A command to invoke to save the request.</param>
+        public RequestWorkbookItemViewModel(
+            RequestModel requestModel,
+            ReactiveCommand<SaveCommandParameter, Unit> saveCommand)
         {
             this.name = requestModel.Name;
+
+            this.OpenRequestCommand = ReactiveCommand.Create(() => new OpenRequestResult(requestModel, saveCommand));
         }
 
         /// <summary>
@@ -31,5 +38,10 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             get => this.name;
             set => this.RaiseAndSetIfChanged(ref this.name, value);
         }
+
+        /// <summary>
+        /// Gets the open request command.
+        /// </summary>
+        public ReactiveCommand<Unit, OpenRequestResult> OpenRequestCommand { get; }
     }
 }

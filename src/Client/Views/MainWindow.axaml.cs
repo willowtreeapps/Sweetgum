@@ -5,17 +5,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Reactive.Disposables;
-using Autofac;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using Avalonia.ReactiveUI;
 using ReactiveUI;
-using WillowTree.Sweetgum.Client.DependencyInjection;
-using WillowTree.Sweetgum.Client.RequestBuilder.Views;
-using WillowTree.Sweetgum.Client.Requests.Models;
+using WillowTree.Sweetgum.Client.BaseControls.Views;
 using WillowTree.Sweetgum.Client.Settings.Views;
 using WillowTree.Sweetgum.Client.ViewModels;
 using WillowTree.Sweetgum.Client.Workbooks.Views;
@@ -25,7 +19,7 @@ namespace WillowTree.Sweetgum.Client.Views
     /// <summary>
     /// The main window view class.
     /// </summary>
-    public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
+    public partial class MainWindow : BaseWindow<MainWindowViewModel>
     {
         private const string WorkbookFileExtension = "sg";
 
@@ -38,58 +32,44 @@ namespace WillowTree.Sweetgum.Client.Views
             },
         };
 
+        private Button SettingsButton => this.FindControl<Button>(nameof(this.SettingsButton));
+
+        private Button NewWorkbookButton => this.FindControl<Button>(nameof(this.NewWorkbookButton));
+
+        private Button LoadWorkbookButton => this.FindControl<Button>(nameof(this.LoadWorkbookButton));
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="MainWindow"/> class.
+        /// Creates a new instance of <see cref="MainWindow"/>.
         /// </summary>
-        public MainWindow()
+        /// <returns>An instance of <see cref="MainWindow"/>.</returns>
+        public static MainWindow Create()
         {
-            this.ViewModel = Dependencies.Container.Resolve<MainWindowViewModel>();
+            var window = new MainWindow();
 
-            this.InitializeComponent();
-#if DEBUG
-            this.AttachDevTools();
-#endif
+            window.InitializeWindow();
 
-            // TODO: Get rid of this.
-            this.RequestBuilderButton.Click += (_, _) =>
+            window.WhenActivated(disposables =>
             {
-                var requestBuilderWindow = RequestBuilderWindow.Create(new RequestModel(
-                    "New Request", // TODO: Change this?
-                    HttpMethod.Get,
-                    string.Empty,
-                    new List<RequestHeaderModel>(),
-                    "application/x-www-form-urlencoded",
-                    null));
-
-                requestBuilderWindow.Show();
-            };
-
-            this.SettingsButton.Click += (_, _) =>
-            {
-                var settingsWindow = new SettingsWindow
-                {
-                    Width = 800,
-                    Height = 800,
-                };
-                settingsWindow.Show();
-            };
-
-            this.WhenActivated(disposables =>
-            {
-                this.BindCommand(
-                        this.ViewModel!,
+                window.BindCommand(
+                        window.ViewModel!,
                         viewModel => viewModel.NewWorkbookCommand,
                         view => view.NewWorkbookButton)
                     .DisposeWith(disposables);
 
-                this.BindCommand(
-                        this.ViewModel!,
+                window.BindCommand(
+                        window.ViewModel!,
                         viewModel => viewModel.LoadWorkbookCommand,
                         view => view.LoadWorkbookButton)
                     .DisposeWith(disposables);
 
-                this.BindInteraction(
-                    this.ViewModel,
+                window.BindCommand(
+                        window.ViewModel!,
+                        viewModel => viewModel.OpenSettingsCommand,
+                        view => view.SettingsButton)
+                    .DisposeWith(disposables);
+
+                window.BindInteraction(
+                    window.ViewModel,
                     viewModel => viewModel.NewWorkbookSpecifyPathInteraction,
                     async context =>
                     {
@@ -98,13 +78,13 @@ namespace WillowTree.Sweetgum.Client.Views
                             DefaultExtension = WorkbookFileExtension,
                             Filters = FileDialogFilters,
                         };
-                        var path = await dialog.ShowAsync(this);
+                        var path = await dialog.ShowAsync(window);
 
                         context.SetOutput(string.IsNullOrWhiteSpace(path) ? string.Empty : path);
                     });
 
-                this.BindInteraction(
-                    this.ViewModel,
+                window.BindInteraction(
+                    window.ViewModel,
                     viewModel => viewModel.LoadWorkbookSpecifyPathInteraction,
                     async context =>
                     {
@@ -114,32 +94,39 @@ namespace WillowTree.Sweetgum.Client.Views
                             Filters = FileDialogFilters,
                         };
 
-                        var path = await dialog.ShowAsync(this);
+                        var path = await dialog.ShowAsync(window);
 
                         context.SetOutput(path.FirstOrDefault() ?? string.Empty);
                     });
 
-                this.WhenAnyObservable(
+                window.WhenAnyObservable(
                         view => view.ViewModel!.NewWorkbookCommand,
                         view => view.ViewModel!.LoadWorkbookCommand)
                     .Subscribe(workbookModel =>
                     {
-                        var window = WorkbookWindow.Create(workbookModel);
-                        window.Show();
+                        var workbookWindow = WorkbookWindow.Create(workbookModel);
+                        workbookWindow.Show();
+                    })
+                    .DisposeWith(disposables);
+
+                window.WhenAnyObservable(view => view.ViewModel!.OpenSettingsCommand)
+                    .Subscribe(_ =>
+                    {
+                        var settingsWindow = new SettingsWindow
+                        {
+                            Width = 800,
+                            Height = 800,
+                        };
+                        settingsWindow.Show();
                     })
                     .DisposeWith(disposables);
             });
+
+            return window;
         }
 
-        private Button RequestBuilderButton => this.FindControl<Button>(nameof(this.RequestBuilderButton));
-
-        private Button SettingsButton => this.FindControl<Button>(nameof(this.SettingsButton));
-
-        private Button NewWorkbookButton => this.FindControl<Button>(nameof(this.NewWorkbookButton));
-
-        private Button LoadWorkbookButton => this.FindControl<Button>(nameof(this.LoadWorkbookButton));
-
-        private void InitializeComponent()
+        /// <inheritdoc cref="BaseWindow{TViewModel}"/>
+        protected override void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
         }

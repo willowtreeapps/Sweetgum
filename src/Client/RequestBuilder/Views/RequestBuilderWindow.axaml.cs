@@ -2,16 +2,17 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
-using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using Autofac;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using ReactiveUI;
-using RealGoodApps.Companion.Attributes;
 using WillowTree.Sweetgum.Client.BaseControls.Views;
 using WillowTree.Sweetgum.Client.RequestBuilder.ViewModels;
 using WillowTree.Sweetgum.Client.Requests.Models;
+using WillowTree.Sweetgum.Client.Workbooks.Models;
 
 namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
 {
@@ -21,13 +22,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
     /// </summary>
     public partial class RequestBuilderWindow : BaseWindow<RequestBuilderViewModel>
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RequestBuilderWindow"/> class.
-        /// </summary>
-        [CompanionType(typeof(RequestBuilderWindow))]
-        public RequestBuilderWindow()
-        {
-        }
+        private TextBox NameTextBox => this.FindControl<TextBox>(nameof(this.NameTextBox));
 
         private StackPanel RequestDataStackPanel => this.FindControl<StackPanel>(nameof(this.RequestDataStackPanel));
 
@@ -57,14 +52,15 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
 
         private Button SaveRequestButton => this.FindControl<Button>(nameof(this.SaveRequestButton));
 
-        private Button LoadRequestButton => this.FindControl<Button>(nameof(this.LoadRequestButton));
-
         /// <summary>
         /// Create an instance of <see cref="RequestBuilderWindow"/>.
         /// </summary>
         /// <param name="requestModel">An instance of <see cref="RequestModel"/>.</param>
+        /// <param name="saveCommand">A command to save the request model.</param>
         /// <returns>An instance of <see cref="RequestBuilderWindow"/>.</returns>
-        public static RequestBuilderWindow Create(RequestModel requestModel)
+        public static RequestBuilderWindow Create(
+            RequestModel requestModel,
+            ReactiveCommand<SaveCommandParameter, Unit> saveCommand)
         {
             var window = new RequestBuilderWindow
             {
@@ -75,10 +71,17 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
             window.InitializeWindow(builder =>
             {
                 builder.RegisterInstance(requestModel).ExternallyOwned();
+                builder.RegisterInstance(saveCommand).ExternallyOwned();
             });
 
             window.WhenActivated(disposables =>
             {
+                window.Bind(
+                        window.ViewModel,
+                        viewModel => viewModel.Name,
+                        view => view.NameTextBox.Text)
+                    .DisposeWith(disposables);
+
                 window.Bind(
                         window.ViewModel,
                         viewModel => viewModel.RequestUrl,
@@ -169,50 +172,27 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
                         view => view.SubmitRequestButton)
                     .DisposeWith(disposables);
 
+                // TODO: Disable the button when saving.
+                window.SaveRequestButton
+                    .Events()
+                    .Click
+                    .Select(_ => new SaveCommandParameter
+                    {
+                        RequestModelChanges = window.ViewModel!.ToModel(),
+                    })
+                    .InvokeCommand(window, view => view.ViewModel!.SaveCommand)
+                    .DisposeWith(disposables);
+
                 window.BindCommand(
                         window.ViewModel!,
                         viewModel => viewModel.SaveCommand,
                         view => view.SaveRequestButton)
                     .DisposeWith(disposables);
 
-                window.BindCommand(
-                        window.ViewModel!,
-                        viewModel => viewModel.LoadCommand,
-                        view => view.LoadRequestButton)
-                    .DisposeWith(disposables);
-
                 window.OneWayBind(
                         window.ViewModel,
                         viewModel => viewModel.ShouldShowResponseDetails,
                         view => view.ResponseDetailsStackPanel.IsVisible)
-                    .DisposeWith(disposables);
-
-                window.BindInteraction(
-                        window.ViewModel,
-                        viewModel => viewModel.LoadSpecifyPathInteraction,
-                        async (context) =>
-                        {
-                            var dialog = new OpenFileDialog
-                            {
-                                AllowMultiple = false,
-                            };
-
-                            var path = await dialog.ShowAsync(window);
-
-                            context.SetOutput(path.FirstOrDefault());
-                        })
-                    .DisposeWith(disposables);
-
-                window.BindInteraction(
-                        window.ViewModel,
-                        viewModel => viewModel.SaveSpecifyPathInteraction,
-                        async (context) =>
-                        {
-                            var dialog = new SaveFileDialog();
-                            var path = await dialog.ShowAsync(window);
-
-                            context.SetOutput(path);
-                        })
                     .DisposeWith(disposables);
             });
 

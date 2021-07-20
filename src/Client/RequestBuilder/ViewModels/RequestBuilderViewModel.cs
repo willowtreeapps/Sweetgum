@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -18,11 +17,11 @@ using System.Threading.Tasks;
 using Avalonia.Collections;
 using Avalonia.Media;
 using ExhaustiveMatching;
-using Newtonsoft.Json;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.Requests.Models;
 using WillowTree.Sweetgum.Client.Settings.Models;
 using WillowTree.Sweetgum.Client.Settings.Services;
+using WillowTree.Sweetgum.Client.Workbooks.Models;
 
 namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
 {
@@ -33,6 +32,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
     {
         private const string FormUrlEncodedContentType = "application/x-www-form-urlencoded";
 
+        private readonly Guid id;
         private readonly ObservableAsPropertyHelper<bool> shouldShowResponseDetailsObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<bool> shouldShowRequestDataTextBoxObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<string> responseStatusCodeObservableAsPropertyHelper;
@@ -41,6 +41,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         private readonly ObservableAsPropertyHelper<string> responseHeadersObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<string> responseTimeObservableAsPropertyHelper;
         private readonly SettingsManager settingsManager;
+        private string name;
         private ContentTypeViewModel? selectedContentTypeViewModel;
         private HttpMethodViewModel? selectedHttpMethodViewModel;
         private string requestData;
@@ -49,11 +50,18 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         /// <summary>
         /// Initializes a new instance of the <see cref="RequestBuilderViewModel"/> class.
         /// </summary>
+        /// <param name="requestModel">An instance of <see cref="RequestModel"/>.</param>
         /// <param name="settingsManager">An instance of <see cref="settingsManager"/>.</param>
-        public RequestBuilderViewModel(SettingsManager settingsManager)
+        /// <param name="saveCommand">An observer to notify when the request is saved.</param>
+        public RequestBuilderViewModel(
+            RequestModel requestModel,
+            SettingsManager settingsManager,
+            ReactiveCommand<SaveCommandParameter, Unit> saveCommand)
         {
-            this.requestUrl = string.Empty;
-            this.requestData = string.Empty;
+            this.id = requestModel.Id;
+            this.name = requestModel.Name;
+            this.requestUrl = requestModel.RequestUrl;
+            this.requestData = requestModel.RequestData ?? string.Empty;
             this.settingsManager = settingsManager;
 
             var httpMethods = new List<HttpMethod>
@@ -73,7 +81,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
             this.HttpMethods = httpMethods.Select(httpMethod => new HttpMethodViewModel(httpMethod)).ToList();
 
             var defaultHttpMethod = this.HttpMethods.FirstOrDefault(m => m.HttpMethod == HttpMethod.Get);
-            this.SelectedHttpMethod = defaultHttpMethod;
+            this.SelectedHttpMethod = this.HttpMethods.FirstOrDefault(m => requestModel.HttpMethod == m.HttpMethod) ?? defaultHttpMethod;
 
             this.ContentTypes = new List<ContentTypeViewModel>
             {
@@ -85,6 +93,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
                 new("application/xml", "XML"),
             };
 
+            this.SelectedContentType = this.ContentTypes.FirstOrDefault(t => t.ContentType == requestModel.ContentType);
             this.RequestHeaders = new AvaloniaList<RequestHeaderViewModel>();
 
             var removeSubject = new Subject<RequestHeaderViewModel>();
@@ -99,6 +108,14 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
 
                     this.RequestHeaders.Remove(requestHeaderViewModel);
                 });
+
+            this.RequestHeaders.AddRange(requestModel.RequestHeaders
+                .Select(h => new RequestHeaderViewModel(removeSubject)
+                {
+                    Name = h.Name,
+                    Value = h.Value,
+                })
+                .ToList());
 
             this.AddRequestHeaderCommand = ReactiveCommand.Create(() => this.RequestHeaders.Add(new RequestHeaderViewModel(removeSubject)));
 
@@ -199,40 +216,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
                     // TODO: Show the exception error.
                 });
 
-            this.SaveCommand = ReactiveCommand.CreateFromTask(this.SaveAsync);
-            this.SaveSpecifyPathInteraction = new Interaction<Unit, string>();
-
-            this.LoadCommand = ReactiveCommand.CreateFromTask(this.LoadAsync);
-
-            this.LoadCommand
-                .Subscribe(loadedRequest =>
-                {
-                    if (loadedRequest == null)
-                    {
-                        return;
-                    }
-
-                    this.SelectedHttpMethod = this.HttpMethods.FirstOrDefault(m => m.HttpMethod == loadedRequest.HttpMethod);
-                    this.RequestUrl = loadedRequest.RequestUrl;
-
-                    this.RequestHeaders.Clear();
-
-                    foreach (var requestHeader in loadedRequest.RequestHeaders)
-                    {
-                        var requestHeaderViewModel = new RequestHeaderViewModel(removeSubject)
-                        {
-                            Name = requestHeader.Name,
-                            Value = requestHeader.Value,
-                        };
-
-                        this.RequestHeaders.Add(requestHeaderViewModel);
-                    }
-
-                    this.SelectedContentType = this.ContentTypes.FirstOrDefault(c => c.ContentType == loadedRequest.ContentType);
-                    this.RequestData = loadedRequest.RequestData ?? string.Empty;
-                });
-
-            this.LoadSpecifyPathInteraction = new Interaction<Unit, string?>();
+            this.SaveCommand = saveCommand;
         }
 
         /// <summary>
@@ -267,6 +251,15 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         /// Gets the list of valid HTTP methods.
         /// </summary>
         public IList<HttpMethodViewModel> HttpMethods { get; }
+
+        /// <summary>
+        /// Gets or sets the request name.
+        /// </summary>
+        public string Name
+        {
+            get => this.name;
+            set => this.RaiseAndSetIfChanged(ref this.name, value);
+        }
 
         /// <summary>
         /// Gets or sets the HTTP request data.
@@ -329,12 +322,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         /// <summary>
         /// Gets a command that saves the HTTP request.
         /// </summary>
-        public ReactiveCommand<Unit, Unit> SaveCommand { get; }
-
-        /// <summary>
-        /// Gets a command that loads an HTTP request.
-        /// </summary>
-        public ReactiveCommand<Unit, RequestModel?> LoadCommand { get; }
+        public ReactiveCommand<SaveCommandParameter, Unit> SaveCommand { get; }
 
         /// <summary>
         /// Gets a command that sends the HTTP request.
@@ -342,14 +330,20 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         public ReactiveCommand<Unit, RequestResult> SendRequestCommand { get; }
 
         /// <summary>
-        /// Gets an interaction that is used to specify a path for the save command.
+        /// Constructs an instance of <see cref="RequestModel"/> from the view model.
         /// </summary>
-        public Interaction<Unit, string> SaveSpecifyPathInteraction { get; }
-
-        /// <summary>
-        /// Gets an interaction that is used to specify a path for the load command.
-        /// </summary>
-        public Interaction<Unit, string?> LoadSpecifyPathInteraction { get; }
+        /// <returns>An instance of <see cref="RequestModel"/>.</returns>
+        public RequestModel ToModel()
+        {
+            return new(
+                this.id,
+                this.Name,
+                this.CalculateCurrentHttpMethod(),
+                this.RequestUrl,
+                this.RequestHeaders.Select(requestHeader => requestHeader.ToModel()).ToList(),
+                this.SelectedContentType?.ContentType ?? string.Empty,
+                this.RequestData);
+        }
 
         private static bool IsMethodWithRequestData(HttpMethod httpMethod)
         {
@@ -426,36 +420,6 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         private HttpMethod CalculateCurrentHttpMethod()
         {
             return this.SelectedHttpMethod?.HttpMethod ?? HttpMethod.Get;
-        }
-
-        private async Task SaveAsync(CancellationToken cancellationToken)
-        {
-            var path = await this.SaveSpecifyPathInteraction.Handle(Unit.Default);
-            var savedRequest = new RequestModel(
-                "My Request", // TODO: Change this
-                this.CalculateCurrentHttpMethod(),
-                this.RequestUrl,
-                this.RequestHeaders.Select(requestHeader => requestHeader.ToModel()).ToList(),
-                this.SelectedContentType?.ContentType ?? string.Empty,
-                this.RequestData);
-
-            await File.WriteAllTextAsync(
-                path,
-                JsonConvert.SerializeObject(savedRequest),
-                cancellationToken);
-        }
-
-        private async Task<RequestModel?> LoadAsync(CancellationToken cancellationToken)
-        {
-            var path = await this.LoadSpecifyPathInteraction.Handle(Unit.Default);
-
-            if (string.IsNullOrWhiteSpace(path))
-            {
-                return null;
-            }
-
-            var savedRequestJson = await File.ReadAllTextAsync(path, cancellationToken);
-            return JsonConvert.DeserializeObject<RequestModel>(savedRequestJson);
         }
 
         /// <summary>
