@@ -66,7 +66,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             foreach (var item in this.Items)
             {
                 // Update all the subfolders if necessary.
-                item.Update(folders.First(f => f.GetPath() == item.Path).Folders);
+                item.Update(folders.First(f => f.GetPath() == item.Path));
             }
         }
     }

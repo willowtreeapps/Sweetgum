@@ -92,10 +92,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// <summary>
         /// This will let sub-folder know that they may need to update based on a new list of folder models.
         /// </summary>
-        /// <param name="folders">The new list of folder models.</param>
-        public void Update(IReadOnlyList<FolderModel> folders)
+        /// <param name="folder">The new folder model.</param>
+        public void Update(FolderModel folder)
         {
-            this.FolderItems.Update(folders);
+            this.FolderItems.Update(folder.Folders);
+            this.RequestItems.Update(folder.Requests);
         }
     }
 }

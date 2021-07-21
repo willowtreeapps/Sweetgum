@@ -2,6 +2,7 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
+using System;
 using System.Reactive;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.Requests.Models;
@@ -25,6 +26,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             RequestModel requestModel,
             ReactiveCommand<SaveCommandParameter, Unit> saveCommand)
         {
+            this.Id = requestModel.Id;
             this.name = requestModel.Name;
 
             this.OpenRequestCommand = ReactiveCommand.Create(() => new OpenRequestResult(requestModel, saveCommand));
@@ -43,5 +45,19 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// Gets the open request command.
         /// </summary>
         public ReactiveCommand<Unit, OpenRequestResult> OpenRequestCommand { get; }
+
+        /// <summary>
+        /// Gets the ID of the request.
+        /// </summary>
+        public Guid Id { get; }
+
+        /// <summary>
+        /// Update a request using a new request model.
+        /// </summary>
+        /// <param name="requestModel">The new request model.</param>
+        public void Update(RequestModel requestModel)
+        {
+            this.Name = requestModel.Name;
+        }
     }
 }
