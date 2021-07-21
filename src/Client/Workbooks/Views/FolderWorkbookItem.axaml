@@ -7,9 +7,32 @@
                     xmlns:reactiveUi="http://reactiveui.net"
                     mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
                     x:Class="WillowTree.Sweetgum.Client.Workbooks.Views.FolderWorkbookItem">
+    <UserControl.Styles>
+        <Style Selector="ToggleButton#ExpandCollapseButton">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="Transparent"
+                            Width="14"
+                            Height="12"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                        <Path Fill="Red"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              Data="M 0 2 L 4 6 L 0 10 Z"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="ToggleButton#ExpandCollapseButton:checked">
+            <Setter Property="RenderTransform">
+                <RotateTransform Angle="45"/>
+            </Setter>
+        </Style>
+    </UserControl.Styles>
     <StackPanel Orientation="Vertical" Margin="10,0,0,0">
         <StackPanel Orientation="Horizontal">
-            <Button x:Name="ExpandCollapseButton" />
+            <ToggleButton x:Name="ExpandCollapseButton" />
             <TextBlock x:Name="NameTextBlock" />
         </StackPanel>
         <StackPanel x:Name="ChildStackPanel" IsVisible="False">

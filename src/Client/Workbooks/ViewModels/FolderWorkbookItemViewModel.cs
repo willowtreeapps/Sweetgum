@@ -4,7 +4,6 @@
 
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Linq;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.Folders.Models;
 using WillowTree.Sweetgum.Client.ProgramState.Models;
@@ -17,7 +16,6 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
     /// </summary>
     public sealed class FolderWorkbookItemViewModel : ReactiveObject
     {
-        private readonly ObservableAsPropertyHelper<string> expandCollapseTextObservableAsPropertyHelper;
         private bool isExpanded;
         private string name;
 
@@ -46,10 +44,6 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             {
                 this.IsExpanded = !this.IsExpanded;
             });
-
-            this.expandCollapseTextObservableAsPropertyHelper = this.WhenAnyValue(viewModel => viewModel.IsExpanded)
-                .Select(currentIsExpanded => currentIsExpanded ? "-" : "+")
-                .ToProperty(this, viewModel => viewModel.ExpandCollapseText);
         }
 
         /// <summary>
@@ -69,11 +63,6 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             get => this.isExpanded;
             set => this.RaiseAndSetIfChanged(ref this.isExpanded, value);
         }
-
-        /// <summary>
-        /// Gets the expand/collapse button text.
-        /// </summary>
-        public string ExpandCollapseText => this.expandCollapseTextObservableAsPropertyHelper.Value;
 
         /// <summary>
         /// Gets a command to toggle the expand/collapse state.

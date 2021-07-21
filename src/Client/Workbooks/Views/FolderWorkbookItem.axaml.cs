@@ -4,6 +4,7 @@
 
 using System.Reactive.Disposables;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using ReactiveUI;
@@ -57,13 +58,13 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
 
                 this.OneWayBind(
                         this.ViewModel,
-                        viewModel => viewModel.ExpandCollapseText,
-                        view => view.ExpandCollapseButton.Content)
+                        viewModel => viewModel.IsExpanded,
+                        view => view.ExpandCollapseButton.IsChecked)
                     .DisposeWith(disposables);
             });
         }
 
-        private Button ExpandCollapseButton => this.FindControl<Button>(nameof(this.ExpandCollapseButton));
+        private ToggleButton ExpandCollapseButton => this.FindControl<ToggleButton>(nameof(this.ExpandCollapseButton));
 
         private TextBlock NameTextBlock => this.FindControl<TextBlock>(nameof(this.NameTextBlock));
 
