@@ -42,10 +42,32 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
                         viewModel => viewModel.RequestItems,
                         view => view.WorkbookRequestItems.ViewModel)
                     .DisposeWith(disposables);
+
+                this.OneWayBind(
+                        this.ViewModel,
+                        viewModel => viewModel.IsExpanded,
+                        view => view.ChildStackPanel.IsVisible)
+                    .DisposeWith(disposables);
+
+                this.BindCommand(
+                        this.ViewModel!,
+                        viewModel => viewModel.ToggleExpandCollapseCommand,
+                        view => view.ExpandCollapseButton)
+                    .DisposeWith(disposables);
+
+                this.OneWayBind(
+                        this.ViewModel,
+                        viewModel => viewModel.ExpandCollapseText,
+                        view => view.ExpandCollapseButton.Content)
+                    .DisposeWith(disposables);
             });
         }
 
+        private Button ExpandCollapseButton => this.FindControl<Button>(nameof(this.ExpandCollapseButton));
+
         private TextBlock NameTextBlock => this.FindControl<TextBlock>(nameof(this.NameTextBlock));
+
+        private StackPanel ChildStackPanel => this.FindControl<StackPanel>(nameof(this.ChildStackPanel));
 
         private WorkbookFolderItems WorkbookFolderItems => this.FindControl<WorkbookFolderItems>(nameof(this.WorkbookFolderItems));
 
