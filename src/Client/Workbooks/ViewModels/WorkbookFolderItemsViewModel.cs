@@ -17,6 +17,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
     /// </summary>
     public sealed class WorkbookFolderItemsViewModel : ReactiveObject
     {
+        private readonly ReactiveCommand<SaveCommandParameter, Unit> saveCommand;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="WorkbookFolderItemsViewModel"/> class.
         /// </summary>
@@ -26,6 +28,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             IReadOnlyList<FolderModel> folders,
             ReactiveCommand<SaveCommandParameter, Unit> saveCommand)
         {
+            this.saveCommand = saveCommand;
             this.Items = new AvaloniaList<FolderWorkbookItemViewModel>();
 
             // TODO: We might need a DI scope here, but this should be fine for now.
@@ -38,5 +41,33 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// Gets the folder items.
         /// </summary>
         public AvaloniaList<FolderWorkbookItemViewModel> Items { get; }
+
+        /// <summary>
+        /// Update the view model by looping the folders and only updated what has changed since the initialization.
+        /// </summary>
+        /// <param name="folders">The updated workbook model's folders.</param>
+        public void Update(IReadOnlyList<FolderModel> folders)
+        {
+            var existingFolders = this.Items
+                .ToList();
+
+            var removedFolders = existingFolders
+                .Where(existingFolder => folders.All(f => f.GetPath() != existingFolder.Path))
+                .ToList();
+
+            var addedFolders = folders
+                .Where(folder => existingFolders.All(f => f.Path != folder.GetPath()))
+                .Select(folder => new FolderWorkbookItemViewModel(folder, this.saveCommand))
+                .ToList();
+
+            this.Items.RemoveAll(removedFolders);
+            this.Items.AddRange(addedFolders);
+
+            foreach (var item in this.Items)
+            {
+                // Update all the subfolders if necessary.
+                item.Update(folders.First(f => f.GetPath() == item.Path).Folders);
+            }
+        }
     }
 }

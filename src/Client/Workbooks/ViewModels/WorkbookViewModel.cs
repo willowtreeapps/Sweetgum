@@ -51,8 +51,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
                     await WorkbookManager.SaveAsync(workbookModel, cancellationToken);
 
-                    // SaveCommand can null be null at this point, because we are assigning it on the previous statement.
-                    this.WorkbookItems = new WorkbookItemsViewModel(workbookModel.Folders, this.SaveCommand!);
+                    this.WorkbookItems.Update(workbookModel);
                     return Unit.Default;
                 },
                 isRenamingBehaviorSubject.Select(r => !r));
@@ -66,7 +65,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                 if (path != null)
                 {
                     workbookModel = workbookModel.NewFolder(path);
-                    this.WorkbookItems = new WorkbookItemsViewModel(workbookModel.Folders, this.SaveCommand);
+                    this.WorkbookItems.Update(workbookModel);
                 }
 
                 return Unit.Default;
@@ -81,7 +80,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                 if (path != null)
                 {
                     workbookModel = workbookModel.NewRequest(path);
-                    this.WorkbookItems = new WorkbookItemsViewModel(workbookModel.Folders, this.SaveCommand);
+                    this.WorkbookItems.Update(workbookModel);
                 }
 
                 return Unit.Default;

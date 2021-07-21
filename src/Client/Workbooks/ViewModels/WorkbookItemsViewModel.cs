@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Reactive;
 using ReactiveUI;
+using RealGoodApps.Companion.Attributes;
 using WillowTree.Sweetgum.Client.Folders.Models;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
 
@@ -31,5 +32,15 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// Gets the folder items.
         /// </summary>
         public WorkbookFolderItemsViewModel FolderItems { get; }
+
+        /// <summary>
+        /// Update the items view model by notifying the folders within the tree view to update.
+        /// </summary>
+        /// <param name="workbookModel">The updated workbook model.</param>
+        [CompanionType(typeof(WorkbookViewModel))]
+        public void Update(WorkbookModel workbookModel)
+        {
+            this.FolderItems.Update(workbookModel.Folders);
+        }
     }
 }

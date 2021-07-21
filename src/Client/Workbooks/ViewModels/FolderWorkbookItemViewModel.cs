@@ -2,6 +2,7 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
+using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
 using ReactiveUI;
@@ -30,6 +31,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         {
             this.isExpanded = false;
             this.name = folderModel.Name;
+            this.Path = folderModel.GetPath();
 
             this.FolderItems = new WorkbookFolderItemsViewModel(folderModel.Folders, saveCommand);
             this.RequestItems = new WorkbookRequestItemsViewModel(folderModel.Requests, saveCommand);
@@ -81,5 +83,19 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// Gets the request items.
         /// </summary>
         public WorkbookRequestItemsViewModel RequestItems { get; }
+
+        /// <summary>
+        /// Gets the path model for the folder.
+        /// </summary>
+        public PathModel Path { get; }
+
+        /// <summary>
+        /// This will let sub-folder know that they may need to update based on a new list of folder models.
+        /// </summary>
+        /// <param name="folders">The new list of folder models.</param>
+        public void Update(IReadOnlyList<FolderModel> folders)
+        {
+            this.FolderItems.Update(folders);
+        }
     }
 }
