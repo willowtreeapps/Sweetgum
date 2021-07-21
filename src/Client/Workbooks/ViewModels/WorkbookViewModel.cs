@@ -2,10 +2,14 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ReactiveUI;
+using WillowTree.Sweetgum.Client.ProgramState.Models;
+using WillowTree.Sweetgum.Client.ProgramState.Services;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
 using WillowTree.Sweetgum.Client.Workbooks.Services;
 
@@ -18,6 +22,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
     {
         private readonly ObservableAsPropertyHelper<bool> isRenamingObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<bool> canSaveObservableAsPropertyHelper;
+        private readonly string path;
         private string name;
         private WorkbookItemsViewModel workbookItems;
 
@@ -25,9 +30,13 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// Initializes a new instance of the <see cref="WorkbookViewModel"/> class.
         /// </summary>
         /// <param name="workbookModel">An instance of <see cref="WorkbookModel"/>.</param>
-        public WorkbookViewModel(WorkbookModel workbookModel)
+        /// <param name="programStateManager">An instance of <see cref="ProgramStateManager"/>.</param>
+        public WorkbookViewModel(
+            WorkbookModel workbookModel,
+            ProgramStateManager programStateManager)
         {
             this.name = workbookModel.Name;
+            this.path = workbookModel.Path;
 
             var isRenamingBehaviorSubject = new BehaviorSubject<bool>(false);
 
@@ -60,11 +69,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             this.NewFolderCommand = ReactiveCommand.CreateFromTask(async () =>
             {
-                var path = await this.NewFolderInteraction.Handle(workbookModel);
+                var newFolderPath = await this.NewFolderInteraction.Handle(workbookModel);
 
-                if (path != null)
+                if (newFolderPath != null)
                 {
-                    workbookModel = workbookModel.NewFolder(path);
+                    workbookModel = workbookModel.NewFolder(newFolderPath);
                     this.WorkbookItems.Update(workbookModel);
                 }
 
@@ -75,11 +84,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             this.NewRequestCommand = ReactiveCommand.CreateFromTask(async () =>
             {
-                var path = await this.NewRequestInteraction.Handle(workbookModel);
+                var newRequestPath = await this.NewRequestInteraction.Handle(workbookModel);
 
-                if (path != null)
+                if (newRequestPath != null)
                 {
-                    workbookModel = workbookModel.NewRequest(path);
+                    workbookModel = workbookModel.NewRequest(newRequestPath);
                     this.WorkbookItems.Update(workbookModel);
                 }
 
@@ -89,7 +98,15 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             this.canSaveObservableAsPropertyHelper = this.SaveCommand.CanExecute
                 .ToProperty(this, viewModel => viewModel.CanSave);
 
-            this.workbookItems = new WorkbookItemsViewModel(workbookModel.Folders, this.SaveCommand);
+            var workbookState = programStateManager.CurrentState
+                                    .WorkbookStates
+                                    .FirstOrDefault(s => s.Path == workbookModel.Path)
+                                ?? new WorkbookStateModel(workbookModel.Path, new List<ExpandCollapseStateModel>());
+
+            this.workbookItems = new WorkbookItemsViewModel(
+                workbookModel.Folders,
+                this.SaveCommand,
+                workbookState);
         }
 
         /// <summary>
@@ -153,6 +170,30 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         {
             get => this.workbookItems;
             set => this.RaiseAndSetIfChanged(ref this.workbookItems, value);
+        }
+
+        /// <summary>
+        /// Converts a view model to an instance of <see cref="WorkbookStateModel"/>.
+        /// </summary>
+        /// <returns>An instance of <see cref="WorkbookStateModel"/>.</returns>
+        public WorkbookStateModel ToWorkbookStateModel()
+        {
+            IReadOnlyList<ExpandCollapseStateModel> GetExpandCollapseStates(IReadOnlyList<FolderWorkbookItemViewModel> folders)
+            {
+                var expandCollapseStates = new List<ExpandCollapseStateModel>();
+
+                foreach (var folder in folders)
+                {
+                    expandCollapseStates.Add(new ExpandCollapseStateModel(folder.Path, folder.IsExpanded));
+                    expandCollapseStates.AddRange(GetExpandCollapseStates(folder.FolderItems.Items));
+                }
+
+                return expandCollapseStates;
+            }
+
+            return new WorkbookStateModel(
+                this.path,
+                GetExpandCollapseStates(this.WorkbookItems.FolderItems.Items));
         }
     }
 }

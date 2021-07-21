@@ -9,6 +9,8 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.BaseControls.Views;
+using WillowTree.Sweetgum.Client.DependencyInjection;
+using WillowTree.Sweetgum.Client.ProgramState.Services;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
 using WillowTree.Sweetgum.Client.Workbooks.ViewModels;
 
@@ -50,6 +52,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
                     .RegisterInstance(workbookModel)
                     .ExternallyOwned();
             });
+
+            var programStateManager = Dependencies.Container.Resolve<ProgramStateManager>();
 
             window.WhenActivated(disposables =>
             {
@@ -157,6 +161,14 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
 
                         context.SetOutput(result);
                     });
+
+                Disposable.Create(() =>
+                    {
+                        var workbookStateModel = window.ViewModel!.ToWorkbookStateModel();
+
+                        programStateManager.Save(programStateManager.CurrentState.UpdateWorkbook(workbookStateModel));
+                    })
+                    .DisposeWith(disposables);
             });
 
             return window;

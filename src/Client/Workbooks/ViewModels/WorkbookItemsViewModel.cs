@@ -7,6 +7,7 @@ using System.Reactive;
 using ReactiveUI;
 using RealGoodApps.Companion.Attributes;
 using WillowTree.Sweetgum.Client.Folders.Models;
+using WillowTree.Sweetgum.Client.ProgramState.Models;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
 
 namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
@@ -21,11 +22,13 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// </summary>
         /// <param name="folders">A read-only list of <see cref="FolderModel"/>.</param>
         /// <param name="saveCommand">A command to invoke to save the request.</param>
+        /// <param name="workbookStateModel">An instance of <see cref="WorkbookStateModel"/>.</param>
         public WorkbookItemsViewModel(
             IReadOnlyList<FolderModel> folders,
-            ReactiveCommand<SaveCommandParameter, Unit> saveCommand)
+            ReactiveCommand<SaveCommandParameter, Unit> saveCommand,
+            WorkbookStateModel workbookStateModel)
         {
-            this.FolderItems = new WorkbookFolderItemsViewModel(folders, saveCommand);
+            this.FolderItems = new WorkbookFolderItemsViewModel(folders, saveCommand, workbookStateModel);
         }
 
         /// <summary>

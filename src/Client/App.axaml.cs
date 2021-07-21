@@ -7,6 +7,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using WillowTree.Sweetgum.Client.DependencyInjection;
+using WillowTree.Sweetgum.Client.ProgramState.Services;
 using WillowTree.Sweetgum.Client.Settings.Services;
 using WillowTree.Sweetgum.Client.Views;
 
@@ -34,8 +35,11 @@ namespace WillowTree.Sweetgum.Client
         /// <inheritdoc cref="Application"/>
         public override void OnFrameworkInitializationCompleted()
         {
-            var settingsInteractor = Dependencies.Container.Resolve<SettingsManager>();
-            settingsInteractor.Load();
+            var settingsManager = Dependencies.Container.Resolve<SettingsManager>();
+            settingsManager.Load();
+
+            var programStateManager = Dependencies.Container.Resolve<ProgramStateManager>();
+            programStateManager.Load();
 
             if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {

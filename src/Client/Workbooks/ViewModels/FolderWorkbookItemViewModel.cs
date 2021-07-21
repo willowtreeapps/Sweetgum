@@ -2,11 +2,12 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
-using System.Collections.Generic;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.Folders.Models;
+using WillowTree.Sweetgum.Client.ProgramState.Models;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
 
 namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
@@ -25,15 +26,20 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// </summary>
         /// <param name="folderModel">An instance of <see cref="FolderModel"/>.</param>
         /// <param name="saveCommand">A command to invoke to save the request.</param>
+        /// <param name="workbookState">An instance of <see cref="WorkbookStateModel"/>.</param>
         public FolderWorkbookItemViewModel(
             FolderModel folderModel,
-            ReactiveCommand<SaveCommandParameter, Unit> saveCommand)
+            ReactiveCommand<SaveCommandParameter, Unit> saveCommand,
+            WorkbookStateModel workbookState)
         {
-            this.isExpanded = false;
+            this.isExpanded = workbookState.ExpandCollapseStates
+                .FirstOrDefault(s => s.FolderPath == folderModel.GetPath())?
+                .IsExpanded ?? false;
+
             this.name = folderModel.Name;
             this.Path = folderModel.GetPath();
 
-            this.FolderItems = new WorkbookFolderItemsViewModel(folderModel.Folders, saveCommand);
+            this.FolderItems = new WorkbookFolderItemsViewModel(folderModel.Folders, saveCommand, workbookState);
             this.RequestItems = new WorkbookRequestItemsViewModel(folderModel.Requests, saveCommand);
 
             this.ToggleExpandCollapseCommand = ReactiveCommand.Create(() =>

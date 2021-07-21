@@ -6,6 +6,7 @@ using System.Reflection;
 using Autofac;
 using ReactiveUI;
 using Splat.Autofac;
+using WillowTree.Sweetgum.Client.ProgramState.Services;
 using WillowTree.Sweetgum.Client.RequestBuilder.ViewModels;
 using WillowTree.Sweetgum.Client.Settings.Services;
 using WillowTree.Sweetgum.Client.Settings.ViewModels;
@@ -39,6 +40,7 @@ namespace WillowTree.Sweetgum.Client.DependencyInjection
             builder.RegisterType<WorkbookNewFolderViewModel>().InstancePerDependency();
             builder.RegisterType<WorkbookNewRequestViewModel>().InstancePerDependency();
             builder.RegisterType<SettingsManager>().SingleInstance();
+            builder.RegisterType<ProgramStateManager>().SingleInstance();
             builder.Register<ICustomAttributeProvider>(_ => typeof(Dependencies).Assembly).SingleInstance();
 
             // Creates and sets the Autofac resolver as the Locator
