@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia;
 using Newtonsoft.Json;
 
 namespace WillowTree.Sweetgum.Client.ProgramState.Models
@@ -19,14 +20,24 @@ namespace WillowTree.Sweetgum.Client.ProgramState.Models
         /// Initializes a new instance of the <see cref="ProgramStateModel"/> class.
         /// </summary>
         /// <param name="workbookStates">A list of workbook states.</param>
+        /// <param name="mainWindowPosition">The main window position.</param>
+        /// <param name="mainWindowWidth">The main window width.</param>
+        /// <param name="mainWindowHeight">The main window height.</param>
         [JsonConstructor]
-        public ProgramStateModel(IReadOnlyList<WorkbookStateModel>? workbookStates)
+        public ProgramStateModel(
+            IReadOnlyList<WorkbookStateModel>? workbookStates,
+            PixelPoint mainWindowPosition,
+            double mainWindowWidth,
+            double mainWindowHeight)
         {
             this.WorkbookStates = workbookStates ?? new List<WorkbookStateModel>();
+            this.MainWindowPosition = mainWindowPosition;
+            this.MainWindowWidth = mainWindowWidth;
+            this.MainWindowHeight = mainWindowHeight;
         }
 
         private ProgramStateModel(ProgramStateModel source)
-            : this(source.WorkbookStates)
+            : this(source.WorkbookStates, source.MainWindowPosition, source.MainWindowWidth, source.MainWindowHeight)
         {
         }
 
@@ -34,6 +45,21 @@ namespace WillowTree.Sweetgum.Client.ProgramState.Models
         /// Gets a list of workbook states.
         /// </summary>
         public IReadOnlyList<WorkbookStateModel> WorkbookStates { get; private init; }
+
+        /// <summary>
+        /// Gets the main window position.
+        /// </summary>
+        public PixelPoint MainWindowPosition { get; private init; }
+
+        /// <summary>
+        /// Gets the main window width.
+        /// </summary>
+        public double MainWindowWidth { get; private init; }
+
+        /// <summary>
+        /// Gets the main window height.
+        /// </summary>
+        public double MainWindowHeight { get; private init; }
 
         /// <summary>
         /// Update a workbook state in a program state model.
@@ -48,6 +74,26 @@ namespace WillowTree.Sweetgum.Client.ProgramState.Models
                     .Where(s => s.Path != workbookStateModel.Path)
                     .Append(workbookStateModel)
                     .ToList(),
+            };
+        }
+
+        /// <summary>
+        /// Update the main window details in a program state model.
+        /// </summary>
+        /// <param name="windowPosition">The window position.</param>
+        /// <param name="windowWidth">The window width.</param>
+        /// <param name="windowHeight">The window height.</param>
+        /// <returns>An instance of <see cref="ProgramStateModel"/>.</returns>
+        public ProgramStateModel UpdateMainWindow(
+            PixelPoint windowPosition,
+            double windowWidth,
+            double windowHeight)
+        {
+            return new(this)
+            {
+                MainWindowPosition = windowPosition,
+                MainWindowWidth = windowWidth,
+                MainWindowHeight = windowHeight,
             };
         }
     }

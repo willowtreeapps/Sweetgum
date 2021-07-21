@@ -4,12 +4,16 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Disposables;
+using Autofac;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.BaseControls.Views;
+using WillowTree.Sweetgum.Client.DependencyInjection;
+using WillowTree.Sweetgum.Client.ProgramState.Services;
 using WillowTree.Sweetgum.Client.Settings.Views;
 using WillowTree.Sweetgum.Client.ViewModels;
 using WillowTree.Sweetgum.Client.Workbooks.Views;
@@ -32,6 +36,8 @@ namespace WillowTree.Sweetgum.Client.Views
             },
         };
 
+        private ProgramStateManager programStateManager = null!;
+
         private Button SettingsButton => this.FindControl<Button>(nameof(this.SettingsButton));
 
         private Button NewWorkbookButton => this.FindControl<Button>(nameof(this.NewWorkbookButton));
@@ -47,6 +53,8 @@ namespace WillowTree.Sweetgum.Client.Views
             var window = new MainWindow();
 
             window.InitializeWindow();
+
+            window.programStateManager = Dependencies.Container.Resolve<ProgramStateManager>();
 
             window.WhenActivated(disposables =>
             {
@@ -123,6 +131,17 @@ namespace WillowTree.Sweetgum.Client.Views
             });
 
             return window;
+        }
+
+        /// <inheritdoc cref="BaseWindow{TViewModel}"/>
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+
+            this.programStateManager.Save(this.programStateManager.CurrentState.UpdateMainWindow(
+                this.Position,
+                this.Width,
+                this.Height));
         }
 
         /// <inheritdoc cref="BaseWindow{TViewModel}"/>

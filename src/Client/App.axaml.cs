@@ -2,6 +2,7 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
+using System;
 using Autofac;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -44,6 +45,26 @@ namespace WillowTree.Sweetgum.Client
             if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 desktop.MainWindow = MainWindow.Create();
+
+                var programState = programStateManager.CurrentState;
+                var mainWindowPosition = programState.MainWindowPosition;
+                var mainWindowWidth = programState.MainWindowWidth;
+                var mainWindowHeight = programState.MainWindowHeight;
+
+                if (mainWindowPosition != default)
+                {
+                    desktop.MainWindow.Position = mainWindowPosition;
+                }
+
+                if (mainWindowWidth > 1)
+                {
+                    desktop.MainWindow.Width = mainWindowWidth;
+                }
+
+                if (mainWindowHeight > 1)
+                {
+                    desktop.MainWindow.Height = mainWindowHeight;
+                }
             }
 
             base.OnFrameworkInitializationCompleted();

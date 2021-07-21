@@ -15,7 +15,11 @@ namespace WillowTree.Sweetgum.Client.ProgramState.Services
     /// </summary>
     public sealed class ProgramStateManager
     {
-        private static readonly ProgramStateModel DefaultState = new(new List<WorkbookStateModel>());
+        private static readonly ProgramStateModel DefaultState = new(
+            new List<WorkbookStateModel>(),
+            default,
+            default,
+            default);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ProgramStateManager"/> class.
