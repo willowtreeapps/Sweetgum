@@ -55,15 +55,13 @@ namespace WillowTree.Sweetgum.Client
                     desktop.MainWindow.Position = mainWindowPosition;
                 }
 
-                if (mainWindowWidth > 1)
-                {
-                    desktop.MainWindow.Width = mainWindowWidth;
-                }
+                desktop.MainWindow.Width = mainWindowWidth > 1
+                    ? mainWindowWidth
+                    : 800;
 
-                if (mainWindowHeight > 1)
-                {
-                    desktop.MainWindow.Height = mainWindowHeight;
-                }
+                desktop.MainWindow.Height = mainWindowHeight > 1
+                    ? mainWindowHeight
+                    : 800;
             }
 
             base.OnFrameworkInitializationCompleted();

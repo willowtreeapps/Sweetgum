@@ -3,7 +3,6 @@
 // </copyright>
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -179,7 +178,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// <returns>An instance of <see cref="WorkbookStateModel"/>.</returns>
         public WorkbookStateModel ToWorkbookStateModel(PixelPoint windowPosition, double windowWidth, double windowHeight)
         {
-            IReadOnlyList<ExpandCollapseStateModel> GetExpandCollapseStates(IReadOnlyList<FolderWorkbookItemViewModel> folders)
+            static IReadOnlyList<ExpandCollapseStateModel> GetExpandCollapseStates(IReadOnlyList<FolderWorkbookItemViewModel> folders)
             {
                 var expandCollapseStates = new List<ExpandCollapseStateModel>();
 

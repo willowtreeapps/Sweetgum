@@ -19,6 +19,9 @@ namespace WillowTree.Sweetgum.Client.ProgramState.Services
             new List<WorkbookStateModel>(),
             default,
             default,
+            default,
+            default,
+            default,
             default);
 
         /// <summary>

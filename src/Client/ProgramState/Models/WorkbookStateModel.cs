@@ -44,17 +44,17 @@ namespace WillowTree.Sweetgum.Client.ProgramState.Models
         /// <summary>
         /// Gets the workbook window position.
         /// </summary>
-        public PixelPoint WindowPosition { get; private init; }
+        public PixelPoint WindowPosition { get; }
 
         /// <summary>
         /// Gets the workbook window width.
         /// </summary>
-        public double WindowWidth { get; private init; }
+        public double WindowWidth { get; }
 
         /// <summary>
         /// Gets the workbook window height.
         /// </summary>
-        public double WindowHeight { get; private init; }
+        public double WindowHeight { get; }
 
         /// <summary>
         /// Gets a list of expand/collapse states for the workbook.

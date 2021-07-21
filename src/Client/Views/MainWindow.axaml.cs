@@ -13,7 +13,6 @@ using Avalonia.Markup.Xaml;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.BaseControls.Views;
 using WillowTree.Sweetgum.Client.DependencyInjection;
-using WillowTree.Sweetgum.Client.ProgramState.Models;
 using WillowTree.Sweetgum.Client.ProgramState.Services;
 using WillowTree.Sweetgum.Client.Settings.Views;
 using WillowTree.Sweetgum.Client.ViewModels;
@@ -142,12 +141,27 @@ namespace WillowTree.Sweetgum.Client.Views
                 window.WhenAnyObservable(view => view.ViewModel!.OpenSettingsCommand)
                     .Subscribe(_ =>
                     {
-                        var settingsWindow = new SettingsWindow
-                        {
-                            Width = 800,
-                            Height = 800,
-                        };
+                        var settingsWindow = SettingsWindow.Create();
                         settingsWindow.Show();
+
+                        var programState = window.programStateManager.CurrentState;
+
+                        var windowPosition = programState.SettingsWindowPosition;
+                        var windowWidth = programState.SettingsWindowWidth;
+                        var windowHeight = programState.SettingsWindowHeight;
+
+                        if (windowPosition != default)
+                        {
+                            settingsWindow.Position = windowPosition;
+                        }
+
+                        settingsWindow.Width = windowWidth > 1
+                            ? windowWidth
+                            : 800;
+
+                        settingsWindow.Height = windowHeight > 1
+                            ? windowHeight
+                            : 800;
                     })
                     .DisposeWith(disposables);
             });
