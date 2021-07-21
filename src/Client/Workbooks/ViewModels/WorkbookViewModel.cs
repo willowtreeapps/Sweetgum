@@ -17,6 +17,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
     public sealed class WorkbookViewModel : ReactiveObject
     {
         private readonly ObservableAsPropertyHelper<bool> isRenamingObservableAsPropertyHelper;
+        private readonly ObservableAsPropertyHelper<bool> canSaveObservableAsPropertyHelper;
         private string name;
         private WorkbookItemsViewModel workbookItems;
 
@@ -49,6 +50,9 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                     }
 
                     await WorkbookManager.SaveAsync(workbookModel, cancellationToken);
+
+                    // SaveCommand can null be null at this point, because we are assigning it on the previous statement.
+                    this.WorkbookItems = new WorkbookItemsViewModel(workbookModel.Folders, this.SaveCommand!);
                     return Unit.Default;
                 },
                 isRenamingBehaviorSubject.Select(r => !r));
@@ -83,6 +87,9 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                 return Unit.Default;
             });
 
+            this.canSaveObservableAsPropertyHelper = this.SaveCommand.CanExecute
+                .ToProperty(this, viewModel => viewModel.CanSave);
+
             this.workbookItems = new WorkbookItemsViewModel(workbookModel.Folders, this.SaveCommand);
         }
 
@@ -99,6 +106,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// Gets a value indicating whether or not the workbook is being renamed.
         /// </summary>
         public bool IsRenaming => this.isRenamingObservableAsPropertyHelper.Value;
+
+        /// <summary>
+        /// Gets a value indicating whether or not the workbook can be saved.
+        /// </summary>
+        public bool CanSave => this.canSaveObservableAsPropertyHelper.Value;
 
         /// <summary>
         /// Gets a command to rename the workbook.

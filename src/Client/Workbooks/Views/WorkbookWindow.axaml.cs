@@ -115,18 +115,17 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
                         view => view.NewRequestButton)
                     .DisposeWith(disposables);
 
-                // TODO: Disable the button when saving.
+                window.OneWayBind(
+                        window.ViewModel,
+                        viewModel => viewModel.CanSave,
+                        view => view.SaveButton.IsEnabled)
+                    .DisposeWith(disposables);
+
                 window.SaveButton
                     .Events()
                     .Click
                     .Select(_ => new SaveCommandParameter())
                     .InvokeCommand(window, view => view.ViewModel!.SaveCommand)
-                    .DisposeWith(disposables);
-
-                window.BindCommand(
-                        window.ViewModel!,
-                        viewModel => viewModel.SaveCommand,
-                        view => view.SaveButton)
                     .DisposeWith(disposables);
 
                 window.OneWayBind(

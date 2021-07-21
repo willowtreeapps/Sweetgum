@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text;
@@ -28,11 +29,12 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
     /// <summary>
     /// The main window view model.
     /// </summary>
-    public sealed class RequestBuilderViewModel : ReactiveObject
+    public sealed class RequestBuilderViewModel : ReactiveObject, IActivatableViewModel
     {
         private const string FormUrlEncodedContentType = "application/x-www-form-urlencoded";
 
         private readonly Guid id;
+        private readonly ObservableAsPropertyHelper<bool> canSaveObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<bool> shouldShowResponseDetailsObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<bool> shouldShowRequestDataTextBoxObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<string> responseStatusCodeObservableAsPropertyHelper;
@@ -58,6 +60,8 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
             SettingsManager settingsManager,
             ReactiveCommand<SaveCommandParameter, Unit> saveCommand)
         {
+            this.Activator = new ViewModelActivator();
+
             this.id = requestModel.Id;
             this.name = requestModel.Name;
             this.requestUrl = requestModel.RequestUrl;
@@ -217,7 +221,20 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
                 });
 
             this.SaveCommand = saveCommand;
+
+            this.canSaveObservableAsPropertyHelper = saveCommand.CanExecute
+                .ToProperty(this, viewModel => viewModel.CanSave);
+
+            this.WhenActivated(disposables =>
+            {
+                this.canSaveObservableAsPropertyHelper.DisposeWith(disposables);
+            });
         }
+
+        /// <summary>
+        /// Gets a value indicating whether or not the request can be saved.
+        /// </summary>
+        public bool CanSave => this.canSaveObservableAsPropertyHelper.Value;
 
         /// <summary>
         /// Gets or sets the content type selected.
@@ -328,6 +345,11 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         /// Gets a command that sends the HTTP request.
         /// </summary>
         public ReactiveCommand<Unit, RequestResult> SendRequestCommand { get; }
+
+        /// <summary>
+        /// Gets the view model activator.
+        /// </summary>
+        public ViewModelActivator Activator { get; }
 
         /// <summary>
         /// Constructs an instance of <see cref="RequestModel"/> from the view model.
