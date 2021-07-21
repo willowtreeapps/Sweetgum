@@ -96,5 +96,22 @@ namespace WillowTree.Sweetgum.Client.ProgramState.Models
                 MainWindowHeight = windowHeight,
             };
         }
+
+        /// <summary>
+        /// Gets the state of a workbook by path.
+        /// </summary>
+        /// <param name="path">The path of the workbook.</param>
+        /// <returns>An instance of <see cref="WorkbookStateModel"/>.</returns>
+        public WorkbookStateModel GetWorkbookStateByPath(string path)
+        {
+            return this.WorkbookStates
+                       .FirstOrDefault(s => s.Path == path)
+                   ?? new WorkbookStateModel(
+                       path,
+                       new List<ExpandCollapseStateModel>(),
+                       default,
+                       default,
+                       default);
+        }
     }
 }

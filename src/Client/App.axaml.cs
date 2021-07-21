@@ -2,7 +2,6 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
-using System;
 using Autofac;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;

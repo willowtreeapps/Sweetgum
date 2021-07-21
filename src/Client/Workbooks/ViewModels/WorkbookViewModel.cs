@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Avalonia;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.ProgramState.Models;
 using WillowTree.Sweetgum.Client.ProgramState.Services;
@@ -98,10 +99,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             this.canSaveObservableAsPropertyHelper = this.SaveCommand.CanExecute
                 .ToProperty(this, viewModel => viewModel.CanSave);
 
-            var workbookState = programStateManager.CurrentState
-                                    .WorkbookStates
-                                    .FirstOrDefault(s => s.Path == workbookModel.Path)
-                                ?? new WorkbookStateModel(workbookModel.Path, new List<ExpandCollapseStateModel>());
+            var workbookState = programStateManager.CurrentState.GetWorkbookStateByPath(workbookModel.Path);
 
             this.workbookItems = new WorkbookItemsViewModel(
                 workbookModel.Folders,
@@ -175,8 +173,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// <summary>
         /// Converts a view model to an instance of <see cref="WorkbookStateModel"/>.
         /// </summary>
+        /// <param name="windowPosition">The workbook window position.</param>
+        /// <param name="windowWidth">The workbook window width.</param>
+        /// <param name="windowHeight">The workbook window height.</param>
         /// <returns>An instance of <see cref="WorkbookStateModel"/>.</returns>
-        public WorkbookStateModel ToWorkbookStateModel()
+        public WorkbookStateModel ToWorkbookStateModel(PixelPoint windowPosition, double windowWidth, double windowHeight)
         {
             IReadOnlyList<ExpandCollapseStateModel> GetExpandCollapseStates(IReadOnlyList<FolderWorkbookItemViewModel> folders)
             {
@@ -193,7 +194,10 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             return new WorkbookStateModel(
                 this.path,
-                GetExpandCollapseStates(this.WorkbookItems.FolderItems.Items));
+                GetExpandCollapseStates(this.WorkbookItems.FolderItems.Items),
+                windowPosition,
+                windowWidth,
+                windowHeight);
         }
     }
 }

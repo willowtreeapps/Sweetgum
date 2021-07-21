@@ -2,6 +2,7 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
+using System.ComponentModel;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Autofac;
@@ -21,6 +22,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
     /// </summary>
     public partial class WorkbookWindow : BaseWindow<WorkbookViewModel>
     {
+        private ProgramStateManager programStateManager = null!;
+
         private TextBlock NameTextBlock => this.FindControl<TextBlock>(nameof(this.NameTextBlock));
 
         private TextBox RenameTextBox => this.FindControl<TextBox>(nameof(this.RenameTextBox));
@@ -53,7 +56,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
                     .ExternallyOwned();
             });
 
-            var programStateManager = Dependencies.Container.Resolve<ProgramStateManager>();
+            window.programStateManager = Dependencies.Container.Resolve<ProgramStateManager>();
 
             window.WhenActivated(disposables =>
             {
@@ -161,17 +164,19 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
 
                         context.SetOutput(result);
                     });
-
-                Disposable.Create(() =>
-                    {
-                        var workbookStateModel = window.ViewModel!.ToWorkbookStateModel();
-
-                        programStateManager.Save(programStateManager.CurrentState.UpdateWorkbook(workbookStateModel));
-                    })
-                    .DisposeWith(disposables);
             });
 
             return window;
+        }
+
+        /// <inheritdoc cref="BaseWindow{TViewModel}"/>
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+
+            var workbookStateModel = this.ViewModel!.ToWorkbookStateModel(this.Position, this.Width, this.Height);
+
+            this.programStateManager.Save(this.programStateManager.CurrentState.UpdateWorkbook(workbookStateModel));
         }
 
         /// <inheritdoc cref="BaseWindow{TViewModel}"/>

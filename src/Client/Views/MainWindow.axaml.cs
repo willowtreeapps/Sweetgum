@@ -13,6 +13,7 @@ using Avalonia.Markup.Xaml;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.BaseControls.Views;
 using WillowTree.Sweetgum.Client.DependencyInjection;
+using WillowTree.Sweetgum.Client.ProgramState.Models;
 using WillowTree.Sweetgum.Client.ProgramState.Services;
 using WillowTree.Sweetgum.Client.Settings.Views;
 using WillowTree.Sweetgum.Client.ViewModels;
@@ -113,7 +114,28 @@ namespace WillowTree.Sweetgum.Client.Views
                     .Subscribe(workbookModel =>
                     {
                         var workbookWindow = WorkbookWindow.Create(workbookModel);
+                        var workbookState = window.programStateManager.CurrentState.GetWorkbookStateByPath(workbookModel.Path);
+
                         workbookWindow.Show();
+
+                        var windowPosition = workbookState.WindowPosition;
+                        var windowWidth = workbookState.WindowWidth;
+                        var windowHeight = workbookState.WindowHeight;
+
+                        if (windowPosition != default)
+                        {
+                            workbookWindow.Position = windowPosition;
+                        }
+
+                        if (windowWidth > 1)
+                        {
+                            workbookWindow.Width = windowWidth;
+                        }
+
+                        if (windowHeight > 1)
+                        {
+                            workbookWindow.Height = windowHeight;
+                        }
                     })
                     .DisposeWith(disposables);
 
