@@ -17,6 +17,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
     /// </summary>
     public sealed class WorkbookRequestItemsViewModel : ReactiveObject
     {
+        private readonly ReactiveCommand<SaveCommandParameter, Unit> saveCommand;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="WorkbookRequestItemsViewModel"/> class.
         /// </summary>
@@ -26,6 +28,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             IReadOnlyList<RequestModel> requests,
             ReactiveCommand<SaveCommandParameter, Unit> saveCommand)
         {
+            this.saveCommand = saveCommand;
             this.Items = new AvaloniaList<RequestWorkbookItemViewModel>();
 
             // TODO: We might need a DI scope here, but this should be fine for now.
@@ -38,5 +41,32 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// Gets the request items.
         /// </summary>
         public AvaloniaList<RequestWorkbookItemViewModel> Items { get; }
+
+        /// <summary>
+        /// Update the request items (remove old and add new) as well as looping through requests and updating in-place.
+        /// </summary>
+        /// <param name="requests">A list of updated request models.</param>
+        public void Update(IReadOnlyList<RequestModel> requests)
+        {
+            var existingRequests = this.Items
+                .ToList();
+
+            var removedRequests = existingRequests
+                .Where(existingRequest => requests.All(r => r.Id != existingRequest.Id))
+                .ToList();
+
+            var addedRequests = requests
+                .Where(request => existingRequests.All(r => r.Id != request.Id))
+                .Select(request => new RequestWorkbookItemViewModel(request, this.saveCommand))
+                .ToList();
+
+            this.Items.RemoveAll(removedRequests);
+            this.Items.AddRange(addedRequests);
+
+            foreach (var item in this.Items)
+            {
+                item.Update(requests.First(r => r.Id == item.Id));
+            }
+        }
     }
 }

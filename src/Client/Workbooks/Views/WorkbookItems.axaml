@@ -7,7 +7,7 @@
                     xmlns:reactiveUi="http://reactiveui.net"
                     mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
                     x:Class="WillowTree.Sweetgum.Client.Workbooks.Views.WorkbookItems">
-    <StackPanel Orientation="Vertical" Margin="10">
+    <StackPanel Orientation="Vertical">
         <views1:WorkbookFolderItems x:Name="WorkbookFolderItems" />
     </StackPanel>
 </reactiveUi:ReactiveUserControl>

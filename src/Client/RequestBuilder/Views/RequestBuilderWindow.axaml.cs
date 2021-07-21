@@ -172,7 +172,12 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
                         view => view.SubmitRequestButton)
                     .DisposeWith(disposables);
 
-                // TODO: Disable the button when saving.
+                window.OneWayBind(
+                        window.ViewModel,
+                        viewModel => viewModel.CanSave,
+                        view => view.SaveRequestButton.IsEnabled)
+                    .DisposeWith(disposables);
+
                 window.SaveRequestButton
                     .Events()
                     .Click
@@ -181,12 +186,6 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
                         RequestModelChanges = window.ViewModel!.ToModel(),
                     })
                     .InvokeCommand(window, view => view.ViewModel!.SaveCommand)
-                    .DisposeWith(disposables);
-
-                window.BindCommand(
-                        window.ViewModel!,
-                        viewModel => viewModel.SaveCommand,
-                        view => view.SaveRequestButton)
                     .DisposeWith(disposables);
 
                 window.OneWayBind(

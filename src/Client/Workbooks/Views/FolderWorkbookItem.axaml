@@ -7,9 +7,14 @@
                     xmlns:reactiveUi="http://reactiveui.net"
                     mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
                     x:Class="WillowTree.Sweetgum.Client.Workbooks.Views.FolderWorkbookItem">
-    <StackPanel Orientation="Vertical" Margin="10">
-        <TextBlock x:Name="NameTextBlock" />
-        <views1:WorkbookFolderItems x:Name="WorkbookFolderItems" />
-        <views1:WorkbookRequestItems x:Name="WorkbookRequestItems" />
+    <StackPanel Orientation="Vertical" Margin="10,0,0,0">
+        <StackPanel Orientation="Horizontal">
+            <Button x:Name="ExpandCollapseButton" />
+            <TextBlock x:Name="NameTextBlock" />
+        </StackPanel>
+        <StackPanel x:Name="ChildStackPanel" IsVisible="False">
+            <views1:WorkbookFolderItems x:Name="WorkbookFolderItems" />
+            <views1:WorkbookRequestItems x:Name="WorkbookRequestItems" />
+        </StackPanel>
     </StackPanel>
 </reactiveUi:ReactiveUserControl>

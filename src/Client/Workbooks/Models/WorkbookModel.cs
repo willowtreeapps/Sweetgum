@@ -309,9 +309,33 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
                 throw new Exception("The request you have specified is not in the workbook and can not be updated.");
             }
 
+            IReadOnlyList<FolderModel> ReplaceRequest(IReadOnlyList<FolderModel> folders)
+            {
+                var newFolders = new List<FolderModel>();
+
+                foreach (var folder in folders)
+                {
+                    var newRequests = folder.Requests
+                        .Select(originalRequestModel => requestModel.Id == originalRequestModel.Id
+                            ? requestModel
+                            : originalRequestModel)
+                        .ToList();
+
+                    var newFolder = new FolderModel(folder)
+                    {
+                        Requests = newRequests,
+                        Folders = ReplaceRequest(folder.Folders),
+                    };
+
+                    newFolders.Add(newFolder);
+                }
+
+                return newFolders;
+            }
+
             return new WorkbookModel(this)
             {
-                Folders = this.Folders,
+                Folders = ReplaceRequest(this.Folders),
             };
         }
 
