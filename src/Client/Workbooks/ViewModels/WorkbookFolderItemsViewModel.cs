@@ -20,25 +20,29 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
     {
         private readonly ReactiveCommand<SaveCommandParameter, Unit> saveCommand;
         private readonly WorkbookStateModel workbookState;
+        private readonly WorkbookModel workbookModel;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WorkbookFolderItemsViewModel"/> class.
         /// </summary>
+        /// <param name="workbookModel">The model of the workbook holding the folders.</param>
         /// <param name="folders">A read-only list of <see cref="FolderModel"/>.</param>
         /// <param name="saveCommand">A command to invoke to save the request.</param>
         /// <param name="workbookState">An instance of <see cref="WorkbookStateModel"/>.</param>
         public WorkbookFolderItemsViewModel(
+            WorkbookModel workbookModel,
             IReadOnlyList<FolderModel> folders,
             ReactiveCommand<SaveCommandParameter, Unit> saveCommand,
             WorkbookStateModel workbookState)
         {
+            this.workbookModel = workbookModel;
             this.saveCommand = saveCommand;
             this.workbookState = workbookState;
             this.Items = new AvaloniaList<FolderWorkbookItemViewModel>();
 
             // TODO: We might need a DI scope here, but this should be fine for now.
             this.Items.AddRange(folders
-                .Select(f => new FolderWorkbookItemViewModel(f, saveCommand, workbookState))
+                .Select(f => new FolderWorkbookItemViewModel(workbookModel, f, saveCommand, workbookState))
                 .ToList());
         }
 
@@ -62,7 +66,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             var addedFolders = folders
                 .Where(folder => existingFolders.All(f => f.Path != folder.GetPath()))
-                .Select(folder => new FolderWorkbookItemViewModel(folder, this.saveCommand, this.workbookState))
+                .Select(folder => new FolderWorkbookItemViewModel(this.workbookModel, folder, this.saveCommand, this.workbookState))
                 .ToList();
 
             this.Items.RemoveAll(removedFolders);

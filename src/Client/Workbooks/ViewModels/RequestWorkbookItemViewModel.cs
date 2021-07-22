@@ -20,16 +20,21 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// <summary>
         /// Initializes a new instance of the <see cref="RequestWorkbookItemViewModel"/> class.
         /// </summary>
+        /// <param name="workbookModel">The model of the workbook holding the request.</param>
         /// <param name="requestModel">An instance of <see cref="RequestModel"/>.</param>
         /// <param name="saveCommand">A command to invoke to save the request.</param>
         public RequestWorkbookItemViewModel(
+            WorkbookModel workbookModel,
             RequestModel requestModel,
             ReactiveCommand<SaveCommandParameter, Unit> saveCommand)
         {
             this.Id = requestModel.Id;
             this.name = requestModel.Name;
 
-            this.OpenRequestCommand = ReactiveCommand.Create(() => new OpenRequestResult(requestModel, saveCommand));
+            this.OpenRequestCommand = ReactiveCommand.Create(() => new OpenRequestResult(
+                workbookModel,
+                requestModel,
+                saveCommand));
         }
 
         /// <summary>

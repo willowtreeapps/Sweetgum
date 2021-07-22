@@ -160,6 +160,7 @@ namespace WillowTree.Sweetgum.Client.ProgramState.Models
                    ?? new WorkbookStateModel(
                        path,
                        new List<ExpandCollapseStateModel>(),
+                       new List<RequestStateModel>(),
                        default,
                        default,
                        default);

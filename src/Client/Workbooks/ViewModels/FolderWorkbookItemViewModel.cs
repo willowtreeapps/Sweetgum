@@ -22,10 +22,12 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// <summary>
         /// Initializes a new instance of the <see cref="FolderWorkbookItemViewModel"/> class.
         /// </summary>
+        /// <param name="workbookModel">The model of the workbook holding the folder.</param>
         /// <param name="folderModel">An instance of <see cref="FolderModel"/>.</param>
         /// <param name="saveCommand">A command to invoke to save the request.</param>
         /// <param name="workbookState">An instance of <see cref="WorkbookStateModel"/>.</param>
         public FolderWorkbookItemViewModel(
+            WorkbookModel workbookModel,
             FolderModel folderModel,
             ReactiveCommand<SaveCommandParameter, Unit> saveCommand,
             WorkbookStateModel workbookState)
@@ -37,8 +39,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             this.name = folderModel.Name;
             this.Path = folderModel.GetPath();
 
-            this.FolderItems = new WorkbookFolderItemsViewModel(folderModel.Folders, saveCommand, workbookState);
-            this.RequestItems = new WorkbookRequestItemsViewModel(folderModel.Requests, saveCommand);
+            this.FolderItems = new WorkbookFolderItemsViewModel(workbookModel, folderModel.Folders, saveCommand, workbookState);
+            this.RequestItems = new WorkbookRequestItemsViewModel(workbookModel, folderModel.Requests, saveCommand);
 
             this.ToggleExpandCollapseCommand = ReactiveCommand.Create(() =>
             {
