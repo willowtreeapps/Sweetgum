@@ -22,6 +22,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
     {
         private readonly ObservableAsPropertyHelper<bool> isRenamingObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<bool> canSaveObservableAsPropertyHelper;
+        private readonly ProgramStateManager programStateManager;
         private readonly string path;
         private string name;
         private WorkbookItemsViewModel workbookItems;
@@ -37,6 +38,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         {
             this.name = workbookModel.Name;
             this.path = workbookModel.Path;
+            this.programStateManager = programStateManager;
 
             var isRenamingBehaviorSubject = new BehaviorSubject<bool>(false);
 
@@ -101,6 +103,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             var workbookState = programStateManager.CurrentState.GetWorkbookStateByPath(workbookModel.Path);
 
             this.workbookItems = new WorkbookItemsViewModel(
+                workbookModel,
                 workbookModel.Folders,
                 this.SaveCommand,
                 workbookState);
@@ -170,14 +173,18 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         }
 
         /// <summary>
-        /// Converts a view model to an instance of <see cref="WorkbookStateModel"/>.
+        /// Save the workbook state using the program state manager given the position, width, and height of the window.
         /// </summary>
-        /// <param name="windowPosition">The workbook window position.</param>
-        /// <param name="windowWidth">The workbook window width.</param>
-        /// <param name="windowHeight">The workbook window height.</param>
-        /// <returns>An instance of <see cref="WorkbookStateModel"/>.</returns>
-        public WorkbookStateModel ToWorkbookStateModel(PixelPoint windowPosition, double windowWidth, double windowHeight)
+        /// <param name="windowPosition">The window position.</param>
+        /// <param name="windowWidth">The window width.</param>
+        /// <param name="windowHeight">The window height.</param>
+        public void SaveState(
+            PixelPoint windowPosition,
+            double windowWidth,
+            double windowHeight)
         {
+            var previousWorkbookState = this.programStateManager.CurrentState.GetWorkbookStateByPath(this.path);
+
             static IReadOnlyList<ExpandCollapseStateModel> GetExpandCollapseStates(IReadOnlyList<FolderWorkbookItemViewModel> folders)
             {
                 var expandCollapseStates = new List<ExpandCollapseStateModel>();
@@ -191,12 +198,15 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                 return expandCollapseStates;
             }
 
-            return new WorkbookStateModel(
-                this.path,
-                GetExpandCollapseStates(this.WorkbookItems.FolderItems.Items),
-                windowPosition,
-                windowWidth,
-                windowHeight);
+            var newWorkbookState = new WorkbookStateModel(previousWorkbookState)
+            {
+                ExpandCollapseStates = GetExpandCollapseStates(this.WorkbookItems.FolderItems.Items),
+                WindowPosition = windowPosition,
+                WindowWidth = windowWidth,
+                WindowHeight = windowHeight,
+            };
+
+            this.programStateManager.Save(this.programStateManager.CurrentState.UpdateWorkbook(newWorkbookState));
         }
     }
 }

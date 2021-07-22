@@ -18,22 +18,26 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
     public sealed class WorkbookRequestItemsViewModel : ReactiveObject
     {
         private readonly ReactiveCommand<SaveCommandParameter, Unit> saveCommand;
+        private readonly WorkbookModel workbookModel;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WorkbookRequestItemsViewModel"/> class.
         /// </summary>
+        /// <param name="workbookModel">The workbook model holding the requests.</param>
         /// <param name="requests">A read-only list of <see cref="RequestModel"/>.</param>
         /// <param name="saveCommand">A command to invoke to save the request.</param>
         public WorkbookRequestItemsViewModel(
+            WorkbookModel workbookModel,
             IReadOnlyList<RequestModel> requests,
             ReactiveCommand<SaveCommandParameter, Unit> saveCommand)
         {
+            this.workbookModel = workbookModel;
             this.saveCommand = saveCommand;
             this.Items = new AvaloniaList<RequestWorkbookItemViewModel>();
 
             // TODO: We might need a DI scope here, but this should be fine for now.
             this.Items.AddRange(requests
-                .Select(r => new RequestWorkbookItemViewModel(r, saveCommand))
+                .Select(r => new RequestWorkbookItemViewModel(workbookModel, r, saveCommand))
                 .ToList());
         }
 
@@ -57,7 +61,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             var addedRequests = requests
                 .Where(request => existingRequests.All(r => r.Id != request.Id))
-                .Select(request => new RequestWorkbookItemViewModel(request, this.saveCommand))
+                .Select(request => new RequestWorkbookItemViewModel(this.workbookModel, request, this.saveCommand))
                 .ToList();
 
             this.Items.RemoveAll(removedRequests);

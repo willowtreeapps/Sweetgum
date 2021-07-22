@@ -20,15 +20,17 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// <summary>
         /// Initializes a new instance of the <see cref="WorkbookItemsViewModel"/> class.
         /// </summary>
+        /// <param name="workbookModel">The workbook model holding the items.</param>
         /// <param name="folders">A read-only list of <see cref="FolderModel"/>.</param>
         /// <param name="saveCommand">A command to invoke to save the request.</param>
         /// <param name="workbookStateModel">An instance of <see cref="WorkbookStateModel"/>.</param>
         public WorkbookItemsViewModel(
+            WorkbookModel workbookModel,
             IReadOnlyList<FolderModel> folders,
             ReactiveCommand<SaveCommandParameter, Unit> saveCommand,
             WorkbookStateModel workbookStateModel)
         {
-            this.FolderItems = new WorkbookFolderItemsViewModel(folders, saveCommand, workbookStateModel);
+            this.FolderItems = new WorkbookFolderItemsViewModel(workbookModel, folders, saveCommand, workbookStateModel);
         }
 
         /// <summary>

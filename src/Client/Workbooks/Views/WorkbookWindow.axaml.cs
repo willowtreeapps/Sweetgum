@@ -10,8 +10,6 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.BaseControls.Views;
-using WillowTree.Sweetgum.Client.DependencyInjection;
-using WillowTree.Sweetgum.Client.ProgramState.Services;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
 using WillowTree.Sweetgum.Client.Workbooks.ViewModels;
 
@@ -22,8 +20,6 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
     /// </summary>
     public partial class WorkbookWindow : BaseWindow<WorkbookViewModel>
     {
-        private ProgramStateManager programStateManager = null!;
-
         private TextBlock NameTextBlock => this.FindControl<TextBlock>(nameof(this.NameTextBlock));
 
         private TextBox RenameTextBox => this.FindControl<TextBox>(nameof(this.RenameTextBox));
@@ -55,8 +51,6 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
                     .RegisterInstance(workbookModel)
                     .ExternallyOwned();
             });
-
-            window.programStateManager = Dependencies.Container.Resolve<ProgramStateManager>();
 
             window.WhenActivated(disposables =>
             {
@@ -174,9 +168,10 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
         {
             base.OnClosing(e);
 
-            var workbookStateModel = this.ViewModel!.ToWorkbookStateModel(this.Position, this.Width, this.Height);
-
-            this.programStateManager.Save(this.programStateManager.CurrentState.UpdateWorkbook(workbookStateModel));
+            this.ViewModel!.SaveState(
+                this.Position,
+                this.Width,
+                this.Height);
         }
 
         /// <inheritdoc cref="BaseWindow{TViewModel}"/>

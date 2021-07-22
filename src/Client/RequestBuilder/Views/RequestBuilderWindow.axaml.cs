@@ -2,6 +2,7 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
+using System.ComponentModel;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -55,21 +56,20 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
         /// <summary>
         /// Create an instance of <see cref="RequestBuilderWindow"/>.
         /// </summary>
+        /// <param name="workbookModel">An instance of <see cref="WorkbookModel"/>.</param>
         /// <param name="requestModel">An instance of <see cref="RequestModel"/>.</param>
         /// <param name="saveCommand">A command to save the request model.</param>
         /// <returns>An instance of <see cref="RequestBuilderWindow"/>.</returns>
         public static RequestBuilderWindow Create(
+            WorkbookModel workbookModel,
             RequestModel requestModel,
             ReactiveCommand<SaveCommandParameter, Unit> saveCommand)
         {
-            var window = new RequestBuilderWindow
-            {
-                Width = 800,
-                Height = 800,
-            };
+            var window = new RequestBuilderWindow();
 
             window.InitializeWindow(builder =>
             {
+                builder.RegisterInstance(workbookModel).ExternallyOwned();
                 builder.RegisterInstance(requestModel).ExternallyOwned();
                 builder.RegisterInstance(saveCommand).ExternallyOwned();
             });
@@ -106,16 +106,16 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
                         view => view.RequestHeadersItemsRepeater.Items)
                     .DisposeWith(disposables);
 
-                window.Bind(
-                        window.ViewModel,
-                        viewModel => viewModel.SelectedContentType,
-                        view => view.ContentTypeComboBox.SelectedItem)
-                    .DisposeWith(disposables);
-
                 window.OneWayBind(
                         window.ViewModel,
                         viewModel => viewModel.ContentTypes,
                         view => view.ContentTypeComboBox.Items)
+                    .DisposeWith(disposables);
+
+                window.Bind(
+                        window.ViewModel,
+                        viewModel => viewModel.SelectedContentType,
+                        view => view.ContentTypeComboBox.SelectedItem)
                     .DisposeWith(disposables);
 
                 window.BindCommand(
@@ -196,6 +196,17 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
             });
 
             return window;
+        }
+
+        /// <inheritdoc cref="BaseWindow{TViewModel}"/>
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+
+            this.ViewModel!.SaveState(
+                this.Position,
+                this.Width,
+                this.Height);
         }
 
         /// <inheritdoc cref="BaseWindow{TViewModel}"/>

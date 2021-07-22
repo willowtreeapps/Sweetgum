@@ -15,10 +15,13 @@ using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Media;
 using ExhaustiveMatching;
 using ReactiveUI;
+using WillowTree.Sweetgum.Client.ProgramState.Models;
+using WillowTree.Sweetgum.Client.ProgramState.Services;
 using WillowTree.Sweetgum.Client.Requests.Models;
 using WillowTree.Sweetgum.Client.Settings.Models;
 using WillowTree.Sweetgum.Client.Settings.Services;
@@ -34,6 +37,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         private const string FormUrlEncodedContentType = "application/x-www-form-urlencoded";
 
         private readonly Guid id;
+        private readonly string workbookPath;
         private readonly ObservableAsPropertyHelper<bool> canSaveObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<bool> shouldShowResponseDetailsObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<bool> shouldShowRequestDataTextBoxObservableAsPropertyHelper;
@@ -43,6 +47,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         private readonly ObservableAsPropertyHelper<string> responseHeadersObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<string> responseTimeObservableAsPropertyHelper;
         private readonly SettingsManager settingsManager;
+        private readonly ProgramStateManager programStateManager;
         private string name;
         private ContentTypeViewModel? selectedContentTypeViewModel;
         private HttpMethodViewModel? selectedHttpMethodViewModel;
@@ -52,21 +57,27 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         /// <summary>
         /// Initializes a new instance of the <see cref="RequestBuilderViewModel"/> class.
         /// </summary>
+        /// <param name="workbookModel">An instance of <see cref="WorkbookModel"/>.</param>
         /// <param name="requestModel">An instance of <see cref="RequestModel"/>.</param>
         /// <param name="settingsManager">An instance of <see cref="settingsManager"/>.</param>
+        /// <param name="programStateManager">An instance of <see cref="ProgramStateManager"/>.</param>
         /// <param name="saveCommand">An observer to notify when the request is saved.</param>
         public RequestBuilderViewModel(
+            WorkbookModel workbookModel,
             RequestModel requestModel,
             SettingsManager settingsManager,
+            ProgramStateManager programStateManager,
             ReactiveCommand<SaveCommandParameter, Unit> saveCommand)
         {
             this.Activator = new ViewModelActivator();
 
+            this.workbookPath = workbookModel.Path;
             this.id = requestModel.Id;
             this.name = requestModel.Name;
             this.requestUrl = requestModel.RequestUrl;
             this.requestData = requestModel.RequestData ?? string.Empty;
             this.settingsManager = settingsManager;
+            this.programStateManager = programStateManager;
 
             var httpMethods = new List<HttpMethod>
             {
@@ -365,6 +376,27 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
                 this.RequestHeaders.Select(requestHeader => requestHeader.ToModel()).ToList(),
                 this.SelectedContentType?.ContentType ?? string.Empty,
                 this.RequestData);
+        }
+
+        /// <summary>
+        /// Save the program state of the request given the window position, width, and height.
+        /// </summary>
+        /// <param name="position">The position of the window.</param>
+        /// <param name="width">The width of the window.</param>
+        /// <param name="height">The height of the window.</param>
+        public void SaveState(PixelPoint position, double width, double height)
+        {
+            var workbookState = this.programStateManager.CurrentState.GetWorkbookStateByPath(this.workbookPath);
+
+            var newRequestState = new RequestStateModel(
+                this.id,
+                position,
+                width,
+                height);
+
+            workbookState = workbookState.UpdateRequest(newRequestState);
+
+            this.programStateManager.Save(this.programStateManager.CurrentState.UpdateWorkbook(workbookState));
         }
 
         private static bool IsMethodWithRequestData(HttpMethod httpMethod)
