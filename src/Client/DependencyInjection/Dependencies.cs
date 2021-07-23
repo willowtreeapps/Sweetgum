@@ -6,6 +6,7 @@ using System.Reflection;
 using Autofac;
 using ReactiveUI;
 using Splat.Autofac;
+using WillowTree.Sweetgum.Client.Environments.ViewModels;
 using WillowTree.Sweetgum.Client.ProgramState.Services;
 using WillowTree.Sweetgum.Client.RequestBuilder.ViewModels;
 using WillowTree.Sweetgum.Client.Settings.Services;
@@ -34,6 +35,8 @@ namespace WillowTree.Sweetgum.Client.DependencyInjection
             var builder = new ContainerBuilder();
 
             builder.RegisterType<RequestBuilderViewModel>().InstancePerDependency();
+            builder.RegisterType<EnvironmentsViewModel>().InstancePerDependency();
+            builder.RegisterType<NewEnvironmentViewModel>().InstancePerDependency();
             builder.RegisterType<MainWindowViewModel>().InstancePerDependency();
             builder.RegisterType<SettingsViewModel>().InstancePerDependency();
             builder.RegisterType<WorkbookViewModel>().InstancePerDependency();

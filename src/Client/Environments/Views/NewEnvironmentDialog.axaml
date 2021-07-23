@@ -1,0 +1,20 @@
+<views:BaseWindow x:TypeArguments="viewModels:NewEnvironmentViewModel" xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:viewModels="clr-namespace:WillowTree.Sweetgum.Client.Environments.ViewModels"
+                    xmlns:views="clr-namespace:WillowTree.Sweetgum.Client.BaseControls.Views"
+                    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                    x:Class="WillowTree.Sweetgum.Client.Environments.Views.NewEnvironmentDialog"
+                    Icon="/Assets/avalonia-logo.ico"
+                    Title="Sweetgum"
+                    WindowStartupLocation="CenterOwner">
+    <StackPanel Orientation="Vertical" Margin="10">
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBlock Text="Environment Name" Margin="0,0,5,0" />
+            <TextBox x:Name="NameTextBox" />
+        </StackPanel>
+
+        <Button x:Name="SubmitButton" Content="Create Environment" />
+    </StackPanel>
+</views:BaseWindow>

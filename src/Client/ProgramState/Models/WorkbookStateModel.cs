@@ -21,6 +21,7 @@ namespace WillowTree.Sweetgum.Client.ProgramState.Models
         /// <param name="path">The path to the workbook on the filesystem.</param>
         /// <param name="expandCollapseStates">A list of expand/collapse states for the workbook.</param>
         /// <param name="requestStates">A list of request states for the workbook.</param>
+        /// <param name="environmentsState">The environments state for the workbook.</param>
         /// <param name="windowPosition">The workbook window position.</param>
         /// <param name="windowWidth">The workbook window width.</param>
         /// <param name="windowHeight">The workbook window height.</param>
@@ -29,6 +30,7 @@ namespace WillowTree.Sweetgum.Client.ProgramState.Models
             string? path,
             IReadOnlyList<ExpandCollapseStateModel>? expandCollapseStates,
             IReadOnlyList<RequestStateModel>? requestStates,
+            EnvironmentsStateModel? environmentsState,
             PixelPoint windowPosition,
             double windowWidth,
             double windowHeight)
@@ -36,6 +38,7 @@ namespace WillowTree.Sweetgum.Client.ProgramState.Models
             this.Path = path ?? string.Empty;
             this.ExpandCollapseStates = expandCollapseStates ?? new List<ExpandCollapseStateModel>();
             this.RequestStates = requestStates ?? new List<RequestStateModel>();
+            this.EnvironmentsState = environmentsState ?? new EnvironmentsStateModel(default, default, default);
             this.WindowPosition = windowPosition;
             this.WindowWidth = windowWidth;
             this.WindowHeight = windowHeight;
@@ -46,7 +49,14 @@ namespace WillowTree.Sweetgum.Client.ProgramState.Models
         /// </summary>
         /// <param name="source">An instance of <see cref="WorkbookStateModel"/>.</param>
         public WorkbookStateModel(WorkbookStateModel source)
-            : this(source.Path, source.ExpandCollapseStates, source.RequestStates, source.WindowPosition, source.WindowWidth, source.WindowHeight)
+            : this(
+                source.Path,
+                source.ExpandCollapseStates,
+                source.RequestStates,
+                source.EnvironmentsState,
+                source.WindowPosition,
+                source.WindowWidth,
+                source.WindowHeight)
         {
         }
 
@@ -81,6 +91,11 @@ namespace WillowTree.Sweetgum.Client.ProgramState.Models
         public IReadOnlyList<RequestStateModel> RequestStates { get; init; }
 
         /// <summary>
+        /// Gets the environments state for the workbook.
+        /// </summary>
+        public EnvironmentsStateModel EnvironmentsState { get; init; }
+
+        /// <summary>
         /// Get the request state by request ID.
         /// </summary>
         /// <param name="requestId">The request ID.</param>
@@ -98,12 +113,25 @@ namespace WillowTree.Sweetgum.Client.ProgramState.Models
         /// <returns>An instance of <see cref="WorkbookStateModel"/>.</returns>
         public WorkbookStateModel UpdateRequest(RequestStateModel requestStateModel)
         {
-            return new WorkbookStateModel(this)
+            return new(this)
             {
                 RequestStates = this.RequestStates
                     .Where(s => s.Id != requestStateModel.Id)
                     .Append(requestStateModel)
                     .ToList(),
+            };
+        }
+
+        /// <summary>
+        /// Update the environments state in the workbook state.
+        /// </summary>
+        /// <param name="environmentsStateModel">An instance of <see cref="EnvironmentsStateModel"/>.</param>
+        /// <returns>An instance of <see cref="WorkbookStateModel"/>.</returns>
+        public WorkbookStateModel UpdateEnvironments(EnvironmentsStateModel environmentsStateModel)
+        {
+            return new(this)
+            {
+                EnvironmentsState = environmentsStateModel,
             };
         }
     }
