@@ -1,0 +1,41 @@
+<views:BaseWindow x:TypeArguments="viewModels1:EnvironmentsViewModel" xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:views="clr-namespace:WillowTree.Sweetgum.Client.BaseControls.Views"
+                    xmlns:viewModels1="clr-namespace:WillowTree.Sweetgum.Client.Environments.ViewModels"
+                    xmlns:views1="clr-namespace:WillowTree.Sweetgum.Client.Environments.Views"
+                    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                    x:Class="WillowTree.Sweetgum.Client.Environments.Views.EnvironmentsWindow"
+                    Icon="/Assets/avalonia-logo.ico"
+                    Title="Sweetgum">
+    <StackPanel Orientation="Vertical" Margin="10">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Environment: " VerticalAlignment="Center" />
+            <ComboBox x:Name="ComboBox">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <views1:EnvironmentComboBoxItem />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </StackPanel>
+
+        <StackPanel x:Name="CurrentEnvironmentStackPanel" Orientation="Vertical" IsVisible="False">
+            <ItemsRepeater x:Name="VariablesItemsRepeater">
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate>
+                        <views1:EnvironmentVariableItem />
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+
+            <Button x:Name="AddVariableButton" Content="Add Variable" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal">
+            <Button x:Name="CreateNewEnvironmentButton" Content="Create New Environment" />
+            <Button x:Name="SaveButton" Content="Save Environments" />
+        </StackPanel>
+    </StackPanel>
+</views:BaseWindow>

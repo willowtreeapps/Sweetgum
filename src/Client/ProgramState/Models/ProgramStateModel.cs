@@ -161,6 +161,7 @@ namespace WillowTree.Sweetgum.Client.ProgramState.Models
                        path,
                        new List<ExpandCollapseStateModel>(),
                        new List<RequestStateModel>(),
+                       new EnvironmentsStateModel(default, default, default),
                        default,
                        default,
                        default);

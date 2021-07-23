@@ -28,6 +28,7 @@
             <Button x:Name="NewFolderButton" Content="New Folder" />
             <Button x:Name="NewRequestButton" Content="New Request" />
             <Button x:Name="SaveButton" Content="Save Workbook" />
+            <Button x:Name="ManageEnvironmentsButton">Manage Environments</Button>
         </StackPanel>
     </StackPanel>
 </views:BaseWindow>

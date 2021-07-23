@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net.Http;
 using Newtonsoft.Json;
 using RealGoodApps.Companion.Attributes;
+using WillowTree.Sweetgum.Client.Environments.Models;
 using WillowTree.Sweetgum.Client.Folders.Models;
 using WillowTree.Sweetgum.Client.Requests.Models;
 using WillowTree.Sweetgum.Client.Workbooks.Services;
@@ -26,11 +27,13 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// <param name="name">The workbook's name.</param>
         /// <param name="path">The workbook's path.</param>
         /// <param name="folders">The workbook's folders.</param>
+        /// <param name="environments">The workbook's environments.</param>
         public WorkbookModel(
             string name,
             string path,
-            IReadOnlyList<FolderModel> folders)
-            : this(name, folders)
+            IReadOnlyList<FolderModel> folders,
+            IReadOnlyList<EnvironmentModel> environments)
+            : this(name, folders, environments)
         {
             this.Path = path;
         }
@@ -38,11 +41,13 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         [JsonConstructor]
         private WorkbookModel(
             string? name,
-            IReadOnlyList<FolderModel>? folders)
+            IReadOnlyList<FolderModel>? folders,
+            IReadOnlyList<EnvironmentModel>? environments)
         {
             this.Name = name ?? string.Empty;
             this.Path = string.Empty;
             this.Folders = folders ?? new List<FolderModel>();
+            this.Environments = environments ?? new List<EnvironmentModel>();
         }
 
         private WorkbookModel(WorkbookModel source)
@@ -50,6 +55,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
             this.Name = source.Name;
             this.Path = source.Path;
             this.Folders = source.Folders;
+            this.Environments = source.Environments;
         }
 
         /// <summary>
@@ -67,6 +73,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// Gets the list of folders in the workbook.
         /// </summary>
         public IReadOnlyList<FolderModel> Folders { get; private init; }
+
+        /// <summary>
+        /// Gets the list of environments in the workbook.
+        /// </summary>
+        public IReadOnlyList<EnvironmentModel> Environments { get; private init; }
 
         /// <summary>
         /// Rename a workbook.
@@ -445,6 +456,68 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
             return flatFolders;
         }
 
+        /// <summary>
+        /// Creates a new environment in the workbook with the specified name.
+        /// </summary>
+        /// <param name="newEnvironmentName">The name of the new environment.</param>
+        /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
+        /// <exception cref="Exception">If the environment specified already exists.</exception>
+        public WorkbookModel NewEnvironment(string newEnvironmentName)
+        {
+            if (this.EnvironmentExists(newEnvironmentName))
+            {
+                throw new Exception($"The environment named {newEnvironmentName} already exists.");
+            }
+
+            return new WorkbookModel(this)
+            {
+                Environments = this.Environments
+                    .Append(new EnvironmentModel(newEnvironmentName, new List<EnvironmentVariableModel>()))
+                    .ToList(),
+            };
+        }
+
+        /// <summary>
+        /// Checks if an environment exists by name.
+        /// </summary>
+        /// <param name="environmentName">The name of the environment to check for.</param>
+        /// <returns>A value indicating whether or not the environment exists.</returns>
+        public bool EnvironmentExists(string environmentName)
+        {
+            return this.GetEnvironmentInternal(environmentName) != null;
+        }
+
+        /// <summary>
+        /// Gets an environment by name.
+        /// </summary>
+        /// <param name="environmentName">The name of the environment.</param>
+        /// <returns>An instance of <see cref="EnvironmentModel"/>.</returns>
+        /// <exception cref="Exception">If the environment specified does not exist.</exception>
+        public EnvironmentModel GetEnvironment(string environmentName)
+        {
+            var environment = this.GetEnvironmentInternal(environmentName);
+
+            if (environment == null)
+            {
+                throw new Exception($"The environment named {environmentName} does not exist.");
+            }
+
+            return environment;
+        }
+
+        /// <summary>
+        /// Update the environments in a workbook.
+        /// </summary>
+        /// <param name="environmentModels">The new environments.</param>
+        /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
+        public WorkbookModel UpdateEnvironments(IReadOnlyList<EnvironmentModel> environmentModels)
+        {
+            return new(this)
+            {
+                Environments = environmentModels,
+            };
+        }
+
         private static IReadOnlyList<FolderModel> GetAllFoldersExceptPath(PathModel path, IReadOnlyList<FolderModel> folders)
         {
             return folders
@@ -495,6 +568,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
             }
 
             return currentFolder;
+        }
+
+        private EnvironmentModel? GetEnvironmentInternal(string environmentName)
+        {
+            return this.Environments.FirstOrDefault(e => e.Name == environmentName);
         }
     }
 }

@@ -60,6 +60,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                         workbookModel = workbookModel.UpdateRequest(saveParameter.RequestModelChanges);
                     }
 
+                    if (saveParameter.EnvironmentModelsChanges != null)
+                    {
+                        workbookModel = workbookModel.UpdateEnvironments(saveParameter.EnvironmentModelsChanges);
+                    }
+
                     await WorkbookManager.SaveAsync(workbookModel, cancellationToken);
 
                     this.WorkbookItems.Update(workbookModel);
@@ -96,6 +101,10 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
                 return Unit.Default;
             });
+
+            this.OpenEnvironmentsCommand = ReactiveCommand.Create(() => new OpenEnvironmentsResult(
+                workbookModel,
+                this.SaveCommand));
 
             this.canSaveObservableAsPropertyHelper = this.SaveCommand.CanExecute
                 .ToProperty(this, viewModel => viewModel.CanSave);
@@ -162,6 +171,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// Gets a command to save the workbook.
         /// </summary>
         public ReactiveCommand<SaveCommandParameter, Unit> SaveCommand { get; }
+
+        /// <summary>
+        /// Gets a command to open the environments manager.
+        /// </summary>
+        public ReactiveCommand<Unit, OpenEnvironmentsResult> OpenEnvironmentsCommand { get; }
 
         /// <summary>
         /// Gets or sets the workbook items.

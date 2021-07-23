@@ -2,6 +2,7 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
+using System;
 using System.ComponentModel;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -10,6 +11,9 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.BaseControls.Views;
+using WillowTree.Sweetgum.Client.DependencyInjection;
+using WillowTree.Sweetgum.Client.Environments.Views;
+using WillowTree.Sweetgum.Client.ProgramState.Services;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
 using WillowTree.Sweetgum.Client.Workbooks.ViewModels;
 
@@ -34,6 +38,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
 
         private Button NewRequestButton => this.FindControl<Button>(nameof(this.NewRequestButton));
 
+        private Button ManageEnvironmentsButton => this.FindControl<Button>(nameof(this.ManageEnvironmentsButton));
+
         private WorkbookItems WorkbookItems => this.FindControl<WorkbookItems>(nameof(this.WorkbookItems));
 
         /// <summary>
@@ -51,6 +57,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
                     .RegisterInstance(workbookModel)
                     .ExternallyOwned();
             });
+
+            var programStateManager = Dependencies.Container.Resolve<ProgramStateManager>();
 
             window.WhenActivated(disposables =>
             {
@@ -129,6 +137,12 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
                     .InvokeCommand(window, view => view.ViewModel!.SaveCommand)
                     .DisposeWith(disposables);
 
+                window.BindCommand(
+                        window.ViewModel!,
+                        viewModel => viewModel.OpenEnvironmentsCommand,
+                        view => view.ManageEnvironmentsButton)
+                    .DisposeWith(disposables);
+
                 window.OneWayBind(
                         window.ViewModel,
                         viewModel => viewModel.WorkbookItems,
@@ -158,6 +172,36 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
 
                         context.SetOutput(result);
                     });
+
+                window.WhenAnyObservable(view => view.ViewModel!.OpenEnvironmentsCommand)
+                    .Subscribe(result =>
+                    {
+                        var environmentsWindow = EnvironmentsWindow.Create(
+                            result.WorkbookModel,
+                            result.SaveCommand);
+                        environmentsWindow.Show();
+
+                        var workbookState = programStateManager.CurrentState.GetWorkbookStateByPath(result.WorkbookModel.Path);
+                        var environmentsState = workbookState.EnvironmentsState;
+
+                        var windowPosition = environmentsState.WindowPosition;
+                        var windowWidth = environmentsState.WindowWidth;
+                        var windowHeight = environmentsState.WindowHeight;
+
+                        if (windowPosition != default)
+                        {
+                            environmentsWindow.Position = windowPosition;
+                        }
+
+                        environmentsWindow.Width = windowWidth > 1
+                            ? windowWidth
+                            : 800;
+
+                        environmentsWindow.Height = windowHeight > 1
+                            ? windowHeight
+                            : 800;
+                    })
+                    .DisposeWith(disposables);
             });
 
             return window;

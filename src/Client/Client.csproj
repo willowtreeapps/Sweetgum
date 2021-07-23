@@ -81,5 +81,21 @@
       <DependentUpon>WorkbookNewRequestDialog.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Environments\Views\EnvironmentsWindow.axaml.cs">
+      <DependentUpon>EnvironmentsWindow.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Environments\Views\EnvironmentComboBoxItem.axaml.cs">
+      <DependentUpon>EnvironmentComboBoxItem.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Environments\Views\EnvironmentVariableItem.axaml.cs">
+      <DependentUpon>EnvironmentVariableItem.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Environments\Views\NewEnvironmentDialog.axaml.cs">
+      <DependentUpon>NewEnvironmentDialog.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 </Project>

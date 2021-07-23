@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RealGoodApps.Companion.Attributes;
+using WillowTree.Sweetgum.Client.Environments.Models;
 using WillowTree.Sweetgum.Client.Folders.Models;
 using WillowTree.Sweetgum.Client.ViewModels;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
@@ -32,7 +33,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Services
         {
             var workbookContents = await File.ReadAllTextAsync(path, cancellationToken);
             var workbookModel = JsonConvert.DeserializeObject<WorkbookModel>(workbookContents)?.WithPath(path) ??
-                                new WorkbookModel(string.Empty, path, new List<FolderModel>());
+                                new WorkbookModel(string.Empty, path, new List<FolderModel>(), new List<EnvironmentModel>());
 
             return workbookModel;
         }
@@ -50,7 +51,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Services
             var workbookModel = new WorkbookModel(
                 "Untitled Workbook",
                 path,
-                new List<FolderModel>());
+                new List<FolderModel>(),
+                new List<EnvironmentModel>());
 
             await SaveAsync(workbookModel, cancellationToken);
 
