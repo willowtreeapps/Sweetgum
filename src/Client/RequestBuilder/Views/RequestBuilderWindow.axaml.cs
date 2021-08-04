@@ -7,6 +7,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Autofac;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Markup.Xaml;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.BaseControls.Views;
@@ -51,6 +52,8 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
         private Button SubmitRequestButton => this.FindControl<Button>(nameof(this.SubmitRequestButton));
 
         private Button SaveRequestButton => this.FindControl<Button>(nameof(this.SaveRequestButton));
+
+        private ToggleButton ResponseContentPrettifyButton => this.FindControl<ToggleButton>(nameof(this.ResponseContentPrettifyButton));
 
         /// <summary>
         /// Create an instance of <see cref="RequestBuilderWindow"/>.
@@ -126,7 +129,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
 
                 window.OneWayBind(
                         window.ViewModel,
-                        viewModel => viewModel.ResponseContent,
+                        viewModel => viewModel.DisplayResponseText,
                         view => view.ResponseContentTextBox.Text)
                     .DisposeWith(disposables);
 
@@ -176,6 +179,12 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
                         window.ViewModel,
                         viewModel => viewModel.CanSave,
                         view => view.SaveRequestButton.IsEnabled)
+                    .DisposeWith(disposables);
+
+                window.Bind(
+                        window.ViewModel!,
+                        viewModel => viewModel.IsPrettyJsonEnabled,
+                        view => view.ResponseContentPrettifyButton.IsChecked)
                     .DisposeWith(disposables);
 
                 window.SaveRequestButton

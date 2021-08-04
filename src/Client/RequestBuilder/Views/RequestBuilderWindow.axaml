@@ -72,7 +72,10 @@
                 <TextBox x:Name="ResponseHeadersTextBox" IsReadOnly="True" Height="100" TextWrapping="Wrap" />
             </StackPanel>
             <StackPanel Orientation="Vertical" Margin="0,0,0,10">
-                <TextBlock Text="Response Contents:" Margin="0,0,0,10" />
+                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,0">
+                    <TextBlock Grid.Column="0" Text="Response Contents:" Margin="0,0,0,10" />
+                    <ToggleButton Grid.Column="1" HorizontalAlignment="Right" x:Name="ResponseContentPrettifyButton" Content="Prettify Response JSON" Margin="0,0,0,10"/>
+                </Grid>
                 <TextBox x:Name="ResponseContentTextBox" IsReadOnly="True" Height="100" TextWrapping="Wrap" />
             </StackPanel>
         </StackPanel>
