@@ -19,6 +19,7 @@ using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Media;
 using ExhaustiveMatching;
+using Newtonsoft.Json;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.ProgramState.Models;
 using WillowTree.Sweetgum.Client.ProgramState.Services;
@@ -39,6 +40,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         private readonly Guid id;
         private readonly string workbookPath;
         private readonly ObservableAsPropertyHelper<bool> canSaveObservableAsPropertyHelper;
+        private readonly ObservableAsPropertyHelper<string> displayResponseTextObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<bool> shouldShowResponseDetailsObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<bool> shouldShowRequestDataTextBoxObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<string> responseStatusCodeObservableAsPropertyHelper;
@@ -49,6 +51,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         private readonly SettingsManager settingsManager;
         private readonly ProgramStateManager programStateManager;
         private string name;
+        private bool isPrettyJsonEnabled;
         private ContentTypeViewModel? selectedContentTypeViewModel;
         private HttpMethodViewModel? selectedHttpMethodViewModel;
         private string requestData;
@@ -231,6 +234,22 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
                     // TODO: Show the exception error.
                 });
 
+            this.displayResponseTextObservableAsPropertyHelper = this.WhenAnyValue(
+                    viewModel => viewModel.ResponseContent,
+                    viewModel => viewModel.IsPrettyJsonEnabled)
+                .Select(tuple =>
+                {
+                    var (responseContent, prettyJsonEnabled) = tuple;
+                    if (!prettyJsonEnabled)
+                    {
+                        return responseContent;
+                    }
+
+                    var parsedJson = JsonConvert.DeserializeObject(responseContent ?? string.Empty);
+                    return JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
+                })
+                .ToProperty(this, viewModel => viewModel.DisplayResponseText);
+
             this.SaveCommand = saveCommand;
 
             this.canSaveObservableAsPropertyHelper = saveCommand.CanExecute
@@ -246,6 +265,11 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         /// Gets a value indicating whether or not the request can be saved.
         /// </summary>
         public bool CanSave => this.canSaveObservableAsPropertyHelper.Value;
+
+        /// <summary>
+        /// Gets the display response text.
+        /// </summary>
+        public string DisplayResponseText => this.displayResponseTextObservableAsPropertyHelper.Value;
 
         /// <summary>
         /// Gets or sets the content type selected.
@@ -279,6 +303,15 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         /// Gets the list of valid HTTP methods.
         /// </summary>
         public IList<HttpMethodViewModel> HttpMethods { get; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether or not the response should be prettified.
+        /// </summary>
+        public bool IsPrettyJsonEnabled
+        {
+            get => this.isPrettyJsonEnabled;
+            set => this.RaiseAndSetIfChanged(ref this.isPrettyJsonEnabled, value);
+        }
 
         /// <summary>
         /// Gets or sets the request name.
