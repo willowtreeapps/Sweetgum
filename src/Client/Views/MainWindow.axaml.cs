@@ -5,6 +5,7 @@
 using System;
 using System.ComponentModel;
 using System.Reactive.Disposables;
+using System.Threading.Tasks;
 using Autofac;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
@@ -74,7 +75,7 @@ namespace WillowTree.Sweetgum.Client.Views
                         };
                         var path = await dialog.ShowAsync(window);
 
-                        context.SetOutput(string.IsNullOrWhiteSpace(path) ? string.Empty : path);
+                        context.SetOutput(path);
                     });
 
                 window.BindInteraction(
@@ -89,7 +90,7 @@ namespace WillowTree.Sweetgum.Client.Views
 
                         var path = await dialog.ShowAsync(window);
 
-                        context.SetOutput(string.IsNullOrWhiteSpace(path) ? string.Empty : path);
+                        context.SetOutput(path);
                     });
 
                 window.WhenAnyObservable(
@@ -147,6 +148,19 @@ namespace WillowTree.Sweetgum.Client.Views
                         settingsWindow.Height = windowHeight > 1
                             ? windowHeight
                             : 800;
+                    })
+                    .DisposeWith(disposables);
+
+                window.WhenAnyObservable(
+                        view => view.ViewModel!.NewWorkbookCommand.ThrownExceptions,
+                        view => view.ViewModel!.LoadWorkbookCommand.ThrownExceptions,
+                        view => view.ViewModel!.OpenSettingsCommand.ThrownExceptions)
+                    .Subscribe(async exception =>
+                    {
+                        if (exception is not TaskCanceledException)
+                        {
+                            await new ErrorDialog(exception, window).ShowDialog(window);
+                        }
                     })
                     .DisposeWith(disposables);
             });
