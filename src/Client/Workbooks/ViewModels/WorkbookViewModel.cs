@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -49,6 +50,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             this.programStateManager = programStateManager;
 
             var isRenamingBehaviorSubject = new BehaviorSubject<bool>(false);
+            var deferredCanCreateItemBehaviorSubject = new BehaviorSubject<bool>(false);
 
             this.isRenamingObservableAsPropertyHelper = isRenamingBehaviorSubject
                 .ToProperty(this, viewModel => viewModel.IsRenaming);
@@ -117,18 +119,20 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             this.NewRequestInteraction = new Interaction<WorkbookModel, PathModel?>();
 
-            this.NewRequestCommand = ReactiveCommand.CreateFromTask(async () =>
-            {
-                var newRequestPath = await this.NewRequestInteraction.Handle(workbookModel);
-
-                if (newRequestPath != null)
+            this.NewRequestCommand = ReactiveCommand.CreateFromTask(
+                async () =>
                 {
-                    workbookModel = workbookModel.NewRequest(newRequestPath);
-                    this.WorkbookItems.Update(workbookModel);
-                }
+                    var newRequestPath = await this.NewRequestInteraction.Handle(workbookModel);
 
-                return Unit.Default;
-            });
+                    if (newRequestPath != null)
+                    {
+                        workbookModel = workbookModel.NewRequest(newRequestPath);
+                        this.WorkbookItems.Update(workbookModel);
+                    }
+
+                    return Unit.Default;
+                },
+                deferredCanCreateItemBehaviorSubject);
 
             this.OpenEnvironmentsCommand = ReactiveCommand.Create(() => new OpenEnvironmentsResult(
                 workbookModel,
@@ -161,6 +165,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                 this.SaveCommand,
                 openRequestCommand,
                 workbookState);
+
+            // This has to be constructed by hand rather than intuited from a lambda expression because Expression has different arity than Expression<Func<WorkbookViewModel, int>>
+            Expression watchChain = Expression.Property(Expression.Property(Expression.Property(Expression.Property(Expression.Parameter(typeof(WorkbookViewModel)), "WorkbookItems"), "FolderItems"), "Items"), "Count");
+            this.SubscribeToExpressionChain<WorkbookViewModel, int>(watchChain).Select(countProperty => countProperty.Value > 0).Subscribe(deferredCanCreateItemBehaviorSubject);
+            deferredCanCreateItemBehaviorSubject.OnNext(this.WorkbookItems.FolderItems.Items.Count > 0); // Reinject the current value once load completes.
         }
 
         /// <summary>
