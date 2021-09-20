@@ -121,6 +121,18 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
                 return this;
             }
 
+            var newPath = path.GetParent().AddSegment(newFolderName);
+
+            if (this.RequestExists(newPath))
+            {
+                throw new Exception($"The new path already exists as a request: {newPath}");
+            }
+
+            if (this.FolderExists(newPath))
+            {
+                throw new Exception($"The new path already exists as a folder: {newPath}");
+            }
+
             return new WorkbookModel(this)
             {
                 Folders = GetAllFoldersWithNewOrMovedFolder(
@@ -146,6 +158,36 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
             }
 
             return this.GetFolderInternal(path) != null;
+        }
+
+        /// <summary>
+        /// Checks if a request exists.
+        /// </summary>
+        /// <param name="path">The path of the request.</param>
+        /// <returns>A value indicating whether or not the request exists.</returns>
+        [CompanionType(typeof(WorkbookViewModel))]
+        [CompanionType(typeof(WorkbookNewFolderViewModel))]
+        public bool RequestExists(PathModel path)
+        {
+            if (path.IsRoot())
+            {
+                return false;
+            }
+
+            if (path.Segments.Count < 2)
+            {
+                return false;
+            }
+
+            var folderModel = this.GetFolderInternal(path.GetParent());
+
+            if (folderModel == null)
+            {
+                return false;
+            }
+
+            var requestNameSegment = path.Segments[^1];
+            return folderModel.Requests.Any(r => r.Name == requestNameSegment);
         }
 
         /// <summary>
@@ -197,6 +239,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
                 throw new Exception($"The folder already exists: {path}");
             }
 
+            if (this.RequestExists(path))
+            {
+                throw new Exception($"The path specified can not be used as it already exists as a request: {path}");
+            }
+
             return new WorkbookModel(this)
             {
                 Folders = GetAllFoldersWithNewOrMovedFolder(
@@ -232,6 +279,16 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
             if (parent.IsRoot())
             {
                 throw new Exception("Requests must not live in the root folder.");
+            }
+
+            if (this.RequestExists(path))
+            {
+                throw new Exception($"The path specified already exists as a request: {path}");
+            }
+
+            if (this.FolderExists(path))
+            {
+                throw new Exception($"The path specified already exists as a folder: {path}");
             }
 
             var requestId = Guid.NewGuid();
@@ -400,6 +457,18 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
             if (newParentPath.StartsWith(parentPath))
             {
                 throw new Exception("Unable to move folder into sub-folder of itself.");
+            }
+
+            var newPath = newParentPath.AddSegment(path.Segments[^1]);
+
+            if (this.FolderExists(newPath))
+            {
+                throw new Exception($"A folder already exists at {newPath} and can not be overwritten.");
+            }
+
+            if (this.RequestExists(newPath))
+            {
+                throw new Exception($"A request already exists at {newPath} and can not be overwritten.");
             }
 
             return new WorkbookModel(this)
