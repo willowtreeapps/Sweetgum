@@ -33,20 +33,20 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
             string path,
             IReadOnlyList<FolderModel> folders,
             IReadOnlyList<EnvironmentModel> environments)
-            : this(name, folders, environments)
+            : this(name, environments)
         {
             this.Path = path;
+            this.Folders = folders;
         }
 
         [JsonConstructor]
         private WorkbookModel(
             string? name,
-            IReadOnlyList<FolderModel>? folders,
             IReadOnlyList<EnvironmentModel>? environments)
         {
             this.Name = name ?? string.Empty;
             this.Path = string.Empty;
-            this.Folders = folders ?? new List<FolderModel>();
+            this.Folders = new List<FolderModel>();
             this.Environments = environments ?? new List<EnvironmentModel>();
         }
 
@@ -72,6 +72,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// <summary>
         /// Gets the list of folders in the workbook.
         /// </summary>
+        [JsonIgnore]
         public IReadOnlyList<FolderModel> Folders { get; private init; }
 
         /// <summary>
@@ -149,6 +150,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// <returns>A value indicating whether or not the folder exists.</returns>
         [CompanionType(typeof(WorkbookViewModel))]
         [CompanionType(typeof(WorkbookNewFolderViewModel))]
+        [CompanionType(typeof(WorkbookManager))]
         public bool FolderExists(PathModel path)
         {
             // The root folder is implicit and always exists.
@@ -220,6 +222,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// <param name="path">The full path of the new folder.</param>
         /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
         [CompanionType(typeof(WorkbookViewModel))]
+        [CompanionType(typeof(WorkbookManager))]
         public WorkbookModel NewFolder(PathModel path)
         {
             if (path.IsRoot())
@@ -291,8 +294,6 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
                 throw new Exception($"The path specified already exists as a folder: {path}");
             }
 
-            var requestId = Guid.NewGuid();
-
             IReadOnlyList<FolderModel> AddRequestInternal(IReadOnlyList<FolderModel> folders)
             {
                 var newFolders = new List<FolderModel>();
@@ -313,14 +314,16 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
 
                     newFolders.Add(new FolderModel(folder)
                     {
-                        Requests = folder.Requests.Append(new RequestModel(
-                            requestId,
-                            path.Segments[^1],
-                            HttpMethod.Get,
-                            string.Empty,
-                            new List<RequestHeaderModel>(),
-                            string.Empty,
-                            null)).ToList(),
+                        Requests = folder.Requests
+                            .Append(new RequestModel(
+                                path.Segments[^1],
+                                parent,
+                                HttpMethod.Get,
+                                string.Empty,
+                                new List<RequestHeaderModel>(),
+                                string.Empty,
+                                string.Empty))
+                            .ToList(),
                     });
                 }
 
@@ -334,17 +337,15 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         }
 
         /// <summary>
-        /// Try to get a request in the workbook by ID.
+        /// Try to get a request in the workbook by path.
         /// If the request is obtained successfully, then the request model and path model will be output to the output variables.
         /// </summary>
-        /// <param name="id">The ID of the request.</param>
+        /// <param name="path">The path of the request.</param>
         /// <param name="requestModel">A variable to output the request model.</param>
-        /// <param name="pathModel">A variable to output the path model.</param>
         /// <returns>A value indicating whether or not the request exists.</returns>
         public bool TryGetRequest(
-            Guid id,
-            out RequestModel? requestModel,
-            out PathModel? pathModel)
+            PathModel path,
+            out RequestModel? requestModel)
         {
             var folders = new Stack<FolderModel>();
 
@@ -357,11 +358,9 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
             {
                 var currentFolder = folders.Pop();
 
-                if (currentFolder.Requests.Any(request => request.Id == id))
+                if (currentFolder.Requests.Any(request => request.GetPath() == path))
                 {
-                    // TODO: It seems like the path model should be easier to obtain from the request model.
-                    requestModel = currentFolder.Requests.First(request => request.Id == id);
-                    pathModel = currentFolder.GetPath().AddSegment(requestModel.Name);
+                    requestModel = currentFolder.Requests.First(request => request.GetPath() == path);
                     return true;
                 }
 
@@ -372,20 +371,49 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
             }
 
             requestModel = null;
-            pathModel = null;
             return false;
         }
 
         /// <summary>
         /// Updates a request in the workbook.
         /// </summary>
+        /// <param name="originalPath">The original path of the request to be updated.</param>
         /// <param name="requestModel">An instance of <see cref="RequestModel"/>.</param>
         /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
-        public WorkbookModel UpdateRequest(RequestModel requestModel)
+        public WorkbookModel UpdateRequest(
+            PathModel originalPath,
+            RequestModel requestModel)
         {
-            if (!this.TryGetRequest(requestModel.Id, out _, out _))
+            if (!this.TryGetRequest(originalPath, out _))
             {
                 throw new Exception("The request you have specified is not in the workbook and can not be updated.");
+            }
+
+            var requestPath = requestModel.GetPath();
+            var parentPath = requestPath.GetParent();
+
+            if (parentPath == PathModel.Root)
+            {
+                throw new Exception("The parent path may not be the root.");
+            }
+
+            // Are we trying to move the request? If so, we should probably make sure the parent folder exists and there isn't a path collision.
+            if (originalPath != requestPath)
+            {
+                if (!this.FolderExists(requestPath.GetParent()))
+                {
+                    throw new Exception($"The parent path {parentPath} is not a folder.");
+                }
+
+                if (this.FolderExists(requestPath))
+                {
+                    throw new Exception($"The path {requestPath} is already in use as a folder.");
+                }
+
+                if (this.RequestExists(requestPath))
+                {
+                    throw new Exception($"The path {requestPath} is already in use as a request.");
+                }
             }
 
             IReadOnlyList<FolderModel> ReplaceRequest(IReadOnlyList<FolderModel> folders)
@@ -395,10 +423,13 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
                 foreach (var folder in folders)
                 {
                     var newRequests = folder.Requests
-                        .Select(originalRequestModel => requestModel.Id == originalRequestModel.Id
-                            ? requestModel
-                            : originalRequestModel)
+                        .Where(r => r.GetPath() != originalPath)
                         .ToList();
+
+                    if (folder.GetPath() == parentPath)
+                    {
+                        newRequests.Add(requestModel);
+                    }
 
                     var newFolder = new FolderModel(folder)
                     {
@@ -511,6 +542,20 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
             return new(this)
             {
                 Path = path,
+            };
+        }
+
+        /// <summary>
+        /// Sets the folders of a workbook.
+        /// </summary>
+        /// <param name="folders">The folders of the workbook.</param>
+        /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
+        [CompanionType(typeof(WorkbookManager))]
+        public WorkbookModel WithFolders(IReadOnlyList<FolderModel> folders)
+        {
+            return new(this)
+            {
+                Folders = folders,
             };
         }
 

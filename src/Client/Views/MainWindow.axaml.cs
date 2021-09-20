@@ -3,9 +3,7 @@
 // </copyright>
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Reactive.Disposables;
 using Autofac;
 using Avalonia.Controls;
@@ -25,17 +23,6 @@ namespace WillowTree.Sweetgum.Client.Views
     /// </summary>
     public partial class MainWindow : BaseWindow<MainWindowViewModel>
     {
-        private const string WorkbookFileExtension = "sg";
-
-        private static readonly List<FileDialogFilter> FileDialogFilters = new()
-        {
-            new FileDialogFilter
-            {
-                Name = "Sweetgum Workbook",
-                Extensions = new List<string> { WorkbookFileExtension },
-            },
-        };
-
         private ProgramStateManager programStateManager = null!;
 
         private Button SettingsButton => this.FindControl<Button>(nameof(this.SettingsButton));
@@ -81,10 +68,9 @@ namespace WillowTree.Sweetgum.Client.Views
                     viewModel => viewModel.NewWorkbookSpecifyPathInteraction,
                     async context =>
                     {
-                        var dialog = new SaveFileDialog
+                        var dialog = new OpenFolderDialog
                         {
-                            DefaultExtension = WorkbookFileExtension,
-                            Filters = FileDialogFilters,
+                            Title = "Select a folder for workbook",
                         };
                         var path = await dialog.ShowAsync(window);
 
@@ -96,15 +82,14 @@ namespace WillowTree.Sweetgum.Client.Views
                     viewModel => viewModel.LoadWorkbookSpecifyPathInteraction,
                     async context =>
                     {
-                        var dialog = new OpenFileDialog
+                        var dialog = new OpenFolderDialog
                         {
-                            AllowMultiple = false,
-                            Filters = FileDialogFilters,
+                            Title = "Select a folder for workbook",
                         };
 
                         var path = await dialog.ShowAsync(window);
 
-                        context.SetOutput(path.FirstOrDefault() ?? string.Empty);
+                        context.SetOutput(string.IsNullOrWhiteSpace(path) ? string.Empty : path);
                     });
 
                 window.WhenAnyObservable(

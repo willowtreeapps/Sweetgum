@@ -37,7 +37,6 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
     {
         private const string FormUrlEncodedContentType = "application/x-www-form-urlencoded";
 
-        private readonly Guid id;
         private readonly string workbookPath;
         private readonly ObservableAsPropertyHelper<bool> canSaveObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<string> displayResponseTextObservableAsPropertyHelper;
@@ -75,8 +74,8 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
             this.Activator = new ViewModelActivator();
 
             this.workbookPath = workbookModel.Path;
-            this.id = requestModel.Id;
             this.name = requestModel.Name;
+            this.OriginalPath = requestModel.GetPath();
             this.requestUrl = requestModel.RequestUrl;
             this.requestData = requestModel.RequestData ?? string.Empty;
             this.settingsManager = settingsManager;
@@ -376,6 +375,11 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         public bool ShouldShowResponseDetails => this.shouldShowResponseDetailsObservableAsPropertyHelper.Value;
 
         /// <summary>
+        /// Gets the original path.
+        /// </summary>
+        public PathModel OriginalPath { get; }
+
+        /// <summary>
         /// Gets a command that adds a request header.
         /// </summary>
         public ReactiveCommand<Unit, Unit> AddRequestHeaderCommand { get; }
@@ -402,8 +406,8 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         public RequestModel ToModel()
         {
             return new(
-                this.id,
                 this.Name,
+                this.OriginalPath.GetParent(),
                 this.CalculateCurrentHttpMethod(),
                 this.RequestUrl,
                 this.RequestHeaders.Select(requestHeader => requestHeader.ToModel()).ToList(),
@@ -422,7 +426,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
             var workbookState = this.programStateManager.CurrentState.GetWorkbookStateByPath(this.workbookPath);
 
             var newRequestState = new RequestStateModel(
-                this.id,
+                this.OriginalPath.GetParent().AddSegment(this.Name),
                 position,
                 width,
                 height);

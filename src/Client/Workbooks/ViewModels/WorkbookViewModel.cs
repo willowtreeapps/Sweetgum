@@ -57,7 +57,9 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                 {
                     if (saveParameter.RequestModelChanges != null)
                     {
-                        workbookModel = workbookModel.UpdateRequest(saveParameter.RequestModelChanges);
+                        workbookModel = workbookModel.UpdateRequest(
+                            saveParameter.RequestModelChanges.OriginalPath,
+                            saveParameter.RequestModelChanges.RequestModel);
                     }
 
                     if (saveParameter.EnvironmentModelsChanges != null)

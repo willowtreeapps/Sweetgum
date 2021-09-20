@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using WillowTree.Sweetgum.Client.Environments.Models;
-using WillowTree.Sweetgum.Client.Requests.Models;
 
 namespace WillowTree.Sweetgum.Client.Workbooks.Models
 {
@@ -16,7 +15,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// <summary>
         /// Gets the request model changes.
         /// </summary>
-        public RequestModel? RequestModelChanges { get; init; }
+        public RequestModelChangeSet? RequestModelChanges { get; init; }
 
         /// <summary>
         /// Gets the read only list of environment models changes.

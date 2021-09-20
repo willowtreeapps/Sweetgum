@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
 using RealGoodApps.Companion.Attributes;
 using WillowTree.Sweetgum.Client.Requests.Models;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
@@ -23,7 +22,6 @@ namespace WillowTree.Sweetgum.Client.Folders.Models
         /// <param name="parentPath">The parent path of the folder.</param>
         /// <param name="folders">The folders within the folder.</param>
         /// <param name="requests">The requests within the folder.</param>
-        [JsonConstructor]
         public FolderModel(
             string? name,
             PathModel? parentPath,

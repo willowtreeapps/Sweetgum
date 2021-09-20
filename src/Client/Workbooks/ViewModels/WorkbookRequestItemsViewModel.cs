@@ -57,11 +57,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                 .ToList();
 
             var removedRequests = existingRequests
-                .Where(existingRequest => requests.All(r => r.Id != existingRequest.Id))
+                .Where(existingRequest => requests.All(r => r.GetPath() != existingRequest.OriginalPath))
                 .ToList();
 
             var addedRequests = requests
-                .Where(request => existingRequests.All(r => r.Id != request.Id))
+                .Where(request => existingRequests.All(r => r.OriginalPath != request.GetPath()))
                 .Select(request => new RequestWorkbookItemViewModel(workbookModel, request, this.saveCommand))
                 .ToList();
 
@@ -72,7 +72,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             {
                 item.Update(
                     workbookModel,
-                    requests.First(r => r.Id == item.Id));
+                    requests.First(r => r.GetPath() == item.OriginalPath));
             }
         }
     }

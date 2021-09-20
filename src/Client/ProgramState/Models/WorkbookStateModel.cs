@@ -2,11 +2,11 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
 using Newtonsoft.Json;
+using WillowTree.Sweetgum.Client.Workbooks.Models;
 
 namespace WillowTree.Sweetgum.Client.ProgramState.Models
 {
@@ -98,12 +98,12 @@ namespace WillowTree.Sweetgum.Client.ProgramState.Models
         /// <summary>
         /// Get the request state by request ID.
         /// </summary>
-        /// <param name="requestId">The request ID.</param>
+        /// <param name="path">The request path.</param>
         /// <returns>An instance of <see cref="RequestStateModel"/>.</returns>
-        public RequestStateModel GetRequestStateById(Guid requestId)
+        public RequestStateModel GetRequestStateByPath(PathModel path)
         {
-            return this.RequestStates.FirstOrDefault(s => s.Id == requestId) ??
-                   new RequestStateModel(requestId, default, default, default);
+            return this.RequestStates.FirstOrDefault(s => s.Path == path) ??
+                   new RequestStateModel(path, default, default, default);
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace WillowTree.Sweetgum.Client.ProgramState.Models
             return new(this)
             {
                 RequestStates = this.RequestStates
-                    .Where(s => s.Id != requestStateModel.Id)
+                    .Where(s => s.Path != requestStateModel.Path)
                     .Append(requestStateModel)
                     .ToList(),
             };

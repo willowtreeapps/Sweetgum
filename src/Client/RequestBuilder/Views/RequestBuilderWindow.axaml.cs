@@ -192,7 +192,9 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.Views
                     .Click
                     .Select(_ => new SaveCommandParameter
                     {
-                        RequestModelChanges = window.ViewModel!.ToModel(),
+                        RequestModelChanges = new RequestModelChangeSet(
+                            window.ViewModel!.OriginalPath,
+                            window.ViewModel!.ToModel()),
                     })
                     .InvokeCommand(window, view => view.ViewModel!.SaveCommand)
                     .DisposeWith(disposables);

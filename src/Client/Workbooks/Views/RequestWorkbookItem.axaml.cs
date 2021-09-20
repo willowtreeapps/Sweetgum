@@ -66,7 +66,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
                         window.Show();
 
                         var workbookState = programStateManager.CurrentState.GetWorkbookStateByPath(result.WorkbookModel.Path);
-                        var requestState = workbookState.GetRequestStateById(result.RequestModel.Id);
+                        var requestState = workbookState.GetRequestStateByPath(result.RequestModel.GetPath());
 
                         var windowPosition = requestState.WindowPosition;
                         var windowWidth = requestState.WindowWidth;

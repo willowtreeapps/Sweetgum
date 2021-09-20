@@ -2,9 +2,9 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
-using System;
 using Avalonia;
 using Newtonsoft.Json;
+using WillowTree.Sweetgum.Client.Workbooks.Models;
 
 namespace WillowTree.Sweetgum.Client.ProgramState.Models
 {
@@ -16,27 +16,27 @@ namespace WillowTree.Sweetgum.Client.ProgramState.Models
         /// <summary>
         /// Initializes a new instance of the <see cref="RequestStateModel"/> class.
         /// </summary>
-        /// <param name="id">The ID of the request that the state is referring to within the workbook.</param>
+        /// <param name="path">The path of the request that the state is referring to within the workbook.</param>
         /// <param name="windowPosition">The request builder window position.</param>
         /// <param name="windowWidth">The request builder window width.</param>
         /// <param name="windowHeight">The request builder window height.</param>
         [JsonConstructor]
         public RequestStateModel(
-            Guid id,
+            PathModel path,
             PixelPoint windowPosition,
             double windowWidth,
             double windowHeight)
         {
-            this.Id = id;
+            this.Path = path;
             this.WindowPosition = windowPosition;
             this.WindowWidth = windowWidth;
             this.WindowHeight = windowHeight;
         }
 
         /// <summary>
-        /// Gets the ID of the request that the state is referring to within the workbook.
+        /// Gets the path of the request that the state is referring to within the workbook.
         /// </summary>
-        public Guid Id { get; }
+        public PathModel Path { get; }
 
         /// <summary>
         /// Gets the request builder window position.
