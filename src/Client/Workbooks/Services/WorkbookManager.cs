@@ -154,12 +154,9 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Services
                     Directory.CreateDirectory(folderPath);
                 }
 
-                // TODO: It should be easier to know the path of a request without having to use folder model.
                 foreach (var requestModel in folderModel.Requests)
                 {
-                    var requestPath = Path.Combine(folderModel
-                        .GetPath()
-                        .AddSegment(requestModel.Name)
+                    var requestPath = Path.Combine(requestModel.GetPath()
                         .Segments
                         .Select(Uri.EscapeDataString)
                         .Prepend(foldersPath)
