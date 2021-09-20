@@ -6,7 +6,9 @@
     <RootNamespace>WillowTree.Sweetgum.Client</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <AvaloniaResource Include="Assets\**" />
+    <AvaloniaResource Include="Assets\avalonia-logo.ico" />
+    <AvaloniaResource Include="Assets\Fonts\FontAwesomeFreeRegular.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\FontAwesomeFreeSolid.ttf" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Autofac" Version="[6.2.0]" />

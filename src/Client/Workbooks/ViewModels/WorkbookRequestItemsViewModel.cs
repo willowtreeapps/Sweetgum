@@ -18,7 +18,6 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
     public sealed class WorkbookRequestItemsViewModel : ReactiveObject
     {
         private readonly ReactiveCommand<SaveCommandParameter, Unit> saveCommand;
-        private readonly WorkbookModel workbookModel;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WorkbookRequestItemsViewModel"/> class.
@@ -31,7 +30,6 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             IReadOnlyList<RequestModel> requests,
             ReactiveCommand<SaveCommandParameter, Unit> saveCommand)
         {
-            this.workbookModel = workbookModel;
             this.saveCommand = saveCommand;
             this.Items = new AvaloniaList<RequestWorkbookItemViewModel>();
 
@@ -49,8 +47,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// <summary>
         /// Update the request items (remove old and add new) as well as looping through requests and updating in-place.
         /// </summary>
+        /// <param name="workbookModel">A new workbook model.</param>
         /// <param name="requests">A list of updated request models.</param>
-        public void Update(IReadOnlyList<RequestModel> requests)
+        public void Update(
+            WorkbookModel workbookModel,
+            IReadOnlyList<RequestModel> requests)
         {
             var existingRequests = this.Items
                 .ToList();
@@ -61,7 +62,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             var addedRequests = requests
                 .Where(request => existingRequests.All(r => r.Id != request.Id))
-                .Select(request => new RequestWorkbookItemViewModel(this.workbookModel, request, this.saveCommand))
+                .Select(request => new RequestWorkbookItemViewModel(workbookModel, request, this.saveCommand))
                 .ToList();
 
             this.Items.RemoveAll(removedRequests);
@@ -69,7 +70,9 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             foreach (var item in this.Items)
             {
-                item.Update(requests.First(r => r.Id == item.Id));
+                item.Update(
+                    workbookModel,
+                    requests.First(r => r.Id == item.Id));
             }
         }
     }

@@ -3,5 +3,10 @@
              x:Class="WillowTree.Sweetgum.Client.App">
     <Application.Styles>
         <FluentTheme Mode="Light"/>
+
+        <!-- Clear out the default functionality where the button text moves slightly when clicked -->
+        <Style Selector="Button:pressed, RepeatButton:pressed, ToggleButton:pressed">
+            <Setter Property="RenderTransform" Value="scale(1.0)" />
+        </Style>
     </Application.Styles>
 </Application>

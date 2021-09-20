@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Reactive.Disposables;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Markup.Xaml;
@@ -46,6 +47,13 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
 
                 this.OneWayBind(
                         this.ViewModel,
+                        viewModel => viewModel.Level,
+                        view => view.RowUserControl.Padding,
+                        level => new Thickness(10 + (level * 15), 10, 0, 10))
+                    .DisposeWith(disposables);
+
+                this.OneWayBind(
+                        this.ViewModel,
                         viewModel => viewModel.IsExpanded,
                         view => view.ChildStackPanel.IsVisible)
                     .DisposeWith(disposables);
@@ -63,6 +71,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
                     .DisposeWith(disposables);
             });
         }
+
+        private UserControl RowUserControl => this.FindControl<UserControl>(nameof(this.RowUserControl));
 
         private ToggleButton ExpandCollapseButton => this.FindControl<ToggleButton>(nameof(this.ExpandCollapseButton));
 

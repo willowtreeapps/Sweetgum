@@ -4,6 +4,7 @@
 
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Subjects;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.Folders.Models;
 using WillowTree.Sweetgum.Client.ProgramState.Models;
@@ -16,6 +17,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
     /// </summary>
     public sealed class FolderWorkbookItemViewModel : ReactiveObject
     {
+        private readonly ObservableAsPropertyHelper<int> levelObservableAsPropertyHelper;
+        private readonly BehaviorSubject<int> levelBehaviorSubject;
         private bool isExpanded;
         private string name;
 
@@ -46,6 +49,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             {
                 this.IsExpanded = !this.IsExpanded;
             });
+
+            this.levelBehaviorSubject = new BehaviorSubject<int>(CalculateLevel(folderModel));
+
+            this.levelObservableAsPropertyHelper =
+                this.levelBehaviorSubject.ToProperty(this, viewModel => viewModel.Level);
         }
 
         /// <summary>
@@ -87,13 +95,29 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         public PathModel Path { get; }
 
         /// <summary>
+        /// Gets the level of the folder.
+        /// </summary>
+        public int Level => this.levelObservableAsPropertyHelper.Value;
+
+        /// <summary>
         /// This will let sub-folder know that they may need to update based on a new list of folder models.
         /// </summary>
+        /// <param name="workbookModel">The new workbook model.</param>
         /// <param name="folder">The new folder model.</param>
-        public void Update(FolderModel folder)
+        public void Update(
+            WorkbookModel workbookModel,
+            FolderModel folder)
         {
-            this.FolderItems.Update(folder.Folders);
-            this.RequestItems.Update(folder.Requests);
+            this.FolderItems.Update(
+                workbookModel,
+                folder.Folders);
+            this.RequestItems.Update(workbookModel, folder.Requests);
+            this.levelBehaviorSubject.OnNext(CalculateLevel(folder));
+        }
+
+        private static int CalculateLevel(FolderModel folder)
+        {
+            return folder.GetPath().Segments.Count - 1;
         }
     }
 }

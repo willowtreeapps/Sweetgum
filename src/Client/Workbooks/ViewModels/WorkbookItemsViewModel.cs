@@ -45,7 +45,9 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         [CompanionType(typeof(WorkbookViewModel))]
         public void Update(WorkbookModel workbookModel)
         {
-            this.FolderItems.Update(workbookModel.Folders);
+            this.FolderItems.Update(
+                workbookModel,
+                workbookModel.Folders);
         }
     }
 }

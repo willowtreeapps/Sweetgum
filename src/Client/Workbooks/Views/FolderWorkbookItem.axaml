@@ -5,36 +5,45 @@
                     xmlns:viewModels="clr-namespace:WillowTree.Sweetgum.Client.Workbooks.ViewModels"
                     xmlns:views1="clr-namespace:WillowTree.Sweetgum.Client.Workbooks.Views"
                     xmlns:reactiveUi="http://reactiveui.net"
+                    xmlns:icons="clr-namespace:WillowTree.Sweetgum.Client.Icons"
                     mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
                     x:Class="WillowTree.Sweetgum.Client.Workbooks.Views.FolderWorkbookItem">
     <UserControl.Styles>
-        <Style Selector="ToggleButton#ExpandCollapseButton">
-            <Setter Property="Template">
-                <ControlTemplate>
-                    <Border Background="Transparent"
-                            Width="14"
-                            Height="12"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center">
-                        <Path Fill="Red"
-                              HorizontalAlignment="Center"
-                              VerticalAlignment="Center"
-                              Data="M 0 2 L 4 6 L 0 10 Z"/>
-                    </Border>
-                </ControlTemplate>
-            </Setter>
-        </Style>
         <Style Selector="ToggleButton#ExpandCollapseButton:checked">
             <Setter Property="RenderTransform">
-                <RotateTransform Angle="45"/>
+                <RotateTransform Angle="90"/>
             </Setter>
         </Style>
+        <Style Selector="ToggleButton#ExpandCollapseButton /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ToggleButton#ExpandCollapseButton:checked /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ToggleButton#ExpandCollapseButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#a3ece4" />
+        </Style>
+        <Style Selector="UserControl#RowUserControl">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="UserControl#RowUserControl:pointerover">
+            <Setter Property="Background" Value="#48DACB" />
+        </Style>
     </UserControl.Styles>
-    <StackPanel Orientation="Vertical" Margin="10,0,0,0">
-        <StackPanel Orientation="Horizontal">
-            <ToggleButton x:Name="ExpandCollapseButton" />
-            <TextBlock x:Name="NameTextBlock" />
-        </StackPanel>
+    <StackPanel Orientation="Vertical">
+        <UserControl x:Name="RowUserControl" Cursor="Hand">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <ToggleButton x:Name="ExpandCollapseButton" BorderThickness="0" Padding="0" Background="Transparent" Width="20" Height="20">
+                    <TextBlock Text="{x:Static icons:FontAwesome.ChevronRight}"
+                               Foreground="#223547"
+                               FontWeight="Black"
+                               FontFamily="{x:Static icons:FontAwesome.FontFamilySolid}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
+                </ToggleButton>
+                <TextBlock x:Name="NameTextBlock" Foreground="#223547" />
+            </StackPanel>
+        </UserControl>
         <StackPanel x:Name="ChildStackPanel" IsVisible="False">
             <views1:WorkbookFolderItems x:Name="WorkbookFolderItems" />
             <views1:WorkbookRequestItems x:Name="WorkbookRequestItems" />

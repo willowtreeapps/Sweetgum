@@ -277,11 +277,17 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         }
 
         /// <summary>
-        /// Check if a request exists in the workbook by ID.
+        /// Try to get a request in the workbook by ID.
+        /// If the request is obtained successfully, then the request model and path model will be output to the output variables.
         /// </summary>
         /// <param name="id">The ID of the request.</param>
+        /// <param name="requestModel">A variable to output the request model.</param>
+        /// <param name="pathModel">A variable to output the path model.</param>
         /// <returns>A value indicating whether or not the request exists.</returns>
-        public bool RequestExists(Guid id)
+        public bool TryGetRequest(
+            Guid id,
+            out RequestModel? requestModel,
+            out PathModel? pathModel)
         {
             var folders = new Stack<FolderModel>();
 
@@ -296,6 +302,9 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
 
                 if (currentFolder.Requests.Any(request => request.Id == id))
                 {
+                    // TODO: It seems like the path model should be easier to obtain from the request model.
+                    requestModel = currentFolder.Requests.First(request => request.Id == id);
+                    pathModel = currentFolder.GetPath().AddSegment(requestModel.Name);
                     return true;
                 }
 
@@ -305,6 +314,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
                 }
             }
 
+            requestModel = null;
+            pathModel = null;
             return false;
         }
 
@@ -315,7 +326,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
         public WorkbookModel UpdateRequest(RequestModel requestModel)
         {
-            if (!this.RequestExists(requestModel.Id))
+            if (!this.TryGetRequest(requestModel.Id, out _, out _))
             {
                 throw new Exception("The request you have specified is not in the workbook and can not be updated.");
             }

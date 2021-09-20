@@ -4,6 +4,7 @@
 
 using System;
 using System.Reactive;
+using System.Reactive.Subjects;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.Requests.Models;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
@@ -15,6 +16,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
     /// </summary>
     public sealed class RequestWorkbookItemViewModel : ReactiveObject
     {
+        private readonly ObservableAsPropertyHelper<int> levelObservableAsPropertyHelper;
+        private readonly BehaviorSubject<int> levelBehaviorSubject;
         private string name;
 
         /// <summary>
@@ -35,6 +38,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                 workbookModel,
                 requestModel,
                 saveCommand));
+
+            this.levelBehaviorSubject = new BehaviorSubject<int>(CalculateLevel(workbookModel, requestModel.Id));
+
+            this.levelObservableAsPropertyHelper =
+                this.levelBehaviorSubject.ToProperty(this, viewModel => viewModel.Level);
         }
 
         /// <summary>
@@ -57,12 +65,34 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         public Guid Id { get; }
 
         /// <summary>
-        /// Update a request using a new request model.
+        /// Gets the level of the request, which is the depth in the workbook.
         /// </summary>
+        public int Level => this.levelObservableAsPropertyHelper.Value;
+
+        /// <summary>
+        /// Update a request using a new request model and new workbook model.
+        /// </summary>
+        /// <param name="workbookModel">The new workbook model.</param>
         /// <param name="requestModel">The new request model.</param>
-        public void Update(RequestModel requestModel)
+        public void Update(
+            WorkbookModel workbookModel,
+            RequestModel requestModel)
         {
             this.Name = requestModel.Name;
+            this.levelBehaviorSubject.OnNext(CalculateLevel(workbookModel, requestModel.Id));
+        }
+
+        private static int CalculateLevel(WorkbookModel workbookModel, Guid requestId)
+        {
+            // TODO: This seems like it could be improved, since ideally we could just use the request model to determine the path.
+            workbookModel.TryGetRequest(requestId, out _, out var pathModel);
+
+            if (pathModel == null)
+            {
+                throw new Exception("The request with the ID specified does not exist in the workbook.");
+            }
+
+            return pathModel.Segments.Count - 1;
         }
     }
 }

@@ -3,9 +3,13 @@
 // </copyright>
 
 using System;
+using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using Autofac;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using ReactiveUI;
@@ -35,13 +39,20 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
                 this.OneWayBind(
                         this.ViewModel,
                         viewModel => viewModel.Name,
-                        view => view.NameButton.Content)
+                        view => view.NameTextBlock.Text)
                     .DisposeWith(disposables);
 
-                this.BindCommand(
-                        this.ViewModel!,
-                        viewModel => viewModel.OpenRequestCommand,
-                        view => view.NameButton)
+                this.OneWayBind(
+                        this.ViewModel,
+                        viewModel => viewModel.Level,
+                        view => view.RowUserControl.Padding,
+                        level => new Thickness(10 + (level * 15) + 15, 10, 0, 10))
+                    .DisposeWith(disposables);
+
+                this.Events()
+                    .PointerReleased
+                    .Select(_ => Unit.Default)
+                    .InvokeCommand(this, view => view.ViewModel!.OpenRequestCommand)
                     .DisposeWith(disposables);
 
                 this
@@ -78,7 +89,9 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
             });
         }
 
-        private Button NameButton => this.FindControl<Button>(nameof(this.NameButton));
+        private UserControl RowUserControl => this.FindControl<UserControl>(nameof(this.RowUserControl));
+
+        private TextBlock NameTextBlock => this.FindControl<TextBlock>(nameof(this.NameTextBlock));
 
         private void InitializeComponent()
         {

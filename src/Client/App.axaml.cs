@@ -2,11 +2,14 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
+using System;
 using Autofac;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using WillowTree.Sweetgum.Client.DependencyInjection;
+using WillowTree.Sweetgum.Client.Fonts;
 using WillowTree.Sweetgum.Client.ProgramState.Services;
 using WillowTree.Sweetgum.Client.Settings.Services;
 using WillowTree.Sweetgum.Client.Views;

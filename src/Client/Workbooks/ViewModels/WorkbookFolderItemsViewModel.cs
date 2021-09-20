@@ -20,7 +20,6 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
     {
         private readonly ReactiveCommand<SaveCommandParameter, Unit> saveCommand;
         private readonly WorkbookStateModel workbookState;
-        private readonly WorkbookModel workbookModel;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WorkbookFolderItemsViewModel"/> class.
@@ -35,7 +34,6 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             ReactiveCommand<SaveCommandParameter, Unit> saveCommand,
             WorkbookStateModel workbookState)
         {
-            this.workbookModel = workbookModel;
             this.saveCommand = saveCommand;
             this.workbookState = workbookState;
             this.Items = new AvaloniaList<FolderWorkbookItemViewModel>();
@@ -54,8 +52,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// <summary>
         /// Update the view model by looping the folders and only updated what has changed since the initialization.
         /// </summary>
+        /// <param name="workbookModel">The updated workbook model.</param>
         /// <param name="folders">The updated workbook model's folders.</param>
-        public void Update(IReadOnlyList<FolderModel> folders)
+        public void Update(
+            WorkbookModel workbookModel,
+            IReadOnlyList<FolderModel> folders)
         {
             var existingFolders = this.Items
                 .ToList();
@@ -66,7 +67,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             var addedFolders = folders
                 .Where(folder => existingFolders.All(f => f.Path != folder.GetPath()))
-                .Select(folder => new FolderWorkbookItemViewModel(this.workbookModel, folder, this.saveCommand, this.workbookState))
+                .Select(folder => new FolderWorkbookItemViewModel(workbookModel, folder, this.saveCommand, this.workbookState))
                 .ToList();
 
             this.Items.RemoveAll(removedFolders);
@@ -75,7 +76,9 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             foreach (var item in this.Items)
             {
                 // Update all the subfolders if necessary.
-                item.Update(folders.First(f => f.GetPath() == item.Path));
+                item.Update(
+                    workbookModel,
+                    folders.First(f => f.GetPath() == item.Path));
             }
         }
     }
