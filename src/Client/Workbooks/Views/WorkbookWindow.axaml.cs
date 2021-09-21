@@ -42,6 +42,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
 
         private WorkbookItems WorkbookItems => this.FindControl<WorkbookItems>(nameof(this.WorkbookItems));
 
+        private ScrollViewer ScrollViewer => this.FindControl<ScrollViewer>(nameof(this.ScrollViewer));
+
         /// <summary>
         /// Constructs an instance of <see cref="WorkbookWindow"/>.
         /// </summary>
@@ -200,6 +202,14 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
                         environmentsWindow.Height = windowHeight > 1
                             ? windowHeight
                             : 800;
+                    })
+                    .DisposeWith(disposables);
+
+                window
+                    .WhenAnyValue(view => view.ClientSize)
+                    .Subscribe(newSize =>
+                    {
+                        window.ScrollViewer.Height = newSize.Height - 80;
                     })
                     .DisposeWith(disposables);
             });
