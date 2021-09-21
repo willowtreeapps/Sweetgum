@@ -56,7 +56,6 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Services
 
             foreach (var subdirectory in subdirectories)
             {
-                var requestPath = Path.Combine(subdirectory, "request.json");
                 var isRequest = File.Exists(Path.Combine(subdirectory, "request.json"));
 
                 var relativePath = Path.GetRelativePath(foldersPath, subdirectory);
@@ -71,6 +70,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Services
 
                 if (isRequest)
                 {
+                    var requestPath = Path.Combine(subdirectory, "request.json");
                     var requestJson = await File.ReadAllTextAsync(requestPath, cancellationToken);
                     var requestModel = JsonConvert.DeserializeObject<RequestModel>(requestJson)?
                         .WithNameAndParentPath(pathModel.Segments[^1], pathModel.GetParent());
@@ -89,7 +89,18 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Services
 
                 if (!workbookModel.FolderExists(pathModel))
                 {
-                    workbookModel = workbookModel.NewFolder(pathModel);
+                    var folderPath = Path.Combine(subdirectory, "folder.json");
+
+                    var folderJson = await File.ReadAllTextAsync(folderPath, cancellationToken);
+                    var folderModel = JsonConvert.DeserializeObject<FolderModel>(folderJson);
+
+                    if (folderModel == null)
+                    {
+                        throw new Exception("Unable to load folder model from saved workbook.");
+                    }
+
+                    workbookModel = workbookModel
+                        .NewFolder(pathModel, folderModel.Description);
                 }
             }
 
@@ -153,6 +164,13 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Services
                 {
                     Directory.CreateDirectory(folderPath);
                 }
+
+                var folderJsonPath = Path.Combine(folderPath, "folder.json");
+
+                await File.WriteAllTextAsync(
+                    folderJsonPath,
+                    JsonConvert.SerializeObject(folderModel),
+                    cancellationToken);
 
                 foreach (var requestModel in folderModel.Requests)
                 {

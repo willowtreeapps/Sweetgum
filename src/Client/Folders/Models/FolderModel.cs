@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using RealGoodApps.Companion.Attributes;
 using WillowTree.Sweetgum.Client.Requests.Models;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
@@ -19,19 +20,22 @@ namespace WillowTree.Sweetgum.Client.Folders.Models
         /// Initializes a new instance of the <see cref="FolderModel"/> class.
         /// </summary>
         /// <param name="name">The name of the folder.</param>
+        /// <param name="description">The description of the folder.</param>
         /// <param name="parentPath">The parent path of the folder.</param>
         /// <param name="folders">The folders within the folder.</param>
         /// <param name="requests">The requests within the folder.</param>
         public FolderModel(
-            string? name,
-            PathModel? parentPath,
-            IReadOnlyList<FolderModel>? folders,
-            IReadOnlyList<RequestModel>? requests)
+            string name,
+            string description,
+            PathModel parentPath,
+            IReadOnlyList<FolderModel> folders,
+            IReadOnlyList<RequestModel> requests)
+            : this(description)
         {
-            this.Name = name ?? string.Empty;
-            this.ParentPath = parentPath ?? PathModel.Root;
-            this.Folders = folders ?? new List<FolderModel>();
-            this.Requests = requests ?? new List<RequestModel>();
+            this.Name = name;
+            this.ParentPath = parentPath;
+            this.Folders = folders;
+            this.Requests = requests;
         }
 
         /// <summary>
@@ -40,28 +44,51 @@ namespace WillowTree.Sweetgum.Client.Folders.Models
         /// <param name="source">An instance of <see cref="WorkbookModel"/>.</param>
         [CompanionType(typeof(WorkbookModel))]
         public FolderModel(FolderModel source)
-            : this(source.Name, source.ParentPath, source.Folders, source.Requests)
+            : this(source.Name, source.Description, source.ParentPath, source.Folders, source.Requests)
         {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FolderModel"/> class.
+        /// </summary>
+        /// <param name="description">The description of the folder.</param>
+        [JsonConstructor]
+        public FolderModel(string? description)
+        {
+            this.Name = string.Empty;
+            this.Description = description ?? string.Empty;
+            this.ParentPath = PathModel.Root;
+            this.Folders = new List<FolderModel>();
+            this.Requests = new List<RequestModel>();
         }
 
         /// <summary>
         /// Gets the name of the folder.
         /// </summary>
+        [JsonIgnore]
         public string Name { get; init; }
+
+        /// <summary>
+        /// Gets the description of the folder.
+        /// </summary>
+        public string Description { get; init; }
 
         /// <summary>
         /// Gets the parent path of the folder.
         /// </summary>
+        [JsonIgnore]
         public PathModel ParentPath { get; init; }
 
         /// <summary>
         /// Gets the subfolders within the folder.
         /// </summary>
+        [JsonIgnore]
         public IReadOnlyList<FolderModel> Folders { get; init; }
 
         /// <summary>
         /// Gets the requests within the folder.
         /// </summary>
+        [JsonIgnore]
         public IReadOnlyList<RequestModel> Requests { get; init; }
 
         /// <summary>

@@ -82,7 +82,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
                 if (newFolderPath != null)
                 {
-                    workbookModel = workbookModel.NewFolder(newFolderPath);
+                    workbookModel = workbookModel.NewFolder(newFolderPath, string.Empty);
                     this.WorkbookItems.Update(workbookModel);
                 }
 

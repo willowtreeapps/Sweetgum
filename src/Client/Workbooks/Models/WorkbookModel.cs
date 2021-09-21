@@ -220,10 +220,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
         /// Add a folder to a workbook.
         /// </summary>
         /// <param name="path">The full path of the new folder.</param>
+        /// <param name="description">The description of the new folder.</param>
         /// <returns>An instance of <see cref="WorkbookModel"/>.</returns>
         [CompanionType(typeof(WorkbookViewModel))]
         [CompanionType(typeof(WorkbookManager))]
-        public WorkbookModel NewFolder(PathModel path)
+        public WorkbookModel NewFolder(PathModel path, string description)
         {
             if (path.IsRoot())
             {
@@ -254,6 +255,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Models
                     PathModel.Root,
                     new FolderModel(
                         path.Segments[^1],
+                        description,
                         parentPath,
                         new List<FolderModel>(),
                         new List<RequestModel>())),
