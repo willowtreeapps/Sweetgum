@@ -44,8 +44,10 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         private readonly ObservableAsPropertyHelper<string> responseContentObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<string> responseHeadersObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<string> responseTimeObservableAsPropertyHelper;
+        private readonly ObservableAsPropertyHelper<double> scrollbarHeightObservableAsPropertyHelper;
         private readonly Subject<RequestModel> requestModelSubject;
         private readonly Subject<RequestHeaderViewModel> removeSubject;
+        private readonly BehaviorSubject<double> scrollbarHeightBehaviorSubject;
         private readonly SettingsManager settingsManager;
         private string name;
         private bool isPrettyJsonEnabled;
@@ -71,12 +73,16 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
             this.name = string.Empty;
             this.requestData = string.Empty;
             this.requestUrl = string.Empty;
+            this.scrollbarHeightBehaviorSubject = new BehaviorSubject<double>(0);
 
             this.HttpMethods = InitializeHttpMethods();
             this.RequestHeaders = new AvaloniaList<RequestHeaderViewModel>();
             this.ContentTypes = InitializeContentTypes();
 
             this.removeSubject = new Subject<RequestHeaderViewModel>();
+
+            this.scrollbarHeightObservableAsPropertyHelper = this.scrollbarHeightBehaviorSubject
+                .ToProperty(this, viewModel => viewModel.ScrollbarHeight);
 
             this.originalPathObservableAsPropertyHelper = this.requestModelSubject
                 .Select(newRequestModel => newRequestModel.GetPath())
@@ -326,6 +332,11 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         public string ResponseStatusCode => this.responseStatusCodeObservableAsPropertyHelper.Value;
 
         /// <summary>
+        /// Gets the scrollbar height.
+        /// </summary>
+        public double ScrollbarHeight => this.scrollbarHeightObservableAsPropertyHelper.Value;
+
+        /// <summary>
         /// Gets the HTTP request response status code color.
         /// </summary>
         public SolidColorBrush ResponseStatusCodeColor => this.responseStatusCodeColorObservableAsPropertyHelper.Value;
@@ -405,6 +416,15 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
                 .ToList());
 
             this.SelectedContentType = this.ContentTypes.FirstOrDefault(t => t.ContentType == requestModel.ContentType);
+        }
+
+        /// <summary>
+        /// Updates the scroll bar height.
+        /// </summary>
+        /// <param name="newHeight">The new height of the scroll bar.</param>
+        public void UpdateScrollbarHeight(double newHeight)
+        {
+            this.scrollbarHeightBehaviorSubject.OnNext(newHeight);
         }
 
         private static List<ContentTypeViewModel> InitializeContentTypes()

@@ -14,6 +14,7 @@ using WillowTree.Sweetgum.Client.BaseControls.Views;
 using WillowTree.Sweetgum.Client.DependencyInjection;
 using WillowTree.Sweetgum.Client.Environments.Views;
 using WillowTree.Sweetgum.Client.ProgramState.Services;
+using WillowTree.Sweetgum.Client.RequestBuilder.ViewModels;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
 using WillowTree.Sweetgum.Client.Workbooks.ViewModels;
 
@@ -213,9 +214,17 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
 
                 window
                     .WhenAnyValue(view => view.ClientSize)
-                    .Subscribe(newSize =>
+                    .CombineLatest(window.WhenAnyValue(view => view.TabControl.SelectedItem))
+                    .Subscribe(tuple =>
                     {
-                        //window.ScrollViewer.Height = newSize.Height - 80;
+                        var (newSize, newSelectedItem) = tuple;
+
+                        if (newSelectedItem is not RequestBuilderViewModel selectedRequestBuilderViewModel)
+                        {
+                            return;
+                        }
+
+                        selectedRequestBuilderViewModel.UpdateScrollbarHeight(newSize.Height - 80);
                     })
                     .DisposeWith(disposables);
             });

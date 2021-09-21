@@ -130,6 +130,12 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
                         view => view.SaveRequestButton.IsEnabled)
                     .DisposeWith(disposables);
 
+                this.OneWayBind(
+                        this.ViewModel,
+                        viewModel => viewModel.ScrollbarHeight,
+                        view => view.ScrollViewer.Height)
+                    .DisposeWith(disposables);
+
                 this.Bind(
                         this.ViewModel!,
                         viewModel => viewModel.IsPrettyJsonEnabled,
@@ -187,6 +193,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
         private Button SaveRequestButton => this.FindControl<Button>(nameof(this.SaveRequestButton));
 
         private ToggleButton ResponseContentPrettifyButton => this.FindControl<ToggleButton>(nameof(this.ResponseContentPrettifyButton));
+
+        private ScrollViewer ScrollViewer => this.FindControl<ScrollViewer>(nameof(this.ScrollViewer));
 
         private void InitializeComponent()
         {
