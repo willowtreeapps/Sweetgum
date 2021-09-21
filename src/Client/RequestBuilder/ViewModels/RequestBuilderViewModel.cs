@@ -15,14 +15,11 @@ using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Media;
 using ExhaustiveMatching;
 using Newtonsoft.Json;
 using ReactiveUI;
-using WillowTree.Sweetgum.Client.ProgramState.Models;
-using WillowTree.Sweetgum.Client.ProgramState.Services;
 using WillowTree.Sweetgum.Client.Requests.Models;
 using WillowTree.Sweetgum.Client.Settings.Models;
 using WillowTree.Sweetgum.Client.Settings.Services;
@@ -37,7 +34,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
     {
         private const string FormUrlEncodedContentType = "application/x-www-form-urlencoded";
 
-        private readonly string workbookPath;
+        private readonly ObservableAsPropertyHelper<PathModel> originalPathObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<bool> canSaveObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<string> displayResponseTextObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<bool> shouldShowResponseDetailsObservableAsPropertyHelper;
@@ -47,8 +44,9 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         private readonly ObservableAsPropertyHelper<string> responseContentObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<string> responseHeadersObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<string> responseTimeObservableAsPropertyHelper;
+        private readonly Subject<RequestModel> requestModelSubject;
+        private readonly Subject<RequestHeaderViewModel> removeSubject;
         private readonly SettingsManager settingsManager;
-        private readonly ProgramStateManager programStateManager;
         private string name;
         private bool isPrettyJsonEnabled;
         private ContentTypeViewModel? selectedContentTypeViewModel;
@@ -59,63 +57,37 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         /// <summary>
         /// Initializes a new instance of the <see cref="RequestBuilderViewModel"/> class.
         /// </summary>
-        /// <param name="workbookModel">An instance of <see cref="WorkbookModel"/>.</param>
         /// <param name="requestModel">An instance of <see cref="RequestModel"/>.</param>
         /// <param name="settingsManager">An instance of <see cref="settingsManager"/>.</param>
-        /// <param name="programStateManager">An instance of <see cref="ProgramStateManager"/>.</param>
         /// <param name="saveCommand">An observer to notify when the request is saved.</param>
         public RequestBuilderViewModel(
-            WorkbookModel workbookModel,
             RequestModel requestModel,
             SettingsManager settingsManager,
-            ProgramStateManager programStateManager,
             ReactiveCommand<SaveCommandParameter, Unit> saveCommand)
         {
-            this.Activator = new ViewModelActivator();
-
-            this.workbookPath = workbookModel.Path;
-            this.name = requestModel.Name;
-            this.OriginalPath = requestModel.GetPath();
-            this.requestUrl = requestModel.RequestUrl;
-            this.requestData = requestModel.RequestData ?? string.Empty;
             this.settingsManager = settingsManager;
-            this.programStateManager = programStateManager;
+            this.Activator = new ViewModelActivator();
+            this.requestModelSubject = new Subject<RequestModel>();
+            this.name = string.Empty;
+            this.requestData = string.Empty;
+            this.requestUrl = string.Empty;
 
-            var httpMethods = new List<HttpMethod>
-            {
-                HttpMethod.Get,
-                HttpMethod.Post,
-                HttpMethod.Put,
-                HttpMethod.Patch,
-                HttpMethod.Delete,
-            };
+            this.HttpMethods = InitializeHttpMethods();
+            this.RequestHeaders = new AvaloniaList<RequestHeaderViewModel>();
+            this.ContentTypes = InitializeContentTypes();
+
+            this.removeSubject = new Subject<RequestHeaderViewModel>();
+
+            this.originalPathObservableAsPropertyHelper = this.requestModelSubject
+                .Select(newRequestModel => newRequestModel.GetPath())
+                .ToProperty(this, viewModel => viewModel.OriginalPath);
 
             this.shouldShowRequestDataTextBoxObservableAsPropertyHelper = this
                 .WhenAnyValue(viewModel => viewModel.SelectedHttpMethod)
                 .Select(currentSelectedHttpMethod => currentSelectedHttpMethod != null && IsMethodWithRequestData(currentSelectedHttpMethod.HttpMethod))
                 .ToProperty(this, viewModel => viewModel.ShouldShowRequestDataTextBox);
 
-            this.HttpMethods = httpMethods.Select(httpMethod => new HttpMethodViewModel(httpMethod)).ToList();
-
-            var defaultHttpMethod = this.HttpMethods.FirstOrDefault(m => m.HttpMethod == HttpMethod.Get);
-            this.SelectedHttpMethod = this.HttpMethods.FirstOrDefault(m => requestModel.HttpMethod == m.HttpMethod) ?? defaultHttpMethod;
-
-            this.ContentTypes = new List<ContentTypeViewModel>
-            {
-                new(FormUrlEncodedContentType, "Form URL Encoded"),
-                new("application/json", "JSON"),
-                new("text/plain", "Text"),
-                new("application/javascript", "Javascript"),
-                new("text/html", "HTML"),
-                new("application/xml", "XML"),
-            };
-
-            this.SelectedContentType = this.ContentTypes.FirstOrDefault(t => t.ContentType == requestModel.ContentType);
-            this.RequestHeaders = new AvaloniaList<RequestHeaderViewModel>();
-
-            var removeSubject = new Subject<RequestHeaderViewModel>();
-
-            removeSubject
+            this.removeSubject
                 .Subscribe(requestHeaderViewModel =>
                 {
                     if (!this.RequestHeaders.Contains(requestHeaderViewModel))
@@ -126,15 +98,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
                     this.RequestHeaders.Remove(requestHeaderViewModel);
                 });
 
-            this.RequestHeaders.AddRange(requestModel.RequestHeaders
-                .Select(h => new RequestHeaderViewModel(removeSubject)
-                {
-                    Name = h.Name,
-                    Value = h.Value,
-                })
-                .ToList());
-
-            this.AddRequestHeaderCommand = ReactiveCommand.Create(() => this.RequestHeaders.Add(new RequestHeaderViewModel(removeSubject)));
+            this.AddRequestHeaderCommand = ReactiveCommand.Create(() => this.RequestHeaders.Add(new RequestHeaderViewModel(this.removeSubject)));
 
             // We can only execute the send request command if the request URL is valid.
             var canExecute = this
@@ -258,6 +222,8 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
             {
                 this.canSaveObservableAsPropertyHelper.DisposeWith(disposables);
             });
+
+            this.Update(requestModel);
         }
 
         /// <summary>
@@ -377,7 +343,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         /// <summary>
         /// Gets the original path.
         /// </summary>
-        public PathModel OriginalPath { get; }
+        public PathModel OriginalPath => this.originalPathObservableAsPropertyHelper.Value;
 
         /// <summary>
         /// Gets a command that adds a request header.
@@ -416,24 +382,56 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         }
 
         /// <summary>
-        /// Save the program state of the request given the window position, width, and height.
+        /// Update the view model using an instance of <see cref="RequestModel"/>.
         /// </summary>
-        /// <param name="position">The position of the window.</param>
-        /// <param name="width">The width of the window.</param>
-        /// <param name="height">The height of the window.</param>
-        public void SaveState(PixelPoint position, double width, double height)
+        /// <param name="requestModel">An instance of <see cref="RequestModel"/>.</param>
+        public void Update(RequestModel requestModel)
         {
-            var workbookState = this.programStateManager.CurrentState.GetWorkbookStateByPath(this.workbookPath);
+            this.name = requestModel.Name;
+            this.requestUrl = requestModel.RequestUrl;
+            this.requestData = requestModel.RequestData ?? string.Empty;
+            this.requestModelSubject.OnNext(requestModel);
 
-            var newRequestState = new RequestStateModel(
-                this.OriginalPath.GetParent().AddSegment(this.Name),
-                position,
-                width,
-                height);
+            var defaultHttpMethod = this.HttpMethods.FirstOrDefault(m => m.HttpMethod == HttpMethod.Get);
+            this.SelectedHttpMethod = this.HttpMethods.FirstOrDefault(m => requestModel.HttpMethod == m.HttpMethod) ?? defaultHttpMethod;
 
-            workbookState = workbookState.UpdateRequest(newRequestState);
+            this.RequestHeaders.Clear();
+            this.RequestHeaders.AddRange(requestModel.RequestHeaders
+                .Select(h => new RequestHeaderViewModel(this.removeSubject)
+                {
+                    Name = h.Name,
+                    Value = h.Value,
+                })
+                .ToList());
 
-            this.programStateManager.Save(this.programStateManager.CurrentState.UpdateWorkbook(workbookState));
+            this.SelectedContentType = this.ContentTypes.FirstOrDefault(t => t.ContentType == requestModel.ContentType);
+        }
+
+        private static List<ContentTypeViewModel> InitializeContentTypes()
+        {
+            return new List<ContentTypeViewModel>
+            {
+                new(FormUrlEncodedContentType, "Form URL Encoded"),
+                new("application/json", "JSON"),
+                new("text/plain", "Text"),
+                new("application/javascript", "Javascript"),
+                new("text/html", "HTML"),
+                new("application/xml", "XML"),
+            };
+        }
+
+        private static List<HttpMethodViewModel> InitializeHttpMethods()
+        {
+            var httpMethods = new List<HttpMethod>
+            {
+                HttpMethod.Get,
+                HttpMethod.Post,
+                HttpMethod.Put,
+                HttpMethod.Patch,
+                HttpMethod.Delete,
+            };
+
+            return httpMethods.Select(httpMethod => new HttpMethodViewModel(httpMethod)).ToList();
         }
 
         private static bool IsMethodWithRequestData(HttpMethod httpMethod)

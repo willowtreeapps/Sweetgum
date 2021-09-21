@@ -18,6 +18,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
     {
         private readonly ObservableAsPropertyHelper<int> levelObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<RequestModel> requestModelObservableAsPropertyHelper;
+        private readonly ObservableAsPropertyHelper<PathModel> originalPathObservableAsPropertyHelper;
         private readonly BehaviorSubject<RequestModel> requestModelBehaviorSubject;
         private string name;
 
@@ -31,7 +32,6 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             ReactiveCommand<RequestModel, Unit> openRequestCommand)
         {
             this.name = requestModel.Name;
-            this.OriginalPath = requestModel.GetPath();
 
             this.OpenRequestCommand = openRequestCommand;
 
@@ -44,6 +44,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             this.requestModelObservableAsPropertyHelper =
                 this.requestModelBehaviorSubject.ToProperty(this, viewModel => viewModel.RequestModel);
+
+            this.originalPathObservableAsPropertyHelper =
+                this.requestModelBehaviorSubject
+                    .Select(newRequestModel => newRequestModel.GetPath())
+                    .ToProperty(this, viewModel => viewModel.OriginalPath);
         }
 
         /// <summary>
@@ -58,7 +63,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// <summary>
         /// Gets the original path model for this request.
         /// </summary>
-        public PathModel OriginalPath { get; }
+        public PathModel OriginalPath => this.originalPathObservableAsPropertyHelper.Value;
 
         /// <summary>
         /// Gets the open request command.

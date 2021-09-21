@@ -60,14 +60,32 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                 workbookModel = workbookModel.Rename(this.Name);
             });
 
+            this.RequestBuilderViewModels = new AvaloniaList<RequestBuilderViewModel>();
+
             this.SaveCommand = ReactiveCommand.CreateFromTask<SaveCommandParameter, Unit>(
                 async (saveParameter, cancellationToken) =>
                 {
                     if (saveParameter.RequestModelChanges != null)
                     {
+                        var beforePath = saveParameter.RequestModelChanges.OriginalPath;
+                        var newPath = saveParameter.RequestModelChanges.RequestModel.GetPath();
+
+                        var requestBuilderViewModel =
+                            this.RequestBuilderViewModels.FirstOrDefault(r => r.OriginalPath == beforePath);
+
                         workbookModel = workbookModel.UpdateRequest(
                             saveParameter.RequestModelChanges.OriginalPath,
                             saveParameter.RequestModelChanges.RequestModel);
+
+                        if (requestBuilderViewModel != null)
+                        {
+                            workbookModel.TryGetRequest(newPath, out var updatedRequestModel);
+
+                            if (updatedRequestModel != null)
+                            {
+                                requestBuilderViewModel.Update(updatedRequestModel);
+                            }
+                        }
                     }
 
                     if (saveParameter.EnvironmentModelsChanges != null)
@@ -121,8 +139,6 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             var workbookState = programStateManager.CurrentState.GetWorkbookStateByPath(workbookModel.Path);
 
-            this.RequestBuilderViewModels = new AvaloniaList<RequestBuilderViewModel>();
-
             var openRequestCommand = ReactiveCommand.Create<RequestModel, Unit>((requestModel) =>
             {
                 Console.WriteLine($"I guess I should open {requestModel.GetPath()}!");
@@ -134,10 +150,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                 }
 
                 this.RequestBuilderViewModels.Add(new RequestBuilderViewModel(
-                    workbookModel,
                     requestModel,
                     settingsManager,
-                    programStateManager,
                     this.SaveCommand));
 
                 return Unit.Default;
