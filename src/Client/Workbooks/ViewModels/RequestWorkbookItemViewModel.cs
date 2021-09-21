@@ -19,7 +19,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         private readonly ObservableAsPropertyHelper<int> levelObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<RequestModel> requestModelObservableAsPropertyHelper;
         private readonly ObservableAsPropertyHelper<PathModel> originalPathObservableAsPropertyHelper;
-        private readonly BehaviorSubject<RequestModel> requestModelBehaviorSubject;
+        private readonly Subject<RequestModel> requestModelSubject;
         private string name;
 
         /// <summary>
@@ -31,24 +31,25 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             RequestModel requestModel,
             ReactiveCommand<RequestModel, Unit> openRequestCommand)
         {
-            this.name = requestModel.Name;
+            this.name = string.Empty;
 
-            this.OpenRequestCommand = openRequestCommand;
-
-            this.requestModelBehaviorSubject = new BehaviorSubject<RequestModel>(requestModel);
+            this.requestModelSubject = new Subject<RequestModel>();
 
             this.levelObservableAsPropertyHelper =
-                this.requestModelBehaviorSubject
-                    .Select(CalculateLevel)
+                this.requestModelSubject
+                    .Select(newRequestModel => newRequestModel.GetPath().Segments.Count - 1)
                     .ToProperty(this, viewModel => viewModel.Level);
 
             this.requestModelObservableAsPropertyHelper =
-                this.requestModelBehaviorSubject.ToProperty(this, viewModel => viewModel.RequestModel);
+                this.requestModelSubject.ToProperty(this, viewModel => viewModel.RequestModel);
 
             this.originalPathObservableAsPropertyHelper =
-                this.requestModelBehaviorSubject
+                this.requestModelSubject
                     .Select(newRequestModel => newRequestModel.GetPath())
                     .ToProperty(this, viewModel => viewModel.OriginalPath);
+
+            this.OpenRequestCommand = openRequestCommand;
+            this.Update(requestModel);
         }
 
         /// <summary>
@@ -84,16 +85,10 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// Update a request using a new request model and new workbook model.
         /// </summary>
         /// <param name="requestModel">The new request model.</param>
-        public void Update(
-            RequestModel requestModel)
+        public void Update(RequestModel requestModel)
         {
             this.Name = requestModel.Name;
-            this.requestModelBehaviorSubject.OnNext(requestModel);
-        }
-
-        private static int CalculateLevel(RequestModel requestModel)
-        {
-            return requestModel.GetPath().Segments.Count - 1;
+            this.requestModelSubject.OnNext(requestModel);
         }
     }
 }
