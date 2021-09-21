@@ -63,7 +63,7 @@ namespace WillowTree.Sweetgum.Client.ViewModels
         {
             var path = await this.NewWorkbookSpecifyPathInteraction.Handle(Unit.Default);
 
-            if (path == null)
+            if (string.IsNullOrEmpty(path))
             {
                 // We don't have access to the observable subscription or CTS here since it's eaten by Avalonia.
                 throw new TaskCanceledException();
@@ -78,7 +78,7 @@ namespace WillowTree.Sweetgum.Client.ViewModels
         {
             var path = await this.LoadWorkbookSpecifyPathInteraction.Handle(Unit.Default);
 
-            if (path == null)
+            if (string.IsNullOrEmpty(path))
             {
                 // We don't have access to the observable subscription or CTS here since it's eaten by Avalonia.
                 throw new TaskCanceledException();

@@ -45,7 +45,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
                     .PointerReleased
                     .Select(_ => this.ViewModel?.RequestModel)
                     .Where(requestModel => requestModel != null)
-                    .InvokeCommand(this, view => view.ViewModel!.OpenRequestCommand)
+                    .InvokeCommand(this, view => view.ViewModel!.OpenRequestCommand!)
                     .DisposeWith(disposables);
             });
         }
