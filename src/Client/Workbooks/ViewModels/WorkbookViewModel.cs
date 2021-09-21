@@ -4,14 +4,18 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Avalonia;
+using Avalonia.Collections;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.ProgramState.Models;
 using WillowTree.Sweetgum.Client.ProgramState.Services;
+using WillowTree.Sweetgum.Client.RequestBuilder.ViewModels;
 using WillowTree.Sweetgum.Client.Requests.Models;
+using WillowTree.Sweetgum.Client.Settings.Services;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
 using WillowTree.Sweetgum.Client.Workbooks.Services;
 
@@ -34,9 +38,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// </summary>
         /// <param name="workbookModel">An instance of <see cref="WorkbookModel"/>.</param>
         /// <param name="programStateManager">An instance of <see cref="ProgramStateManager"/>.</param>
+        /// <param name="settingsManager">An instance of <see cref="SettingsManager"/>.</param>
         public WorkbookViewModel(
             WorkbookModel workbookModel,
-            ProgramStateManager programStateManager)
+            ProgramStateManager programStateManager,
+            SettingsManager settingsManager)
         {
             this.name = workbookModel.Name;
             this.path = workbookModel.Path;
@@ -115,9 +121,25 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             var workbookState = programStateManager.CurrentState.GetWorkbookStateByPath(workbookModel.Path);
 
+            this.RequestBuilderViewModels = new AvaloniaList<RequestBuilderViewModel>();
+
             var openRequestCommand = ReactiveCommand.Create<RequestModel, Unit>((requestModel) =>
             {
                 Console.WriteLine($"I guess I should open {requestModel.GetPath()}!");
+
+                if (this.RequestBuilderViewModels.Any(requestBuilderViewModel =>
+                    requestBuilderViewModel.OriginalPath == requestModel.GetPath()))
+                {
+                    return Unit.Default;
+                }
+
+                this.RequestBuilderViewModels.Add(new RequestBuilderViewModel(
+                    workbookModel,
+                    requestModel,
+                    settingsManager,
+                    programStateManager,
+                    this.SaveCommand));
+
                 return Unit.Default;
             });
 
@@ -196,6 +218,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             get => this.workbookItems;
             set => this.RaiseAndSetIfChanged(ref this.workbookItems, value);
         }
+
+        /// <summary>
+        /// Gets the list of request builder view models.
+        /// </summary>
+        public AvaloniaList<RequestBuilderViewModel> RequestBuilderViewModels { get; }
 
         /// <summary>
         /// Save the workbook state using the program state manager given the position, width, and height of the window.

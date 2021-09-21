@@ -42,7 +42,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
 
         private WorkbookItems WorkbookItems => this.FindControl<WorkbookItems>(nameof(this.WorkbookItems));
 
-        private ScrollViewer ScrollViewer => this.FindControl<ScrollViewer>(nameof(this.ScrollViewer));
+        private TabControl TabControl => this.FindControl<TabControl>(nameof(this.TabControl));
 
         /// <summary>
         /// Constructs an instance of <see cref="WorkbookWindow"/>.
@@ -64,6 +64,12 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
 
             window.WhenActivated(disposables =>
             {
+                window.OneWayBind(
+                        window.ViewModel,
+                        viewModel => viewModel.RequestBuilderViewModels,
+                        view => view.TabControl.Items)
+                    .DisposeWith(disposables);
+
                 window.Bind(
                         window.ViewModel,
                         viewModel => viewModel.Name,
@@ -209,7 +215,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
                     .WhenAnyValue(view => view.ClientSize)
                     .Subscribe(newSize =>
                     {
-                        window.ScrollViewer.Height = newSize.Height - 80;
+                        //window.ScrollViewer.Height = newSize.Height - 80;
                     })
                     .DisposeWith(disposables);
             });
