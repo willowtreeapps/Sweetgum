@@ -141,8 +141,6 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             var openRequestCommand = ReactiveCommand.Create<RequestModel, Unit>((requestModel) =>
             {
-                Console.WriteLine($"I guess I should open {requestModel.GetPath()}!");
-
                 if (this.RequestBuilderViewModels.Any(requestBuilderViewModel =>
                     requestBuilderViewModel.OriginalPath == requestModel.GetPath()))
                 {
