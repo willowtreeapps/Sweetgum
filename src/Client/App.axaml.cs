@@ -4,6 +4,7 @@
 
 using Autofac;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using WillowTree.Sweetgum.Client.DependencyInjection;
@@ -35,6 +36,13 @@ namespace WillowTree.Sweetgum.Client
         /// <inheritdoc cref="Application"/>
         public override void OnFrameworkInitializationCompleted()
         {
+            if (Design.IsDesignMode)
+            {
+                // The Visual Studio designer doesn't run our entry point, so DI and services haven't been set up.
+                // Do this now.
+                Dependencies.ConfigureServices();
+            }
+
             var settingsManager = Dependencies.Container.Resolve<SettingsManager>();
             settingsManager.Load();
 

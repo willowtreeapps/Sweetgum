@@ -1,0 +1,22 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="150"
+        x:Class="WillowTree.Sweetgum.Client.Views.ErrorDialog"
+        Title="Sweetgum"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False" CanResize="false"
+        >
+  <Grid Margin="16">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="1*"/>
+      <RowDefinition Height="30"/>
+    </Grid.RowDefinitions>
+    <Border Background="{DynamicResource ThemeBackgroundBrush}" Grid.Row="0" Grid.Column="0">
+      <TextBlock HorizontalAlignment="Center" TextAlignment="Left" Name="txtMessage" Text="Sorry, an error occurred." />
+    </Border>
+    <Border Background="{DynamicResource ThemeControlMidBrush}" Grid.Row="1" Grid.Column="0">
+      <Button HorizontalAlignment="Center" HorizontalContentAlignment="Center" MinWidth="100" Name="btnOk" Content="Ok" />
+    </Border>
+  </Grid>
+</Window>
