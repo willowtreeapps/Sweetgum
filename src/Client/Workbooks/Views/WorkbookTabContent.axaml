@@ -1,0 +1,83 @@
+<reactiveUi:ReactiveUserControl x:TypeArguments="viewModels1:RequestBuilderViewModel" xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:reactiveUi="http://reactiveui.net"
+                    xmlns:viewModels1="clr-namespace:WillowTree.Sweetgum.Client.RequestBuilder.ViewModels"
+                    xmlns:views="clr-namespace:WillowTree.Sweetgum.Client.RequestBuilder.Views"
+                    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                    x:Class="WillowTree.Sweetgum.Client.Workbooks.Views.WorkbookTabContent">
+    <ScrollViewer x:Name="ScrollViewer" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
+        <StackPanel Orientation="Vertical" Margin="10">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <Button x:Name="SaveRequestButton" Content="Save Changes" />
+            </StackPanel>
+
+            <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,10">
+                <TextBlock Grid.Column="0" Text="Name:" Margin="0,0,10,0" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" x:Name="NameTextBox" />
+            </Grid>
+
+            <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,10">
+                <ComboBox Grid.Column="0" x:Name="HttpMethodComboBox">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <views:HttpMethodItem />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBox Grid.Column="1" x:Name="RequestUrlTextBox" Margin="10,0" />
+                <Button Grid.Column="2" x:Name="SubmitRequestButton" Content="Send Request" />
+            </Grid>
+            <StackPanel x:Name="RequestHeadersStackPanel" Orientation="Vertical" Margin="0,0,0,10">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="Request Headers:" Margin="0,0,0,10" />
+                    <ItemsRepeater x:Name="RequestHeadersItemsRepeater">
+                        <ItemsRepeater.ItemTemplate>
+                            <DataTemplate>
+                                <views:RequestHeaderItem />
+                            </DataTemplate>
+                        </ItemsRepeater.ItemTemplate>
+                    </ItemsRepeater>
+                    <Button x:Name="AddRequestHeaderButton" Content="Add Request Header" />
+                </StackPanel>
+            </StackPanel>
+            <StackPanel x:Name="RequestDataStackPanel" Orientation="Vertical" Margin="0,0,0,10">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Content Type:" VerticalAlignment="Center" Margin="0,0,5,0" />
+                    <ComboBox x:Name="ContentTypeComboBox">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <views:ContentTypeItem />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="Request Data:" Margin="0,0,0,10" />
+                    <TextBox x:Name="RequestDataTextBox" Height="100" AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+            <StackPanel x:Name="ResponseDetailsStackPanel" Orientation="Vertical">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                    <TextBlock Text="Response Code:" Margin="0,0,5,0" />
+                    <TextBlock x:Name="ResponseStatusCodeTextBlock" FontWeight="Bold" Margin="0,0,10,0" />
+
+                    <TextBlock Text="Response Time:" Margin="0,0,5,0" />
+                    <TextBlock x:Name="ResponseTimeTextBlock" FontWeight="Bold" />
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Margin="0,0,0,10">
+                    <TextBlock Text="Response Headers:" Margin="0,0,0,10" />
+                    <TextBox x:Name="ResponseHeadersTextBox" IsReadOnly="True" Height="100" TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Margin="0,0,0,10">
+                    <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,0">
+                        <TextBlock Grid.Column="0" Text="Response Contents:" Margin="0,0,0,10" />
+                        <ToggleButton Grid.Column="1" HorizontalAlignment="Right" x:Name="ResponseContentPrettifyButton" Content="Prettify Response JSON" Margin="0,0,0,10"/>
+                    </Grid>
+                    <TextBox x:Name="ResponseContentTextBox" IsReadOnly="True" Height="100" TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</reactiveUi:ReactiveUserControl>

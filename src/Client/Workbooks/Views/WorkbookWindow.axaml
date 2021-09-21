@@ -33,72 +33,17 @@
             </WrapPanel>
         </StackPanel>
         <StackPanel Grid.Column="1" Orientation="Vertical" Margin="10">
-            <TabControl>
-                <TabItem Header="Circle" VerticalContentAlignment="Center">
-                    <ScrollViewer x:Name="ScrollViewer" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Hidden">
-                        <StackPanel Orientation="Vertical" Spacing="10">
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                            <TextBlock Text="I am in the circle page!" />
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
-                <TabItem>
-                    <TabItem.Header>
-                        <TextBlock VerticalAlignment="Center">Triangle</TextBlock>
-                    </TabItem.Header>
-                    <StackPanel>
-                        <TextBlock Text="I am in the triangle page ! I'll put a button to show you that each page contains what you want." HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                        <Button>A button in the triangle page !</Button>
-                    </StackPanel>
-                </TabItem>
-                <TabItem>
-                    <TabItem.Header>
-                        <TextBlock VerticalAlignment="Center">Square</TextBlock>
-                    </TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Square : " HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                        <Rectangle Fill="Blue" Width="63" Height="41"/>
-                    </StackPanel>
-                </TabItem>
+            <TabControl x:Name="TabControl">
+                <TabControl.ItemTemplate>
+                    <DataTemplate>
+                        <views1:WorkbookTab />
+                    </DataTemplate>
+                </TabControl.ItemTemplate>
+                <TabControl.ContentTemplate>
+                    <DataTemplate>
+                        <views1:WorkbookTabContent />
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
             </TabControl>
         </StackPanel>
     </Grid>

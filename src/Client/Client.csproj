@@ -23,10 +23,6 @@
     <PackageReference Include="Splat.Autofac" Version="[11.1.1]" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="RequestBuilder\Views\RequestBuilderWindow.axaml.cs">
-      <DependentUpon>RequestBuilderWindow.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Update="RequestBuilder\Views\HttpMethodItem.axaml.cs">
       <DependentUpon>HttpMethodItem.axaml</DependentUpon>
       <SubType>Code</SubType>
@@ -97,6 +93,14 @@
     </Compile>
     <Compile Update="Environments\Views\NewEnvironmentDialog.axaml.cs">
       <DependentUpon>NewEnvironmentDialog.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Workbooks\Views\WorkbookTab.axaml.cs">
+      <DependentUpon>WorkbookTab.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Workbooks\Views\WorkbookTabContent.axaml.cs">
+      <DependentUpon>WorkbookTabContent.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

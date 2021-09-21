@@ -8,6 +8,7 @@ using System.Reactive.Subjects;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.Folders.Models;
 using WillowTree.Sweetgum.Client.ProgramState.Models;
+using WillowTree.Sweetgum.Client.Requests.Models;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
 
 namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
@@ -28,11 +29,13 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// <param name="workbookModel">The model of the workbook holding the folder.</param>
         /// <param name="folderModel">An instance of <see cref="FolderModel"/>.</param>
         /// <param name="saveCommand">A command to invoke to save the request.</param>
+        /// <param name="openRequestCommand">A command to invoke to open the request.</param>
         /// <param name="workbookState">An instance of <see cref="WorkbookStateModel"/>.</param>
         public FolderWorkbookItemViewModel(
             WorkbookModel workbookModel,
             FolderModel folderModel,
             ReactiveCommand<SaveCommandParameter, Unit> saveCommand,
+            ReactiveCommand<RequestModel, Unit> openRequestCommand,
             WorkbookStateModel workbookState)
         {
             this.isExpanded = workbookState.ExpandCollapseStates
@@ -42,8 +45,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             this.name = folderModel.Name;
             this.Path = folderModel.GetPath();
 
-            this.FolderItems = new WorkbookFolderItemsViewModel(workbookModel, folderModel.Folders, saveCommand, workbookState);
-            this.RequestItems = new WorkbookRequestItemsViewModel(workbookModel, folderModel.Requests, saveCommand);
+            this.FolderItems = new WorkbookFolderItemsViewModel(workbookModel, folderModel.Folders, saveCommand, openRequestCommand, workbookState);
+            this.RequestItems = new WorkbookRequestItemsViewModel(folderModel.Requests, openRequestCommand);
 
             this.ToggleExpandCollapseCommand = ReactiveCommand.Create(() =>
             {
@@ -111,7 +114,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             this.FolderItems.Update(
                 workbookModel,
                 folder.Folders);
-            this.RequestItems.Update(workbookModel, folder.Requests);
+            this.RequestItems.Update(folder.Requests);
             this.levelBehaviorSubject.OnNext(CalculateLevel(folder));
         }
 

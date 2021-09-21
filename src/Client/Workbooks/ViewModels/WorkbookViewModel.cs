@@ -2,14 +2,20 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Avalonia;
+using Avalonia.Collections;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.ProgramState.Models;
 using WillowTree.Sweetgum.Client.ProgramState.Services;
+using WillowTree.Sweetgum.Client.RequestBuilder.ViewModels;
+using WillowTree.Sweetgum.Client.Requests.Models;
+using WillowTree.Sweetgum.Client.Settings.Services;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
 using WillowTree.Sweetgum.Client.Workbooks.Services;
 
@@ -32,9 +38,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// </summary>
         /// <param name="workbookModel">An instance of <see cref="WorkbookModel"/>.</param>
         /// <param name="programStateManager">An instance of <see cref="ProgramStateManager"/>.</param>
+        /// <param name="settingsManager">An instance of <see cref="SettingsManager"/>.</param>
         public WorkbookViewModel(
             WorkbookModel workbookModel,
-            ProgramStateManager programStateManager)
+            ProgramStateManager programStateManager,
+            SettingsManager settingsManager)
         {
             this.name = workbookModel.Name;
             this.path = workbookModel.Path;
@@ -52,14 +60,32 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                 workbookModel = workbookModel.Rename(this.Name);
             });
 
+            this.RequestBuilderViewModels = new AvaloniaList<RequestBuilderViewModel>();
+
             this.SaveCommand = ReactiveCommand.CreateFromTask<SaveCommandParameter, Unit>(
                 async (saveParameter, cancellationToken) =>
                 {
                     if (saveParameter.RequestModelChanges != null)
                     {
+                        var beforePath = saveParameter.RequestModelChanges.OriginalPath;
+                        var newPath = saveParameter.RequestModelChanges.RequestModel.GetPath();
+
+                        var requestBuilderViewModel =
+                            this.RequestBuilderViewModels.FirstOrDefault(r => r.OriginalPath == beforePath);
+
                         workbookModel = workbookModel.UpdateRequest(
                             saveParameter.RequestModelChanges.OriginalPath,
                             saveParameter.RequestModelChanges.RequestModel);
+
+                        if (requestBuilderViewModel != null)
+                        {
+                            workbookModel.TryGetRequest(newPath, out var updatedRequestModel);
+
+                            if (updatedRequestModel != null)
+                            {
+                                requestBuilderViewModel.Update(updatedRequestModel);
+                            }
+                        }
                     }
 
                     if (saveParameter.EnvironmentModelsChanges != null)
@@ -113,10 +139,27 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             var workbookState = programStateManager.CurrentState.GetWorkbookStateByPath(workbookModel.Path);
 
+            var openRequestCommand = ReactiveCommand.Create<RequestModel, Unit>((requestModel) =>
+            {
+                if (this.RequestBuilderViewModels.Any(requestBuilderViewModel =>
+                    requestBuilderViewModel.OriginalPath == requestModel.GetPath()))
+                {
+                    return Unit.Default;
+                }
+
+                this.RequestBuilderViewModels.Add(new RequestBuilderViewModel(
+                    requestModel,
+                    settingsManager,
+                    this.SaveCommand));
+
+                return Unit.Default;
+            });
+
             this.workbookItems = new WorkbookItemsViewModel(
                 workbookModel,
                 workbookModel.Folders,
                 this.SaveCommand,
+                openRequestCommand,
                 workbookState);
         }
 
@@ -187,6 +230,11 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
             get => this.workbookItems;
             set => this.RaiseAndSetIfChanged(ref this.workbookItems, value);
         }
+
+        /// <summary>
+        /// Gets the list of request builder view models.
+        /// </summary>
+        public AvaloniaList<RequestBuilderViewModel> RequestBuilderViewModels { get; }
 
         /// <summary>
         /// Save the workbook state using the program state manager given the position, width, and height of the window.

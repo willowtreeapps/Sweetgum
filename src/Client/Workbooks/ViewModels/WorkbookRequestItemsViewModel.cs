@@ -8,7 +8,6 @@ using System.Reactive;
 using Avalonia.Collections;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.Requests.Models;
-using WillowTree.Sweetgum.Client.Workbooks.Models;
 
 namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 {
@@ -17,25 +16,23 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
     /// </summary>
     public sealed class WorkbookRequestItemsViewModel : ReactiveObject
     {
-        private readonly ReactiveCommand<SaveCommandParameter, Unit> saveCommand;
+        private readonly ReactiveCommand<RequestModel, Unit> openRequestCommand;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WorkbookRequestItemsViewModel"/> class.
         /// </summary>
-        /// <param name="workbookModel">The workbook model holding the requests.</param>
         /// <param name="requests">A read-only list of <see cref="RequestModel"/>.</param>
-        /// <param name="saveCommand">A command to invoke to save the request.</param>
+        /// <param name="openRequestCommand">A command to invoke to open the request.</param>
         public WorkbookRequestItemsViewModel(
-            WorkbookModel workbookModel,
             IReadOnlyList<RequestModel> requests,
-            ReactiveCommand<SaveCommandParameter, Unit> saveCommand)
+            ReactiveCommand<RequestModel, Unit> openRequestCommand)
         {
-            this.saveCommand = saveCommand;
+            this.openRequestCommand = openRequestCommand;
             this.Items = new AvaloniaList<RequestWorkbookItemViewModel>();
 
             // TODO: We might need a DI scope here, but this should be fine for now.
             this.Items.AddRange(requests
-                .Select(r => new RequestWorkbookItemViewModel(workbookModel, r, saveCommand))
+                .Select(r => new RequestWorkbookItemViewModel(r, this.openRequestCommand))
                 .ToList());
         }
 
@@ -47,11 +44,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// <summary>
         /// Update the request items (remove old and add new) as well as looping through requests and updating in-place.
         /// </summary>
-        /// <param name="workbookModel">A new workbook model.</param>
         /// <param name="requests">A list of updated request models.</param>
-        public void Update(
-            WorkbookModel workbookModel,
-            IReadOnlyList<RequestModel> requests)
+        public void Update(IReadOnlyList<RequestModel> requests)
         {
             var existingRequests = this.Items
                 .ToList();
@@ -62,7 +56,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             var addedRequests = requests
                 .Where(request => existingRequests.All(r => r.OriginalPath != request.GetPath()))
-                .Select(request => new RequestWorkbookItemViewModel(workbookModel, request, this.saveCommand))
+                .Select(request => new RequestWorkbookItemViewModel(request, this.openRequestCommand))
                 .ToList();
 
             this.Items.RemoveAll(removedRequests);
@@ -70,9 +64,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             foreach (var item in this.Items)
             {
-                item.Update(
-                    workbookModel,
-                    requests.First(r => r.GetPath() == item.OriginalPath));
+                item.Update(requests.First(r => r.GetPath() == item.OriginalPath));
             }
         }
     }
