@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.Requests.Models;
@@ -16,32 +17,33 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
     public sealed class RequestWorkbookItemViewModel : ReactiveObject
     {
         private readonly ObservableAsPropertyHelper<int> levelObservableAsPropertyHelper;
-        private readonly BehaviorSubject<int> levelBehaviorSubject;
+        private readonly ObservableAsPropertyHelper<RequestModel> requestModelObservableAsPropertyHelper;
+        private readonly BehaviorSubject<RequestModel> requestModelBehaviorSubject;
         private string name;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequestWorkbookItemViewModel"/> class.
         /// </summary>
-        /// <param name="workbookModel">The model of the workbook holding the request.</param>
         /// <param name="requestModel">An instance of <see cref="RequestModel"/>.</param>
-        /// <param name="saveCommand">A command to invoke to save the request.</param>
+        /// <param name="openRequestCommand">A command to invoke to open the request.</param>
         public RequestWorkbookItemViewModel(
-            WorkbookModel workbookModel,
             RequestModel requestModel,
-            ReactiveCommand<SaveCommandParameter, Unit> saveCommand)
+            ReactiveCommand<RequestModel, Unit> openRequestCommand)
         {
             this.name = requestModel.Name;
             this.OriginalPath = requestModel.GetPath();
 
-            this.OpenRequestCommand = ReactiveCommand.Create(() => new OpenRequestResult(
-                workbookModel,
-                requestModel,
-                saveCommand));
+            this.OpenRequestCommand = openRequestCommand;
 
-            this.levelBehaviorSubject = new BehaviorSubject<int>(CalculateLevel(requestModel));
+            this.requestModelBehaviorSubject = new BehaviorSubject<RequestModel>(requestModel);
 
             this.levelObservableAsPropertyHelper =
-                this.levelBehaviorSubject.ToProperty(this, viewModel => viewModel.Level);
+                this.requestModelBehaviorSubject
+                    .Select(CalculateLevel)
+                    .ToProperty(this, viewModel => viewModel.Level);
+
+            this.requestModelObservableAsPropertyHelper =
+                this.requestModelBehaviorSubject.ToProperty(this, viewModel => viewModel.RequestModel);
         }
 
         /// <summary>
@@ -61,7 +63,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// <summary>
         /// Gets the open request command.
         /// </summary>
-        public ReactiveCommand<Unit, OpenRequestResult> OpenRequestCommand { get; }
+        public ReactiveCommand<RequestModel, Unit> OpenRequestCommand { get; }
 
         /// <summary>
         /// Gets the level of the request, which is the depth in the workbook.
@@ -69,16 +71,19 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         public int Level => this.levelObservableAsPropertyHelper.Value;
 
         /// <summary>
+        /// Gets the request model of the workbook item.
+        /// </summary>
+        public RequestModel RequestModel => this.requestModelObservableAsPropertyHelper.Value;
+
+        /// <summary>
         /// Update a request using a new request model and new workbook model.
         /// </summary>
-        /// <param name="workbookModel">The new workbook model.</param>
         /// <param name="requestModel">The new request model.</param>
         public void Update(
-            WorkbookModel workbookModel,
             RequestModel requestModel)
         {
             this.Name = requestModel.Name;
-            this.levelBehaviorSubject.OnNext(CalculateLevel(requestModel));
+            this.requestModelBehaviorSubject.OnNext(requestModel);
         }
 
         private static int CalculateLevel(RequestModel requestModel)

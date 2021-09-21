@@ -2,6 +2,7 @@
 // Copyright (c) WillowTree, LLC. All rights reserved.
 // </copyright>
 
+using System;
 using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -10,6 +11,7 @@ using Avalonia;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.ProgramState.Models;
 using WillowTree.Sweetgum.Client.ProgramState.Services;
+using WillowTree.Sweetgum.Client.Requests.Models;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
 using WillowTree.Sweetgum.Client.Workbooks.Services;
 
@@ -113,10 +115,17 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             var workbookState = programStateManager.CurrentState.GetWorkbookStateByPath(workbookModel.Path);
 
+            var openRequestCommand = ReactiveCommand.Create<RequestModel, Unit>((requestModel) =>
+            {
+                Console.WriteLine($"I guess I should open {requestModel.GetPath()}!");
+                return Unit.Default;
+            });
+
             this.workbookItems = new WorkbookItemsViewModel(
                 workbookModel,
                 workbookModel.Folders,
                 this.SaveCommand,
+                openRequestCommand,
                 workbookState);
         }
 

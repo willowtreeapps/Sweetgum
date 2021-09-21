@@ -9,6 +9,7 @@ using Avalonia.Collections;
 using ReactiveUI;
 using WillowTree.Sweetgum.Client.Folders.Models;
 using WillowTree.Sweetgum.Client.ProgramState.Models;
+using WillowTree.Sweetgum.Client.Requests.Models;
 using WillowTree.Sweetgum.Client.Workbooks.Models;
 
 namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
@@ -19,6 +20,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
     public sealed class WorkbookFolderItemsViewModel : ReactiveObject
     {
         private readonly ReactiveCommand<SaveCommandParameter, Unit> saveCommand;
+        private readonly ReactiveCommand<RequestModel, Unit> openRequestCommand;
         private readonly WorkbookStateModel workbookState;
 
         /// <summary>
@@ -27,20 +29,23 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
         /// <param name="workbookModel">The model of the workbook holding the folders.</param>
         /// <param name="folders">A read-only list of <see cref="FolderModel"/>.</param>
         /// <param name="saveCommand">A command to invoke to save the request.</param>
+        /// <param name="openRequestCommand">A command to invoke to open the request.</param>
         /// <param name="workbookState">An instance of <see cref="WorkbookStateModel"/>.</param>
         public WorkbookFolderItemsViewModel(
             WorkbookModel workbookModel,
             IReadOnlyList<FolderModel> folders,
             ReactiveCommand<SaveCommandParameter, Unit> saveCommand,
+            ReactiveCommand<RequestModel, Unit> openRequestCommand,
             WorkbookStateModel workbookState)
         {
             this.saveCommand = saveCommand;
+            this.openRequestCommand = openRequestCommand;
             this.workbookState = workbookState;
             this.Items = new AvaloniaList<FolderWorkbookItemViewModel>();
 
             // TODO: We might need a DI scope here, but this should be fine for now.
             this.Items.AddRange(folders
-                .Select(f => new FolderWorkbookItemViewModel(workbookModel, f, saveCommand, workbookState))
+                .Select(f => new FolderWorkbookItemViewModel(workbookModel, f, saveCommand, this.openRequestCommand, workbookState))
                 .ToList());
         }
 
@@ -67,7 +72,7 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             var addedFolders = folders
                 .Where(folder => existingFolders.All(f => f.Path != folder.GetPath()))
-                .Select(folder => new FolderWorkbookItemViewModel(workbookModel, folder, this.saveCommand, this.workbookState))
+                .Select(folder => new FolderWorkbookItemViewModel(workbookModel, folder, this.saveCommand, this.openRequestCommand, this.workbookState))
                 .ToList();
 
             this.Items.RemoveAll(removedFolders);
