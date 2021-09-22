@@ -166,10 +166,10 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                 openRequestCommand,
                 workbookState);
 
-            // This has to be constructed by hand rather than intuited from a lambda expression because Expression has different arity than Expression<Func<WorkbookViewModel, int>>
-            Expression watchChain = Expression.Property(Expression.Property(Expression.Property(Expression.Property(Expression.Parameter(typeof(WorkbookViewModel)), "WorkbookItems"), "FolderItems"), "Items"), "Count");
-            this.SubscribeToExpressionChain<WorkbookViewModel, int>(watchChain).Select(countProperty => countProperty.Value > 0).Subscribe(deferredCanCreateItemBehaviorSubject);
-            deferredCanCreateItemBehaviorSubject.OnNext(this.WorkbookItems.FolderItems.Items.Count > 0); // Reinject the current value once load completes.
+            this
+                .WhenAnyValue(viewModel => viewModel.WorkbookItems.FolderItems.Items.Count)
+                .Select(c => c > 0)
+                .Subscribe(deferredCanCreateItemBehaviorSubject);
         }
 
         /// <summary>
