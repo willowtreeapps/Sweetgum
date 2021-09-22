@@ -62,10 +62,12 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         /// <param name="requestModel">An instance of <see cref="RequestModel"/>.</param>
         /// <param name="settingsManager">An instance of <see cref="settingsManager"/>.</param>
         /// <param name="saveCommand">An observer to notify when the request is saved.</param>
+        /// <param name="closeCommand">An observer to notify when the request is closed.</param>
         public RequestBuilderViewModel(
             RequestModel requestModel,
             SettingsManager settingsManager,
-            ReactiveCommand<SaveCommandParameter, Unit> saveCommand)
+            ReactiveCommand<SaveCommandParameter, Unit> saveCommand,
+            ReactiveCommand<PathModel, Unit> closeCommand)
         {
             this.settingsManager = settingsManager;
             this.Activator = new ViewModelActivator();
@@ -220,6 +222,7 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
                 .ToProperty(this, viewModel => viewModel.DisplayResponseText);
 
             this.SaveCommand = saveCommand;
+            this.CloseRequestCommand = closeCommand;
 
             this.canSaveObservableAsPropertyHelper = saveCommand.CanExecute
                 .ToProperty(this, viewModel => viewModel.CanSave);
@@ -365,6 +368,11 @@ namespace WillowTree.Sweetgum.Client.RequestBuilder.ViewModels
         /// Gets a command that saves the HTTP request.
         /// </summary>
         public ReactiveCommand<SaveCommandParameter, Unit> SaveCommand { get; }
+
+        /// <summary>
+        /// Gets a command that closes the HTTP request.
+        /// </summary>
+        public ReactiveCommand<PathModel, Unit> CloseRequestCommand { get; }
 
         /// <summary>
         /// Gets a command that sends the HTTP request.

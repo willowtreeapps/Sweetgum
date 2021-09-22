@@ -143,6 +143,22 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
 
             var workbookState = programStateManager.CurrentState.GetWorkbookStateByPath(workbookModel.Path);
 
+            var closeRequestCommand = ReactiveCommand.Create<PathModel, Unit>(originalPath =>
+            {
+                var requestBuilderViewModel = this.RequestBuilderViewModels.FirstOrDefault(requestBuilderViewModel =>
+                    requestBuilderViewModel.OriginalPath == originalPath);
+
+                if (requestBuilderViewModel == null)
+                {
+                    return Unit.Default;
+                }
+
+                // TODO: Prompt the user first to save changes.
+                this.RequestBuilderViewModels.Remove(requestBuilderViewModel);
+
+                return Unit.Default;
+            });
+
             var openRequestCommand = ReactiveCommand.Create<RequestModel, Unit>((requestModel) =>
             {
                 if (this.RequestBuilderViewModels.Any(requestBuilderViewModel =>
@@ -154,7 +170,8 @@ namespace WillowTree.Sweetgum.Client.Workbooks.ViewModels
                 this.RequestBuilderViewModels.Add(new RequestBuilderViewModel(
                     requestModel,
                     settingsManager,
-                    this.SaveCommand));
+                    this.SaveCommand,
+                    closeRequestCommand));
 
                 return Unit.Default;
             });
