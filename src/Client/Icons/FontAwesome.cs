@@ -19,6 +19,12 @@ namespace WillowTree.Sweetgum.Client.Icons
         public const string ChevronRight = "\uf054";
 
         /// <summary>
+        /// The unicode character for the times glyph.
+        /// For more information, see: https://fontawesome.com/v5.15/icons/times?style=solid.
+        /// </summary>
+        public const string Times = "\uf00d";
+
+        /// <summary>
         /// The regular font family.
         /// Please note that you still need to specify the "Normal" weight for the text element.
         /// </summary>

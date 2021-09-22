@@ -4,7 +4,13 @@
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     xmlns:reactiveUi="http://reactiveui.net"
                     xmlns:viewModels1="clr-namespace:WillowTree.Sweetgum.Client.RequestBuilder.ViewModels"
+                    xmlns:icons="clr-namespace:WillowTree.Sweetgum.Client.Icons"
                     mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
                     x:Class="WillowTree.Sweetgum.Client.Workbooks.Views.WorkbookTab">
-    <TextBlock x:Name="NameTextBlock" />
+    <StackPanel Orientation="Horizontal" Spacing="10">
+        <TextBlock x:Name="NameTextBlock" />
+        <Button x:Name="CloseButton" Width="30" Height="30">
+            <TextBlock FontFamily="{x:Static icons:FontAwesome.FontFamilySolid}" FontWeight="Black" Text="{x:Static icons:FontAwesome.Times}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+        </Button>
+    </StackPanel>
 </reactiveUi:ReactiveUserControl>

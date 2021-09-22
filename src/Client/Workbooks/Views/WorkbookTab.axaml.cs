@@ -3,7 +3,9 @@
 // </copyright>
 
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using ReactiveUI;
@@ -30,10 +32,21 @@ namespace WillowTree.Sweetgum.Client.Workbooks.Views
                         viewModel => viewModel.Name,
                         view => view.NameTextBlock.Text)
                     .DisposeWith(disposables);
+
+                this.CloseButton
+                    .Events()
+                    .Click
+                    .Select(_ => this.ViewModel)
+                    .Where(vm => vm != null)
+                    .Select(vm => vm.OriginalPath)
+                    .InvokeCommand(this, view => view.ViewModel.CloseRequestCommand)
+                    .DisposeWith(disposables);
             });
         }
 
         private TextBlock NameTextBlock => this.FindControl<TextBlock>(nameof(this.NameTextBlock));
+
+        private Button CloseButton => this.FindControl<Button>(nameof(this.CloseButton));
 
         private void InitializeComponent()
         {
